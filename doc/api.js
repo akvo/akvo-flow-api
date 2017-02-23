@@ -93,3 +93,18 @@
 	}
     ]
 }
+
+// Get response data as a bulk "file"
+
+// Request /instance/{instanceId}/responses/{surveyId}/{formId}
+// Response Headers:
+// * 301 Moved Permanently
+// * Location https://api/akvo.org/flow/{instanceId}/response-data/{id}
+// where
+// * "Pending"
+//   * 202 Accepted
+// * "File Available"
+//   * 200 OK
+//   * Content-Encoding: chunked, gzipped
+// * "Error"
+//   * 4XX (timeout, not-found, other error)
