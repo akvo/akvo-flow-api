@@ -1,0 +1,16 @@
+[
+  {
+    "request": {
+      "url": "^/surveys$",
+      "method": "GET"
+    },
+    "response": {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "latency": 1000,
+      "file": "surveys.get.json"
+    }
+  }
+]
