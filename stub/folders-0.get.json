@@ -1,0 +1,19 @@
+{
+  "folders" : [ {
+    "id" : "2010933",
+    "parentId" : "0",
+    "name" : "Folder: gbojkr9lx",
+    "createdAt" : "2015-01-20T09:51:08.521Z",
+    "updatedAt" : "2015-02-02T11:20:46.746Z",
+    "foldersUrl" : "https://api.akvo.org/flow/instance/akvoflow-61/folders?parentId=2010933",
+    "surveysUrl" : "https://api.akvo.org/flow/instance/akvoflow-61/surveys?parentId=2010933"
+  }, {
+    "id" : "7041881",
+    "parentId" : "0",
+    "name" : "Folder: gbojkvm2k",
+    "createdAt" : "2015-01-22T11:16:20.156Z",
+    "updatedAt" : "2015-01-22T11:16:26.744Z",
+    "foldersUrl" : "https://api.akvo.org/flow/instance/akvoflow-61/folders?parentId=7041881",
+    "surveysUrl" : "https://api.akvo.org/flow/instance/akvoflow-61/surveys?parentId=7041881"
+  } ]
+}

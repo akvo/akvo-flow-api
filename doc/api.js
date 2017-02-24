@@ -19,6 +19,7 @@
     folders: [
 	{
 	    id: "123",
+	    parentId: "0"
 	    name: "A Folder",
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
@@ -26,6 +27,7 @@
 	    surveysUrl: "https://.../folders?parentId=123",
 	}, {
 	    id: "321",
+	    parentId: "123"
 	    name: "Another Folder",
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
@@ -42,12 +44,14 @@
     surveys: [
 	{
 	    id: "223"
+	    folderId: "123
 	    name: "A Survey",
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
 	    surveyUrl: "https://.../survey/223",
 	}, {
 	    id: "221",
+	    folderId: "123"
 	    name: "Another Survey",
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
@@ -80,16 +84,16 @@
 		    modifiedAt: "2017-02-23T03:30:58",
 		    questions: [
 			{
-			    id: "4567"
-			    name: "A Question?"
-			    type: "FREE_TEXT"
+			    id: "4567",
+			    name: "A Question?",
+			    type: "FREE_TEXT",
 			    createdAt: "2017-02-23T03:30:58",
 			    modifiedAt: "2017-02-23T03:30:58",
 			},
 			{
-			    id: "3765"
-			    name: "Another Question?"
-			    type: "VIDEO"
+			    id: "3765",
+			    name: "Another Question?",
+			    type: "VIDEO",
 			    createdAt: "2017-02-23T03:30:58",
 			    modifiedAt: "2017-02-23T03:30:58",
 			}
@@ -105,7 +109,7 @@
 			{
 			    id: "3444",
 			    name: "Yet Another Question?",
-			    type: "OPTION"
+			    type: "OPTION",
 			    createdAt: "2017-02-23T03:30:58",
 			    modifiedAt: "2017-02-23T03:30:58",
 			}
