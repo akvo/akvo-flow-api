@@ -20,11 +20,15 @@
 	{
 	    id: "123",
 	    name: "A Folder",
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
 	    foldersUrl: "https://.../folders?parentId=123",
 	    surveysUrl: "https://.../folders?parentId=123",
 	}, {
 	    id: "321",
 	    name: "Another Folder",
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
 	    foldersUrl: "https://.../folders?parentId=321",
 	    surveysUrl: "https://.../folders?parentId=321",
 	}
@@ -39,10 +43,14 @@
 	{
 	    id: "223"
 	    name: "A Survey",
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
 	    surveyUrl: "https://.../survey/223",
 	}, {
 	    id: "221",
 	    name: "Another Survey",
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
 	    surveyUrl: "https://.../survey/221",
 	}
     ]
@@ -54,26 +62,36 @@
 {
     id: "223",
     name: "A Survey",
+    createdAt: "2017-02-23T03:30:58",
+    modifiedAt: "2017-02-23T03:30:58",
     forms: [
 	{
 	    id: "1234",
 	    surveyId: "2345",
 	    name: "A Form",
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
 	    questionGroups: [
 		{
 		    id: "3456",
 		    name: "A Question Group",
 		    isRepeatable: false,
+		    createdAt: "2017-02-23T03:30:58",
+		    modifiedAt: "2017-02-23T03:30:58",
 		    questions: [
 			{
 			    id: "4567"
 			    name: "A Question?"
 			    type: "FREE_TEXT"
+			    createdAt: "2017-02-23T03:30:58",
+			    modifiedAt: "2017-02-23T03:30:58",
 			},
 			{
 			    id: "3765"
 			    name: "Another Question?"
 			    type: "VIDEO"
+			    createdAt: "2017-02-23T03:30:58",
+			    modifiedAt: "2017-02-23T03:30:58",
 			}
 		    ]
 		},
@@ -81,11 +99,15 @@
 		    id: "2543",
 		    name: "Another Question Group",
 		    isRepeatable: true,
+		    createdAt: "2017-02-23T03:30:58",
+		    modifiedAt: "2017-02-23T03:30:58",
 		    questions: [
 			{
 			    id: "3444",
 			    name: "Yet Another Question?",
 			    type: "OPTION"
+			    createdAt: "2017-02-23T03:30:58",
+			    modifiedAt: "2017-02-23T03:30:58",
 			}
 		    ]
 		}
