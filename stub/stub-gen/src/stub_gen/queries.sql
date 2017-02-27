@@ -60,3 +60,24 @@ SELECT payload->'key'->>'id' as id,
         WHERE payload->'properties'->>'surveyId' = :form-id
        ) b
  WHERE a.payload->'properties'->>'questionId' = b.question_id;
+
+-- :name get-responses
+SELECT coalesce(payload->'properties'->>'value', payload->'properties'->>'valueText') AS value,
+       payload->'properties'->>'iteration' AS iteration,
+       payload->'properties'->>'questionID' AS "question-id",
+       payload->'properties'->>'surveyInstanceId' AS "form-instance-id"
+  FROM answer
+ WHERE payload->'properties'->>'surveyId' = :form-id;
+
+-- :name get-form-instances
+SELECT payload->'key'->>'id' AS id,
+       payload->'properties'->>'surveyId' AS "form-id",
+       payload->'properties'->>'surveyalTime' AS "surveyal-time",
+       payload->'properties'->>'submitterName' AS "submitter",
+       payload->'properties'->>'collectionDate' AS "submission-date",
+       payload->'properties'->>'deviceIdentifier' AS "device-identifier",
+       payload->'properties'->>'surveyedLocaleId' AS "data-point-id",
+       payload->'properties'->>'surveyedLocaleIdentifier' AS "identifier",
+       payload->'properties'->>'surveyedLocaleDisplayName' AS "display-name"
+  FROM form_instance
+ WHERE payload->'properties'->>'surveyId' = :form-id
