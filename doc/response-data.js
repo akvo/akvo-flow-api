@@ -1,9 +1,53 @@
 // Response data format
-// This format is not "self describing", meaning you need the form definition to be able to
-// correctly interpret the data structure. It could be made self describing by embedding the
-// form definition
 {
-    formId: "2345",
+    form: {
+	id: "1234",
+	surveyId: "2345",
+	name: "A Form",
+	createdAt: "2017-02-23T03:30:58",
+	modifiedAt: "2017-02-23T03:30:58",
+	questionGroups: [
+	    {
+		id: "3456",
+		name: "A Question Group",
+		isRepeatable: false,
+		createdAt: "2017-02-23T03:30:58",
+		modifiedAt: "2017-02-23T03:30:58",
+		questions: [
+		    {
+			id: "4567",
+			name: "A Question?",
+			type: "FREE_TEXT",
+			createdAt: "2017-02-23T03:30:58",
+			modifiedAt: "2017-02-23T03:30:58",
+		    },
+		    {
+			id: "3765",
+			name: "Another Question?",
+			type: "VIDEO",
+			createdAt: "2017-02-23T03:30:58",
+			modifiedAt: "2017-02-23T03:30:58",
+		    }
+		]
+	    },
+	    {
+		id: "2543",
+		name: "Another Question Group",
+		isRepeatable: true,
+		createdAt: "2017-02-23T03:30:58",
+		modifiedAt: "2017-02-23T03:30:58",
+		questions: [
+		    {
+			id: "3444",
+			name: "Yet Another Question?",
+			type: "OPTION",
+			createdAt: "2017-02-23T03:30:58",
+			modifiedAt: "2017-02-23T03:30:58",
+		    }
+		]
+	    }
+	]
+    },
     formInstances: [
 	{
 	    id: "3456",
@@ -13,7 +57,7 @@
 	    deviceIdentifier: "foo",
 	    submissionDate: "2017-02-23T03:30:58", // ISO 8601
 	    submitter: "John",
-	    duration: "P0H2M19S", // ISO 8601 (duration)
+	    duration: 123, // seconds
 	    responses: {
 		// Not sure about this list, as found in QuestionDto.java. I seem to remember
 		// that there's a mismatch between question types in form definitions and
