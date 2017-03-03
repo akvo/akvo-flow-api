@@ -20,8 +20,6 @@
 
 (comment
 
-
-
   ;; Attempt 1: Pull all form instances and responses in one go: 40s
   (gae/with-datastore [ds ds-spec]
     (time

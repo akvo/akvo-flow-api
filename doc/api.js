@@ -14,7 +14,7 @@
 
 // List folders:
 // /instance/{instanceId}/folders?parentId={parentId}
-
+// parentId=0 (or missing) means root folders
 {
     folders: [
 	{
@@ -24,7 +24,7 @@
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
 	    foldersUrl: "https://.../folders?parentId=123",
-	    surveysUrl: "https://.../folders?parentId=123",
+	    surveysUrl: "https://.../surveys?folderId=123",
 	}, {
 	    id: "321",
 	    parentId: "123"
@@ -32,7 +32,7 @@
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
 	    foldersUrl: "https://.../folders?parentId=321",
-	    surveysUrl: "https://.../folders?parentId=321",
+	    surveysUrl: "https://.../surveys?folderId=321",
 	}
     ]
 }
@@ -44,7 +44,7 @@
     surveys: [
 	{
 	    id: "223"
-	    folderId: "123
+	    folderId: "123",
 	    name: "A Survey",
 	    createdAt: "2017-02-23T03:30:58",
 	    modifiedAt: "2017-02-23T03:30:58",
@@ -120,17 +120,60 @@
     ]
 }
 
-// Get response data as a bulk "file"
+// Fetch form instances
+// Request /instance/{instanceId}/form-instances/{formId}?pageSize=N
+// Page size is optional with some default value used if missing.
+{
+    nextPageUrl: "https://.../form-instances/{formId}?pageSize=N&cursor=32jifso543jggifa",
+    formInstances: [
+	{
+	    id: "3456",
+	    dataPointId: "4567",
+	    identifier: "hxeq-lb2e-g1n2",
+	    displayName: "",
+	    deviceIdentifier: "foo",
+	    submissionDate: "2017-02-23T03:30:58", // ISO 8601
+	    submitter: "John",
+	    duration: 123, // seconds
+	    responses: {
+		// Not sure about this list, as found in QuestionDto.java. I seem to remember
+		// that there's a mismatch between question types in form definitions and
+		// response types: FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
+		// NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
 
-// Request /instance/{instanceId}/responses/{surveyId}/{formId}
-// Response Headers:
-// * 301 Moved Permanently
-// * Location https://api/akvo.org/flow/{instanceId}/response-data/{id}
-// where
-// * "Pending"
-//   * 202 Accepted
-// * "File Available"
-//   * 200 OK
-//   * Content-Encoding: chunked, gzipped
-// * "Error"
-//   * 4XX (timeout, not-found, other error)
+		// If this form instance is part of a RQG, then all responses will be an array
+		// of responses. The index represents the iteration number and null represents
+		// missing iterations.
+
+		// question id -> response data
+		"597442059": "ABC", // FREE_TEXT
+		"432341353": { code: "abc", text: "ABC" }, // OPTION
+		"643423135": 1023, // NUMBER
+		"532353235": { lat: 51.5432, lon: 24.5432 }, // GEO
+		"543643421": "https://example.com/abc.jpg", // PHOTO
+		"352315446": "https://example.com/abc.mov", // VIDEO
+		"523352135": "2017-02-23T03:30:58", // DATE
+		"423352364": [{ code: "abc", text: "ABC" },
+			      { code: "def", text: "DEF" }], // CASCADE
+		"342352313": {
+		    type: "Feature",
+		    geometry: {
+			type: "Point",
+			coordinates: [125.6, 10.1]
+		    },
+		    properties: {
+			name: "Dinagat Islands"
+		    }
+		}, // GEOJSON
+		"353254356": "Zm9vYmFy", // SIGNATURE
+		"352342364": "?", // SCAN
+		"523521354": "?", // TRACK
+		"352343446": "?", // NAME
+		"323525436": "?", // STRENGTH
+	    }
+	},
+	{
+	    // next form instance
+	}
+    ]
+}
