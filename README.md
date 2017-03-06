@@ -17,8 +17,9 @@
 
 ### Start
 
-	$ make start
-	$ # wait few seconds to Keycloak starts and imports the Akvo realm
+	$ make start # assumes lumen-keycloak container is running
+	$ # or #
+	$ make start-full # wait few seconds to Keycloak starts and imports the Akvo realm
 
 
 ### Test
