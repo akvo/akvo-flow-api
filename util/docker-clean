@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eu
+
+CONTAINERS=$(docker ps -aq --filter "status=exited" --filter "status=dead" --filter "status=created")
+
+if [[ -n "$CONTAINERS" ]]; then
+    docker rm -v $CONTAINERS
+fi
+
+IMAGES=$(docker images --no-trunc | awk '$2 ~/^<none>/ {print $3}')
+
+if [[ -n "$IMAGES" ]]; then
+    docker rmi $IMAGES
+fi

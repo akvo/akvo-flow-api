@@ -23,7 +23,7 @@
 
 ### Test
 
-    $ ./nginx/test-proxy.sh
+    $ ./util/test-proxy.sh
 
 ## Other info
 

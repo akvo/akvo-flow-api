@@ -1,7 +1,7 @@
 build:
 	docker build -t akvo/flow-api-keycloak .
 
-start:
+start-full:
 	docker run \
         --name flow-api-keycloak \
 	--detach \

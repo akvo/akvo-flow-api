@@ -7,3 +7,5 @@ start:
 	--detach \
 	--publish 3333:3333 \
 	akvo/flow-api-stub
+
+start-full: start
