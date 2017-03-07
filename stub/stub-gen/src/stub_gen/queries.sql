@@ -81,3 +81,5 @@ SELECT payload->'key'->>'id' AS id,
        payload->'properties'->>'surveyedLocaleDisplayName' AS "display-name"
   FROM form_instance
  WHERE payload->'properties'->>'surveyId' = :form-id
+ ORDER BY "submission-date"
+  LIMIT 10;

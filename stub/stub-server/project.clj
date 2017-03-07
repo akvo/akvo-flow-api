@@ -3,6 +3,7 @@
   :url "http://example.com/FIXME"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.8.0"]
+                 [cheshire "5.7.0"]
                  [ring "1.5.1"]
                  [compojure "1.5.2"]]
   :aot [stub-server.handler]

@@ -2,7 +2,8 @@
   "Small ring server to serve stub data. Run with 'lein run -m stub-server.handler"
   (:require [compojure.core :refer [GET] :as compojure]
             [ring.adapter.jetty :as jetty]
-            [ring.middleware.params :as params])
+            [ring.middleware.params :as params]
+            [cheshire.core :as json])
   (:gen-class))
 
 (defn slurpf [fmt & args]
@@ -35,7 +36,24 @@
      (let [file (slurpf "resources/survey-%s.get.json" id)]
        {:status 200
         :headers {"Content-Type" "application/json"}
-        :body file}))))
+        :body file}))
+   (GET "/form-instances/:survey-id/:form-id" [survey-id form-id :as r]
+     (let [idx (get-in r [:query-params "cursor"] "0")
+           idx (Long/parseLong idx)
+           data (json/parse-string (slurp "resources/response-data.json"))
+           form-instances (if (< idx 10)
+                            [(get-in data ["formInstances" idx])]
+                            [])]
+       {:status 200
+        :headers {"Content-Type" "application/json"}
+        :body (json/generate-string
+               {:formInstances form-instances
+                :cursor (if (< idx 10)
+                          (format "http://localhost:3333/form-instances/%s/%s?cursor=%s"
+                                  survey-id
+                                  form-id
+                                  (inc idx))
+                          nil)})}))))
 
 (defn -main [& args]
   (-> routes

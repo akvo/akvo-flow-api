@@ -10,7 +10,7 @@
 
 (hugsql/def-db-fns "stub_gen/queries.sql")
 
-(def conn-str "jdbc:postgresql://localhost/akvoflow61?user=postgres")
+(def conn-str "jdbc:postgresql://192.168.1.206/akvoflow61?user=postgres")
 
 (defn to-iso-8601 [ts]
   (.format date-format (.toInstant (Date. ts))))
@@ -37,16 +37,6 @@
       parsed)))
 
 
-(comment
-  (spit "/project/stub/folders-0.get.json" (json/generate-string {"folders" (folders "0")}
-                                                                 {:pretty true}))
-
-  (spit "/project/stub/folders-2010933.get.json" (json/generate-string {"folders" (folders "2010933")}
-                                                                       {:pretty true}))
-
-  (spit "/project/stub/folders-20650973.get.json" (json/generate-string {"folders" (folders "20650973")}
-                                                                        {:pretty true})))
-
 (defn surveys [folder-id]
   (jdbc/with-db-connection [conn conn-str]
     (let [raw (get-surveys conn {:folder-id folder-id})
@@ -64,12 +54,6 @@
                                                "akvoflow-61"
                                                id)})) raw)]
       parsed)))
-
-(comment
-  (spit "/project/stub/surveys-20650973.get.json" (json/generate-string {"surveys" (surveys "20650973")}
-                                                                        {:pretty true}))
-  )
-
 
 
 (defn questions [question-group-id]
@@ -127,11 +111,6 @@
   {"id" id
    "name" "Survey: x"
    "forms" (forms id)})
-
-(comment
-  (spit "/project/stub/survey-7020925.get.json" (json/generate-string (survey "7020925")
-                                                                      {:pretty true})))
-
 
 ;; Responses
 
@@ -248,7 +227,7 @@
                   "displayName" (str "display-name-" (rand-str))})
        form-instances))
 
-(defn respons-data [survey-id form-id]
+(defn response-data [survey-id form-id]
   (let [;; The full form definition
         form-definition (response-form survey-id form-id)
         ;; A map from form-instance-id to the form-instance
@@ -268,13 +247,9 @@
                                      (get-form-instances conn-str {:form-id form-id}))) )
         ;; An index of response data
         response-index (responses form-definition (get-responses conn-str {:form-id form-id}))]
-    {"form" form-definition
-     "formInstances" (vals (reduce (fn [resp [form-instance-id form-instance]]
-                                     (assoc resp form-instance-id (assoc form-instance
-                                                                         "questions"
-                                                                         (get response-index form-instance-id))))
-                                   {}
-                                   form-instances))}))
-
-(comment
-  (spit "response-data.json" (json/generate-string (respons-data "7020925" "5021286"))) )
+    {"formInstances" (vals (reduce (fn [resp [form-instance-id form-instance]]
+                                           (assoc resp form-instance-id (assoc form-instance
+                                                                               "questions"
+                                                                               (get response-index form-instance-id))))
+                                         {}
+                                         form-instances))}))
