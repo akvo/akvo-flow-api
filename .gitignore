@@ -11,3 +11,4 @@ pom.xml.asc
 .lein-failures
 .nrepl-port
 stub/stub-server/target/
+flow/.akvo-flow-cache/
