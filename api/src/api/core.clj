@@ -1,26 +1,16 @@
 (ns api.core
-  (:import [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
+  (:import [com.gallatinsystems.common Constants]
+           [com.gallatinsystems.survey.dao SurveyDAO SurveyGroupDAO]
            [com.gallatinsystems.user.dao UserDao]
-           [com.gallatinsystems.survey.dao SurveyDAO]
-           [com.gallatinsystems.common Constants]
-           [org.apache.commons.codec.binary Base64]
+           [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
            [com.google.apphosting.utils.config AppEngineWebXmlReader]
-           [java.io ByteArrayInputStream])
-  (:require [clojure.string :as str]
+           [java.io ByteArrayInputStream]
+           [org.apache.commons.codec.binary Base64])
+  (:require [clj-http.client :as http]
             [clojure.java.io :as io]
-            [clj-http.client :as http]))
+            [clojure.string :as str]))
 
-(def p12-dir (System/getProperty "java.io.tmpdir"))
-
-#_(let [auth-token ""
-        email ""
-        alias-map (get-alias-map instance-map)
-        instance-id (get alias-map "uat1")
-        host (str instance-id ".appspot.com")
-        port 443
-        iam-account (get-in instance-map [instance-id "serviceAccountId"])
-        p12-file (get-p12 instance-id auth-token)]
-    (get-filtered-surveys host iam-account (.getAbsolutePath p12-file) email))
+(def tmp-dir (System/getProperty "java.io.tmpdir"))
 
 (defn get-filtered-surveys
   [host iam-account p12-path email]
@@ -43,44 +33,42 @@
         (finally
           (.uninstall installer))))))
 
+(defn contents-url [path]
+  (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
+
+(defn headers [auth-token]
+  {"Authorization" (format "token %s" auth-token)
+   "Content-Type" "application/json"})
+
+(defn github-contents [auth-token path]
+  (:body (http/get (contents-url path)
+                   {:headers (headers auth-token)
+                    :as :json})))
+
 (defn get-instances [auth-token]
-  (let [folders (->> (http/get "https://api.github.com/repos/akvo/akvo-flow-server-config/contents/"
-                               {:headers {"Authorization" (format "token %s" auth-token)}
-                                :as :json})
-                     :body
-                     (filter #(= "dir" (:type %)))
-                     (map :name))]
-    folders))
+  (->> (github-contents auth-token "/")
+       (filter #(= "dir" (:type %)))
+       (map :name)))
 
 (defn get-instance-props [instance-id auth-token]
-  (let [temp-file (java.io.File/createTempFile "appengine" ".xml")
-        _ (spit temp-file
-                (String.
-                 (Base64/decodeBase64
-                  (-> (http/get (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents/%s/appengine-web.xml"
-                                        instance-id)
-                                {:headers {"Authorization" (format "token %s"
-                                                                   auth-token)}
-                                 :as :json})
-                      :body
-                      :content))))
-        ae-reader (AppEngineWebXmlReader. (System/getProperty "java.io.tmpdir")
-                                          (.getName temp-file))]
-    {:instance-id instance-id
-     :properties (.getSystemProperties (.readAppEngineWebXml ae-reader))}))
+  (let [tmp-file (java.io.File/createTempFile "appengine" ".xml")
+        _ (spit tmp-file
+                (-> (github-contents auth-token (format "/%s/appengine-web.xml" instance-id))
+                    :content
+                    Base64/decodeBase64
+                    String.))
+        ae-reader (AppEngineWebXmlReader. tmp-dir
+                                          (.getName tmp-file))]
+    (.getSystemProperties (.readAppEngineWebXml ae-reader))))
 
 (defn get-instance-map [auth-token]
   (let [instances (get-instances auth-token)]
-    (reduce (fn [m {:keys [properties instance-id]}]
-              (if (nil? instance-id)
-                m
-                (assoc m instance-id properties)))
+    (reduce (fn [m instance-id]
+              (try
+                (assoc m instance-id (get-instance-props instance-id auth-token))
+                (catch Exception e m)))
             {}
-            (map (fn [instance-id]
-                   (try
-                     (get-instance-props instance-id auth-token)
-                     (catch clojure.lang.ExceptionInfo e)))
-                 instances))))
+            instances)))
 
 (defn get-alias-map [instances-map]
   (reduce (fn [m [instance-id props]]
@@ -90,29 +78,31 @@
           {}
           instances-map))
 
-
-
 (defn fetch-p12
   "Fetch the p12 file from github. Save it and return the File.
   Returns nil if the file can't be found"
   [instance-id auth-token]
   (try
-    (let [bytes (-> (http/get (format
-                               "https://api.github.com/repos/akvo/akvo-flow-server-config/contents/%1$s/%1$s.p12"
-                               instance-id)
-                              {:headers {"Authorization" (str "token " auth-token)
-                                         "Content-Type" "application/json"}
-                               :as :json})
-                    :body
+    (let [bytes (-> (github-contents auth-token (format "/%1$s/%1$s.p12" instance-id))
                     :content
                     Base64/decodeBase64)
-          file (io/file p12-dir (str instance-id ".p12"))]
+          file (io/file tmp-dir (str instance-id ".p12"))]
       (io/copy bytes file)
       file)
     (catch clojure.lang.ExceptionInfo e)))
 
 (defn get-p12 [instance-id auth-token]
-  (let [file (io/file p12-dir (str instance-id ".p12"))]
+  (let [file (io/file tmp-dir (str instance-id ".p12"))]
     (if (.exists file)
       file
       (fetch-p12 instance-id auth-token))))
+
+#_(let [auth-token ""
+        email ""
+        alias-map (get-alias-map instance-map)
+        instance-id (get alias-map "uat1")
+        host (str instance-id ".appspot.com")
+        port 443
+        iam-account (get-in instance-map [instance-id "serviceAccountId"])
+        p12-file (get-p12 instance-id auth-token)]
+    (get-filtered-surveys host iam-account (.getAbsolutePath p12-file) email))
