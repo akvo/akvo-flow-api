@@ -12,26 +12,33 @@
 
 (def tmp-dir (System/getProperty "java.io.tmpdir"))
 
-(defn get-filtered-surveys
-  [host iam-account p12-path email]
-  (let [options (.server (RemoteApiOptions.) host 443)]
-    (.useServiceAccountCredential options
-                                  iam-account
-                                  p12-path)
-    (let [installer (RemoteApiInstaller.)]
-      (.install installer options)
-      (try
-        (let [user-dao (UserDao.)
-              user (.findUserByEmail user-dao email)
-              survey-dao (SurveyDAO.)
-              all-surveys (.list survey-dao Constants/ALL_RESULTS)
-              user-surveys (.filterByUserAuthorizationObjectId survey-dao
-                                                               all-surveys
-                                                               (-> user .getKey .getId))]
-          (println (.size user-surveys))
-          (println (.size all-surveys)))
-        (finally
-          (.uninstall installer))))))
+(defmacro with-remote-api [spec & body]
+  `(let [host# (get ~spec :host 443)
+         port# (get ~spec :port)
+         iam-account# (get ~spec :iam-account)
+         p12-path# (get ~spec :p12-path)
+         options# (.server (RemoteApiOptions.) host# port#)]
+     (.useServiceAccountCredential options#
+                                   iam-account#
+                                   p12-path#)
+     (let [installer# (RemoteApiInstaller.)]
+       (.install installer# options#)
+       (try
+         ~@body
+         (finally
+           (.uninstall installer#))))))
+
+(defn get-filtered-surveys [spec email]
+  (with-remote-api spec
+    (let [user-dao (UserDao.)
+          user (.findUserByEmail user-dao email)
+          survey-dao (SurveyDAO.)
+          all-surveys (.list survey-dao Constants/ALL_RESULTS)
+          user-surveys (.filterByUserAuthorizationObjectId survey-dao
+                                                           all-surveys
+                                                           (-> user .getKey .getId))]
+      (println (.size user-surveys))
+      (println (.size all-surveys)))))
 
 (defn contents-url [path]
   (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
@@ -99,10 +106,14 @@
 
 #_(let [auth-token ""
         email ""
+        instance-map (get-instance-map auth-token)
         alias-map (get-alias-map instance-map)
         instance-id (get alias-map "uat1")
         host (str instance-id ".appspot.com")
         port 443
         iam-account (get-in instance-map [instance-id "serviceAccountId"])
         p12-file (get-p12 instance-id auth-token)]
-    (get-filtered-surveys host iam-account (.getAbsolutePath p12-file) email))
+    (get-filtered-surveys {:host host
+                           :iam-account iam-account
+                           :p12-path (.getAbsolutePath p12-file) }
+                          email))
