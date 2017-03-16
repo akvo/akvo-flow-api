@@ -16,4 +16,5 @@
                  [org.datanucleus/datanucleus-jpa "1.1.5"]
                  [org.apache.geronimo.specs/geronimo-jpa_3.0_spec "1.1.1"]
                  [clj-http "2.3.0"]
-                 [cheshire "5.7.0"]])
+                 [cheshire "5.7.0"]]
+  :java-source-paths ["java/src"])
