@@ -24,6 +24,17 @@
          (finally
            (.uninstall installer#))))))
 
+(defmacro with-local-api [& body]
+  `(let [options# (-> (RemoteApiOptions.)
+                      (.server "localhost" 8080))]
+     (.useDevelopmentServerCredential options#)
+     (let [installer# (RemoteApiInstaller.)]
+       (.install installer# options#)
+       (try
+         ~@body
+         (finally
+           (.uninstall installer#))))))
+
 (def ^:private date-format (.toFormat (DateTimeFormatter/ISO_INSTANT)))
 
 (defn- to-iso-8601 [date]
