@@ -1,12 +1,13 @@
 (ns api.core
   (:import [com.gallatinsystems.common Constants]
-           [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+           [com.gallatinsystems.survey.dao.SurveyDAO]
            [com.gallatinsystems.user.dao UserDao]
            [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
            [com.google.apphosting.utils.config AppEngineWebXmlReader]
            [java.io ByteArrayInputStream]
-           [org.apache.commons.codec.binary Base64]
-           [java.time.format DateTimeFormatter])
+           [java.time.format DateTimeFormatter]
+           [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+           [org.apache.commons.codec.binary Base64])
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
             [clojure.string :as str]))
@@ -40,6 +41,15 @@
 (defn to-iso-8601 [date]
   (.format date-format (.toInstant date)))
 
+(defn created-at [entity]
+  (to-iso-8601 (.getCreatedDateTime entity)))
+
+(defn modified-at [entity]
+  (to-iso-8601 (.getLastUpdateDateTime entity)))
+
+(defn id [entity]
+  (-> entity .getKey .getId))
+
 
 (defn get-filtered-folders [spec email parent-id]
   (with-remote-api spec
@@ -53,11 +63,11 @@
 
       (->> user-folders
            (map (fn [folder]
-                  {:id (str (-> folder .getKey .getId))
+                  {:id (str (id folder))
                    :name (.getName folder)
                    :parent-id (str (.getParentId folder))
-                   :created-at (to-iso-8601 (.getCreatedDateTime folder))
-                   :modified-at (to-iso-8601 (.getLastUpdateDateTime folder))}))
+                   :created-at (created-at folder)
+                   :modified-at (modified-at folder)}))
            (filter #(= (:parent-id %) parent-id))))))
 
 (defn get-filtered-surveys [spec email folder-id]
@@ -72,14 +82,64 @@
 
       (->> user-surveys
            (map (fn [survey]
-                  {:id (str (-> survey .getKey .getId))
+                  {:id (str (id survey))
                    :name (.getName survey)
                    :folder-id (str (.getParentId survey))
-                   :created-at (to-iso-8601 (.getCreatedDateTime survey))
-                   :modified-at (to-iso-8601 (.getLastUpdateDateTime survey))}))
+                   :created-at (created-at survey)
+                   :modified-at (modified-at survey)}))
            (filter #(= (:folder-id %) folder-id))))))
 
+(defn ->question [question]
+  {:id (str (id question))
+   :name (.getText question)
+   :type (str (.getType question))
+   :order (.getOrder question)
+   :created-at (created-at question)
+   :modified-at (modified-at question)})
 
+
+
+(defn question-group-definition [question-group questions]
+  (let [qs (sort-by :order (map ->question questions))]
+    {:id (str (id question-group))
+     :name (.getName question-group)
+     :repeatable? (.getRepeatable question-group)
+     :questions qs
+     :created-at (created-at question-group)
+     :modified-at (modified-at question-group)}))
+
+(defn get-form-definition [email form-id]
+  (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        ;; Includes question groups, but contrary to docstring does not contain questions
+        form (.loadFullSurvey form-dao form-id)
+        question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
+        questions (group-by #(.getQuestionGroupId %)
+                            (.listQuestionsBySurvey question-dao form-id))]
+    {:id (str (id form))
+     :name (.getName form)
+     :question-groups (mapv (fn [question-group]
+                              (question-group-definition question-group
+                                                         (get questions
+                                                              (id question-group))))
+                            (.values (.getQuestionGroupMap form)))
+     :created-at (created-at form)
+     :modified-at (modified-at form)}))
+
+(defn get-survey-definition [email survey-id]
+  (let [user-dao (UserDao.)
+        user (.findUserByEmail user-dao email)
+        survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
+        survey (.getByKey survey-dao (Long/parseLong survey-id))
+        form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        forms (.filterByUserAuthorizationObjectId form-dao
+                                                  (.listSurveysByGroup form-dao (Long/parseLong survey-id))
+                                                  (id user))]
+    {:id survey-id
+     :name (.getName survey)
+     :forms (mapv #(get-form-definition email (id %))
+                  forms)
+     :created-at (created-at survey)
+     :modified-at (modified-at survey)}))
 
 (defn contents-url [path]
   (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
@@ -147,9 +207,19 @@
       file
       (fetch-p12 instance-id auth-token))))
 
-#_(let [auth-token ""
+(comment
+  (defn remote-api-spec [instance-map instance-id]
+    (let [auth-token (System/getenv "GITHUB_API_KEY")
+          host (str instance-id ".appspot.com")
+          iam-account (get-in instance-map [instance-id "serviceAccountId"])
+          p12-file (get-p12 instance-id auth-token)]
+      {:host host
+       :iam-account iam-account
+       :p12-path (.getAbsolutePath p12-file)}))
+
+  (let [auth-token (System/getenv "GITHUB_API_KEY")
         email ""
-        ;;instance-map (get-instance-map auth-token)
+        instance-map (get-instance-map auth-token)
         alias-map (get-alias-map instance-map)
         instance-id (get alias-map "uat1")
         host (str instance-id ".appspot.com")
@@ -158,14 +228,13 @@
         p12-file (get-p12 instance-id auth-token)]
     (get-filtered-folders {:host host
                            :iam-account iam-account
-                           :p12-path (.getAbsolutePath p12-file)
-                           }
+                           :p12-path (.getAbsolutePath p12-file)}
                           email
                           "27009117"))
 
-#_(let [auth-token ""
+  (let [auth-token (System/getenv "GITHUB_API_KEY")
         email ""
-        ;;instance-map (get-instance-map auth-token)
+        instance-map (get-instance-map auth-token)
         alias-map (get-alias-map instance-map)
         instance-id (get alias-map "uat1")
         host (str instance-id ".appspot.com")
@@ -174,7 +243,15 @@
         p12-file (get-p12 instance-id auth-token)]
     (get-filtered-surveys {:host host
                            :iam-account iam-account
-                           :p12-path (.getAbsolutePath p12-file)
-                           }
+                           :p12-path (.getAbsolutePath p12-file)}
                           email
                           "24109115"))
+
+  (def auth-token (System/getenv "GITHUB_API_KEY"))
+  (def instance-map (get-instance-map auth-token))
+
+  (remote-api-spec instance-map "akvoflow-uat1")
+  (with-remote-api (remote-api-spec instance-map "akvoflow-uat1")
+    (get-survey-definition "" "31929121"))
+
+  )
