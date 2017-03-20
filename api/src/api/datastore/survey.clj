@@ -61,16 +61,17 @@
 
 (defn get-survey-definition [email survey-id]
   (let [user-dao (UserDao.)
-        user (.findUserByEmail user-dao email)
-        survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
-        survey (.getByKey survey-dao (Long/parseLong survey-id))
-        form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
-        forms (.filterByUserAuthorizationObjectId form-dao
-                                                  (.listSurveysByGroup form-dao (Long/parseLong survey-id))
-                                                  (ds/id user))]
-    {:id survey-id
-     :name (.getName survey)
-     :forms (mapv #(get-form-definition email (ds/id %))
-                  forms)
-     :created-at (ds/created-at survey)
-     :modified-at (ds/modified-at survey)}))
+        user (.findUserByEmail user-dao email)]
+    (when user
+      (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
+            survey (.getByKey survey-dao (Long/parseLong survey-id))
+            form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+            forms (.filterByUserAuthorizationObjectId form-dao
+                                                      (.listSurveysByGroup form-dao (Long/parseLong survey-id))
+                                                      (ds/id user))]
+        {:id survey-id
+         :name (.getName survey)
+         :forms (mapv #(get-form-definition email (ds/id %))
+                      forms)
+         :created-at (ds/created-at survey)
+         :modified-at (ds/modified-at survey)}))))
