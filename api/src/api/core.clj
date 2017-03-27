@@ -2,7 +2,13 @@
   (:require [api.akvo-flow-server-config :as config]
             [api.datastore :as ds]
             [api.datastore.folder :as folder]
-            [api.datastore.survey :as survey]))
+            [api.datastore.survey :as survey]
+            [clojure.java.io :as io])
+  (:import [java.util.logging LogManager]))
+
+;; Configure Datanucleus logging
+(.readConfiguration (LogManager/getLogManager)
+                    (io/input-stream (io/resource "logging.properties")))
 
 (comment
   (defn remote-api-spec [instance-map instance-id]
@@ -47,7 +53,22 @@
   (def auth-token (System/getenv "GITHUB_API_KEY"))
   (def instance-map (config/get-instance-map auth-token))
 
-  (ds/with-remote-api (remote-api-spec instance-map "akvoflow-uat1")
+  (ds/with-local-api
     (survey/get-survey-definition "@gmail.com" "31929121"))
 
-  )
+  (import com.google.appengine.api.datastore.Entity)
+  (import com.google.appengine.api.datastore.Query)
+  (import com.google.appengine.api.datastore.DatastoreServiceFactory)
+  (import com.google.appengine.api.datastore.FetchOptions$Builder)
+
+  (ds/with-local-api
+    (let [e (doto (Entity. "Survey")
+             (.setProperty "createdAt" (java.util.Date.))
+             (.setProperty "name" (str "Test " (System/nanoTime))))
+          ds (DatastoreServiceFactory/getDatastoreService)]
+      (.put ds e)))
+
+  (ds/with-local-api
+    (let [ds (DatastoreServiceFactory/getDatastoreService)
+          q (Query. "Question")]
+      (.asList (.prepare ds q) (FetchOptions$Builder/withDefaults)))))
