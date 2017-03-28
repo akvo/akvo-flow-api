@@ -11,32 +11,51 @@
       page-size
       MAX_PAGE_SIZE)))
 
-(defn form-instances-query [ds form-id cursor page-size]
-  (.iterator (q/result ds
-                       {:kind "SurveyInstance"
-                        :filter (q/= "surveyId" form-id)}
-                       {:start-cursor cursor
-                        :chunk-size page-size
-                        :limit page-size})))
+(defn form-instances-query [ds form-definition {:keys [cursor page-size]}]
+  (let [page-size (normalize-page-size page-size)]
+    (.iterator (q/result ds
+                         {:kind "SurveyInstance"
+                          :filter (q/= "surveyId" (Long/parseLong (:id form-definition)))}
+                         {:start-cursor cursor
+                          :chunk-size page-size
+                          :limit page-size}))))
 
-(defn fetch-answers [ds form-instances]
-  (reduce (fn [form-instance-answers form-instance-batch]
-            (reduce (fn [fia answer]
-                      (assoc-in fia
-                                [(str (.getProperty answer "surveyInstanceId"))
-                                 (.getProperty answer "questionID")
-                                 (or (.getProperty answer "iteration") 0)]
-                                (or (.getProperty answer "value")
-                                    (.getProperty answer "valueText"))))
-                    form-instance-answers
-                    (q/result ds
-                              {:kind "QuestionAnswerStore"
-                               :filter (q/in "surveyInstanceId"
-                                             (map (comp #(Long/parseLong %) :id)
-                                                  form-instance-batch))}
-                              {:chunk-size 300})))
+(defn question-type-map
+  "Builds a map from question id to type"
+  [form-definition]
+  (reduce (fn [question-types {:keys [id type]}]
+            (assoc question-types id type))
           {}
-          (partition-all 30 form-instances)))
+          (mapcat :questions (:question-groups form-definition))))
+
+(defmulti parse-response (fn [type response-str] type))
+
+(defn fetch-answers [ds form-definition form-instances]
+  (let [question-types (question-type-map form-definition)]
+    (reduce (fn [form-instance-answers form-instance-batch]
+              (reduce (fn [fia answer]
+                        (let [form-instance-id (str (.getProperty answer "surveyInstanceId"))
+                              question-id (.getProperty answer "questionID")
+                              response-str (or (.getProperty answer "value")
+                                               (.getProperty answer "valueText"))
+                              iteration (or (.getProperty answer "iteration") 0)
+                              response (when response-str
+                                         (parse-response (get question-types question-id)
+                                                         response-str))]
+                          (assoc-in fia
+                                    [form-instance-id
+                                     question-id
+                                     iteration]
+                                    response)))
+                      form-instance-answers
+                      (q/result ds
+                                {:kind "QuestionAnswerStore"
+                                 :filter (q/in "surveyInstanceId"
+                                               (map (comp #(Long/parseLong %) :id)
+                                                    form-instance-batch))}
+                                {:chunk-size 300})))
+            {}
+            (partition-all 30 form-instances))))
 
 (defn form-instance-entity->map [form-instance]
   {:id (-> form-instance .getKey .getId str)
@@ -50,14 +69,13 @@
    :display-name (.getProperty form-instance "surveyedLocaleDisplayName")})
 
 (defn fetch-form-instances
-  ([ds form-id]
-   (fetch-form-instances ds form-id {}))
-  ([ds form-id {:keys [page-size cursor]}]
-   (let [page-size (normalize-page-size page-size)
-         form-instances-iterator (form-instances-query ds form-id cursor page-size)
+  ([ds form-definition]
+   (fetch-form-instances ds form-definition {}))
+  ([ds form-definition opts]
+   (let [form-instances-iterator (form-instances-query ds form-definition opts)
          cursor (.getCursor form-instances-iterator)
          form-instances (mapv form-instance-entity->map (iterator-seq form-instances-iterator))
-         answers (fetch-answers ds form-instances)]
+         answers (fetch-answers ds form-definition form-instances)]
      {:form-instances (mapv (fn [form-instance]
                               (assoc form-instance
                                      :responses

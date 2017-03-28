@@ -31,8 +31,6 @@
    :created-at (ds/created-at question)
    :modified-at (ds/modified-at question)})
 
-
-
 (defn question-group-definition [question-group questions]
   (let [qs (sort-by :order (map ->question questions))]
     {:id (str (ds/id question-group))
@@ -53,8 +51,7 @@
      :name (.getName form)
      :question-groups (mapv (fn [question-group]
                               (question-group-definition question-group
-                                                         (get questions
-                                                              (ds/id question-group))))
+                                                         (get questions (ds/id question-group))))
                             (.values (.getQuestionGroupMap form)))
      :created-at (ds/created-at form)
      :modified-at (ds/modified-at form)}))
