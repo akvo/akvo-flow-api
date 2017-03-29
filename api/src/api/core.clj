@@ -55,13 +55,19 @@
   (def instance-map (config/get-instance-map auth-token))
 
   (ds/with-local-api
-    (survey/get-survey-definition "@gmail.com" "31929121"))
+    (folder/get-filtered-folders "@akvo.org" "0"))
+
+  (ds/with-local-api
+    (survey/get-filtered-surveys "@akvo.org" "78859123"))
+
+  (ds/with-local-api
+    (survey/get-survey-definition "@akvo.org" ""))
 
   (ds/with-local-api
     (let [ds (DatastoreServiceFactory/getDatastoreService)]
-      (let [sd (survey/get-survey-definition "@gmail.com" "31929121")
-            fd (second (:forms sd))]
-        (form-instance/fetch-form-instances ds fd))))
+      (let [sd (survey/get-survey-definition "@akvo.org" "100909115")
+            fd (first (:forms sd))]
+        (form-instance/fetch-form-instances ds fd {:page-size 5}))))
 
   (import com.google.appengine.api.datastore.Entity)
   (import com.google.appengine.api.datastore.Query)

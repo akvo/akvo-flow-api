@@ -4,24 +4,23 @@
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
   (:require [api.datastore :as ds]))
 
-(defn get-filtered-surveys [spec email folder-id]
-  (ds/with-remote-api spec
-    (let [user-dao (UserDao.)
-          user (.findUserByEmail user-dao email)
-          survey-dao (SurveyDAO.)
-          all-surveys (.listAll survey-dao)
-          user-surveys (.filterByUserAuthorizationObjectId survey-dao
-                                                           all-surveys
-                                                           (-> user .getKey .getId))]
+(defn get-filtered-surveys [email folder-id]
+  (let [user-dao (UserDao.)
+        user (.findUserByEmail user-dao email)
+        survey-dao (SurveyDAO.)
+        all-surveys (.listAll survey-dao)
+        user-surveys (.filterByUserAuthorizationObjectId survey-dao
+                                                         all-surveys
+                                                         (-> user .getKey .getId))]
 
-      (->> user-surveys
-           (map (fn [survey]
-                  {:id (str (ds/id survey))
-                   :name (.getName survey)
-                   :folder-id (str (.getParentId survey))
-                   :created-at (ds/created-at survey)
-                   :modified-at (ds/modified-at survey)}))
-           (filter #(= (:folder-id %) folder-id))))))
+    (->> user-surveys
+         (map (fn [survey]
+                {:id (str (ds/id survey))
+                 :name (.getName survey)
+                 :folder-id (str (.getParentId survey))
+                 :created-at (ds/created-at survey)
+                 :modified-at (ds/modified-at survey)}))
+         (filter #(= (:folder-id %) folder-id)))))
 
 (defn ->question [question]
   {:id (str (ds/id question))

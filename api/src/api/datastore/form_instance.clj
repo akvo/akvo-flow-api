@@ -32,8 +32,6 @@
           {}
           (mapcat :questions (:question-groups form-definition))))
 
-
-
 ;; FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
 ;; NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
 (defmulti parse-response (fn [type response-str] type))
@@ -124,7 +122,7 @@
                         (let [form-instance-id (str (.getProperty answer "surveyInstanceId"))
                               question-id (.getProperty answer "questionID")
                               response-str (or (.getProperty answer "value")
-                                               (.getProperty answer "valueText"))
+                                               (.getValue (.getProperty answer "valueText")))
                               iteration (or (.getProperty answer "iteration") 0)
                               response (when response-str
                                          (parse-response (get question-types question-id)
@@ -146,12 +144,12 @@
 
 (defn form-instance-entity->map [form-instance]
   {:id (-> form-instance .getKey .getId str)
-   :form-id (.getProperty form-instance "surveyId")
+   :form-id (str (.getProperty form-instance "surveyId"))
    :surveyal-time (.getProperty form-instance "surveyalTime")
    :submitter (.getProperty form-instance "submitterName")
    :submission-date (.getProperty form-instance "collectionDate")
    :device-identifier (.getProperty form-instance "deviceIdentifier")
-   :data-point-id (.getProperty form-instance "surveyedLocaleId")
+   :data-point-id (str (.getProperty form-instance "surveyedLocaleId"))
    :identifier (.getProperty form-instance "surveyedLocaleIdentifier")
    :display-name (.getProperty form-instance "surveyedLocaleDisplayName")})
 
@@ -160,8 +158,10 @@
    (fetch-form-instances ds form-definition {}))
   ([ds form-definition opts]
    (let [form-instances-iterator (form-instances-query ds form-definition opts)
-         cursor (.getCursor form-instances-iterator)
          form-instances (mapv form-instance-entity->map (iterator-seq form-instances-iterator))
+         cursor (let [cursor (.toWebSafeString (.getCursor form-instances-iterator))]
+                  (when-not (empty? cursor)
+                    cursor))
          answers (fetch-answers ds form-definition form-instances)]
      {:form-instances (mapv (fn [form-instance]
                               (assoc form-instance
