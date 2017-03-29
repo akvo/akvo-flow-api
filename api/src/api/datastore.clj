@@ -37,7 +37,7 @@
 
 (def ^:private date-format (.toFormat (DateTimeFormatter/ISO_INSTANT)))
 
-(defn- to-iso-8601 [date]
+(defn to-iso-8601 [date]
   (.format date-format (.toInstant date)))
 
 (defn created-at [entity]

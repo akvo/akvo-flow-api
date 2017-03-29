@@ -60,7 +60,7 @@
   (ds/with-local-api
     (let [ds (DatastoreServiceFactory/getDatastoreService)]
       (let [sd (survey/get-survey-definition "@gmail.com" "31929121")
-            fd (first (:forms sd))]
+            fd (second (:forms sd))]
         (form-instance/fetch-form-instances ds fd))))
 
   (import com.google.appengine.api.datastore.Entity)

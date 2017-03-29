@@ -1,6 +1,10 @@
 (ns api.datastore.form-instance
-  (:require[akvo.commons.gae :as gae]
-           [akvo.commons.gae.query :as q]))
+  (:require [akvo.commons.gae :as gae]
+            [akvo.commons.gae.query :as q]
+            [api.datastore :as ds]
+            [cheshire.core :as json]
+            [clojure.string :as s])
+  (:import [com.fasterxml.jackson.core JsonParseException]))
 
 (def MAX_PAGE_SIZE 300)
 
@@ -28,11 +32,90 @@
           {}
           (mapcat :questions (:question-groups form-definition))))
 
+
+
+;; FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
+;; NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
 (defmulti parse-response (fn [type response-str] type))
 
-(defmethod parse-response :default
-  [type response-str]
+(defmethod parse-response "FREE_TEXT"
+  [_ response-str]
   response-str)
+
+(defmethod parse-response "OPTION"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _)))
+
+(defn parse-double [s]
+  (try (Double/parseDouble s)
+       (catch NumberFormatException _)))
+
+(defmethod parse-response "NUMBER"
+  [_ response-str]
+  (parse-double response-str))
+
+;; 52.40376391|-1.75630525|189.6|6oqmgtjv
+(defmethod parse-response "GEO"
+  [_ response-str]
+  (let [[lat long elev code] (s/split response-str #"\|")]
+    {:lat (parse-double lat)
+     :long (parse-double long)
+     :elev (parse-double elev)
+     :code code}))
+
+;; {"filename":"/storage/.../.jpg","location":null}
+;; or
+;; /storage/.../.jpg
+;; TODO: If location is non-null, what is the format?
+(defmethod parse-response "PHOTO"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _
+         {"filename" response-str
+          "location" nil})))
+
+(defmethod parse-response "VIDEO"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _
+         {"filename" response-str
+          "location" nil})))
+
+(defmethod parse-response "SCAN"
+  [_ response-str]
+  response-str)
+
+(defmethod parse-response "TRACK"
+  [_ response-str]
+  response-str)
+
+(defmethod parse-response "NAME"
+  [_ response-str]
+  response-str)
+
+(defmethod parse-response "STRENGTH"
+  [_ response-str]
+  response-str)
+
+(defmethod parse-response "DATE"
+  [_ response-str]
+  (ds/to-iso-8601 (java.util.Date. (Long/parseLong response-str))))
+
+(defmethod parse-response "CASCADE"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _)))
+
+(defmethod parse-response "GEOSHAPE"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _)))
+
+(defmethod parse-response "SIGNATURE"
+  [_ response-str]
+  (try (json/parse-string response-str)
+       (catch JsonParseException _)))
 
 (defn fetch-answers [ds form-definition form-instances]
   (let [question-types (question-type-map form-definition)]
