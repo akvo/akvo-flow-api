@@ -30,6 +30,10 @@
 
 (defmulti parse-response (fn [type response-str] type))
 
+(defmethod parse-response :default
+  [type response-str]
+  response-str)
+
 (defn fetch-answers [ds form-definition form-instances]
   (let [question-types (question-type-map form-definition)]
     (reduce (fn [form-instance-answers form-instance-batch]
