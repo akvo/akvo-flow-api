@@ -5,6 +5,14 @@ set -eu
 TEST_DATA_URL="https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
+# Flow data access classes
+
+cd flow
+
+./build.sh
+
+cd ..
+
 # Lein
 
 mkdir -p $HOME/.lein

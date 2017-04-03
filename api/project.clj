@@ -4,7 +4,7 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.akvo.flow/data-access "a871631951"]
+                 [org.akvo.flow/data-access "v1.9.15"]
                  [org.akvo/commons "0.4.2"]
                  [com.google.appengine/appengine-tools-sdk "1.9.50"]
                  [javax.jdo/jdo2-api "2.3-eb"]
