@@ -11,6 +11,7 @@
                  [org.datanucleus/datanucleus-core "1.1.5"]
                  [com.google.appengine/appengine-remote-api "1.9.50"]
                  [com.google.appengine/appengine-api-1.0-sdk "1.9.50"]
+                 [com.google.appengine/appengine-jsr107cache "1.9.50"]
                  [net.sf.jsr107cache/jsr107cache "1.1"]
                  [servletapi/servlet-api "2.4-20040521"]
                  [com.google.appengine.orm/datanucleus-appengine "1.0.10"]

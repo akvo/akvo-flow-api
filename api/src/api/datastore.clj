@@ -1,6 +1,11 @@
 (ns api.datastore
+  (:require [clojure.java.io :as io])
   (:import [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
-           [java.time.format DateTimeFormatter]))
+           [java.time.format DateTimeFormatter]
+           [java.util.logging LogManager]))
+
+(.readConfiguration (LogManager/getLogManager)
+                    (io/input-stream (io/resource "logging.properties")))
 
 (defmacro with-remote-api [spec & body]
   `(let [host# (get ~spec :host)
