@@ -19,7 +19,9 @@
       page-size
       MAX_PAGE_SIZE)))
 
-(defn form-instances-query ^QueryResultIterator [ds form-definition {:keys [cursor page-size]}]
+(defn form-instances-query
+  ^com.google.appengine.api.datastore.QueryResultIterator
+  [ds form-definition {:keys [cursor page-size]}]
   (let [page-size (normalize-page-size page-size)]
     (.iterator ^QueryResultIterable (q/result ds
                                               {:kind "SurveyInstance"
