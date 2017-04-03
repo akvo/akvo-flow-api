@@ -1,15 +1,16 @@
 (ns api.datastore.folder-test
   (:require [api.datastore :as ds]
             [api.datastore.folder :as folder]
+            [api.datastore.user :as user]
             [clojure.test :refer :all])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
 (deftest folder-test
   (ds/with-local-api
     (let [ds (DatastoreServiceFactory/getDatastoreService)
-          user-1 "akvo.flow.user.test@gmail.com"
-          user-2 "akvo.flow.user.test2@gmail.com"
-          user-3 "akvo.flow.user.test3@gmail.com"
+          user-1 (user/id "akvo.flow.user.test@gmail.com")
+          user-2 (user/id "akvo.flow.user.test2@gmail.com")
+          user-3 (user/id "akvo.flow.user.test3@gmail.com")
           root-folders-1 (folder/get-filtered-folders user-1 "0")
           root-folders-2 (folder/get-filtered-folders user-2 "0")
           root-folders-3 (folder/get-filtered-folders user-3 "0")

@@ -2,13 +2,14 @@
   (:require [api.datastore :as ds]
             [api.datastore.form-instance :as form-instance]
             [api.datastore.survey :as survey]
+            [api.datastore.user :as user]
             [clojure.test :refer :all])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
 (deftest form-instance-pagination-test
   (ds/with-local-api
     (let [ds (DatastoreServiceFactory/getDatastoreService)
-          survey (survey/get-survey-definition "akvo.flow.user.test@gmail.com" "152342023")
+          survey (survey/get-survey-definition (user/id "akvo.flow.user.test@gmail.com") "152342023")
           form (first (:forms survey))]
 
       (testing "Default page size"

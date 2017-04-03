@@ -3,14 +3,12 @@
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
   (:require [api.datastore :as ds]))
 
-(defn get-filtered-folders [email parent-id]
-  (let [user-dao (UserDao.)
-        user (.findUserByEmail user-dao email)
-        folder-dao (FolderDAO.)
+(defn get-filtered-folders [user-id parent-id]
+  (let [folder-dao (FolderDAO.)
         all-folders (.listAll folder-dao)
         user-folders (.filterByUserAuthorizationObjectId folder-dao
                                                          all-folders
-                                                         (ds/id user))]
+                                                         user-id)]
 
     (->> user-folders
          (map (fn [folder]

@@ -1,17 +1,14 @@
 (ns api.datastore.survey
   (:import [com.gallatinsystems.survey.dao.SurveyDAO]
-           [com.gallatinsystems.user.dao UserDao]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
   (:require [api.datastore :as ds]))
 
-(defn get-filtered-surveys [email folder-id]
-  (let [user-dao (UserDao.)
-        user (.findUserByEmail user-dao email)
-        survey-dao (SurveyDAO.)
+(defn get-filtered-surveys [user-id folder-id]
+  (let [survey-dao (SurveyDAO.)
         all-surveys (.listAll survey-dao)
         user-surveys (.filterByUserAuthorizationObjectId survey-dao
                                                          all-surveys
-                                                         (-> user .getKey .getId))]
+                                                         user-id)]
 
     (->> user-surveys
          (map (fn [survey]
@@ -39,7 +36,7 @@
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
 
-(defn get-form-definition [email form-id]
+(defn get-form-definition [form-id]
   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         ;; Includes question groups, but contrary to docstring does not contain questions
         form (.loadFullSurvey form-dao form-id)
@@ -55,19 +52,16 @@
      :created-at (ds/created-at form)
      :modified-at (ds/modified-at form)}))
 
-(defn get-survey-definition [email survey-id]
-  (let [user-dao (UserDao.)
-        user (.findUserByEmail user-dao email)]
-    (when user
-      (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
-            survey (.getByKey survey-dao (Long/parseLong survey-id))
-            form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
-            forms (.filterByUserAuthorizationObjectId form-dao
-                                                      (.listSurveysByGroup form-dao (Long/parseLong survey-id))
-                                                      (ds/id user))]
-        {:id survey-id
-         :name (.getName survey)
-         :forms (mapv #(get-form-definition email (ds/id %))
-                      forms)
-         :created-at (ds/created-at survey)
-         :modified-at (ds/modified-at survey)}))))
+(defn get-survey-definition [user-id survey-id]
+  (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
+        survey (.getByKey survey-dao (Long/parseLong survey-id))
+        form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        forms (.filterByUserAuthorizationObjectId form-dao
+                                                  (.listSurveysByGroup form-dao (Long/parseLong survey-id))
+                                                  user-id)]
+    {:id survey-id
+     :name (.getName survey)
+     :forms (mapv #(get-form-definition (ds/id %))
+                  forms)
+     :created-at (ds/created-at survey)
+     :modified-at (ds/modified-at survey)}))
