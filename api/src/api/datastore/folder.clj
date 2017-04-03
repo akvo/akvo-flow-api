@@ -1,9 +1,10 @@
 (ns api.datastore.folder
   (:import [com.gallatinsystems.user.dao UserDao]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
+  (:refer-clojure :exclude [list])
   (:require [api.datastore :as ds]))
 
-(defn get-filtered-folders [user-id parent-id]
+(defn list [user-id parent-id]
   (let [folder-dao (FolderDAO.)
         all-folders (.listAll folder-dao)
         user-folders (.filterByUserAuthorizationObjectId folder-dao

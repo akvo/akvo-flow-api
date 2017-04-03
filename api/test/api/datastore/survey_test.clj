@@ -12,9 +12,9 @@
           user-2 (user/id "akvo.flow.user.test2@gmail.com")
           user-3 (user/id "akvo.flow.user.test3@gmail.com")
           folder-id "153142013"
-          surveys-1 (survey/get-filtered-surveys user-1 folder-id)
-          surveys-2 (survey/get-filtered-surveys user-2 folder-id)
-          surveys-3 (survey/get-filtered-surveys user-3 folder-id)]
+          surveys-1 (survey/list user-1 folder-id)
+          surveys-2 (survey/list user-2 folder-id)
+          surveys-3 (survey/list user-3 folder-id)]
       (testing "Filtered surveys"
         (is (= 2 (count surveys-1)))
         (is (= 2 (count surveys-2)))

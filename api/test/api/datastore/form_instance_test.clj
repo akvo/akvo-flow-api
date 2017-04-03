@@ -9,27 +9,27 @@
 (deftest form-instance-pagination-test
   (ds/with-local-api
     (let [ds (DatastoreServiceFactory/getDatastoreService)
-          survey (survey/get-survey-definition (user/id "akvo.flow.user.test@gmail.com") "152342023")
+          survey (survey/by-id (user/id "akvo.flow.user.test@gmail.com") "152342023")
           form (first (:forms survey))]
 
       (testing "Default page size"
         (is (= 30
-               (count (:form-instances (form-instance/fetch-form-instances ds form))))))
+               (count (:form-instances (form-instance/list ds form))))))
 
       (testing "Basic pagination"
-        (is (= (:form-instances (form-instance/fetch-form-instances ds form))
-               (let [page-1 (form-instance/fetch-form-instances ds form {:page-size 15})
-                     page-2 (form-instance/fetch-form-instances ds form {:page-size 15
-                                                                         :cursor (:cursor page-1)})]
+        (is (= (:form-instances (form-instance/list ds form))
+               (let [page-1 (form-instance/list ds form {:page-size 15})
+                     page-2 (form-instance/list ds form {:page-size 15
+                                                         :cursor (:cursor page-1)})]
                  (concat (:form-instances page-1)
                          (:form-instances page-2))))))
 
       (testing "End of pagination"
-        (let [page-1 (form-instance/fetch-form-instances ds form {:page-size 150})
-              page-2 (form-instance/fetch-form-instances ds form {:page-size 150
-                                                                  :cursor (:cursor page-1)})
-              page-3 (form-instance/fetch-form-instances ds form {:page-size 150
-                                                                  :cursor (:cursor page-2)})]
+        (let [page-1 (form-instance/list ds form {:page-size 150})
+              page-2 (form-instance/list ds form {:page-size 150
+                                                  :cursor (:cursor page-1)})
+              page-3 (form-instance/list ds form {:page-size 150
+                                                  :cursor (:cursor page-2)})]
           (is (= 150 (count (:form-instances page-1))))
           (is (= 17 (count (:form-instances page-2))))
           (is (empty? (:form-instances page-3))))))))

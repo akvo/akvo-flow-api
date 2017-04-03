@@ -4,6 +4,7 @@
             [api.datastore :as ds]
             [cheshire.core :as json]
             [clojure.string :as s])
+  (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]))
 
 (def MAX_PAGE_SIZE 300)
@@ -153,9 +154,9 @@
    :identifier (.getProperty form-instance "surveyedLocaleIdentifier")
    :display-name (.getProperty form-instance "surveyedLocaleDisplayName")})
 
-(defn fetch-form-instances
+(defn list
   ([ds form-definition]
-   (fetch-form-instances ds form-definition {}))
+   (list ds form-definition {}))
   ([ds form-definition opts]
    (let [form-instances-iterator (form-instances-query ds form-definition opts)
          form-instances (mapv form-instance-entity->map (iterator-seq form-instances-iterator))

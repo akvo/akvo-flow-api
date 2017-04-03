@@ -1,9 +1,10 @@
 (ns api.datastore.survey
   (:import [com.gallatinsystems.survey.dao.SurveyDAO]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
+  (:refer-clojure :exclude [list])
   (:require [api.datastore :as ds]))
 
-(defn get-filtered-surveys [user-id folder-id]
+(defn list [user-id folder-id]
   (let [survey-dao (SurveyDAO.)
         all-surveys (.listAll survey-dao)
         user-surveys (.filterByUserAuthorizationObjectId survey-dao
@@ -52,7 +53,7 @@
      :created-at (ds/created-at form)
      :modified-at (ds/modified-at form)}))
 
-(defn get-survey-definition [user-id survey-id]
+(defn by-id [user-id survey-id]
   (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
         survey (.getByKey survey-dao (Long/parseLong survey-id))
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
