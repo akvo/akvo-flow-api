@@ -1,4 +1,4 @@
-(ns api.datastore.survey-test
+(ns api.datastore.user-test
   (:require  [api.datastore :as ds]
              [api.datastore.user :as user]
              [clojure.test :refer :all]))
