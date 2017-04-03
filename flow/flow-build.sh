@@ -8,9 +8,8 @@ git checkout develop
 git pull
 git fetch --tags
 
-TAG="a871631951"
-
-#TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+# Last released tag
+TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 
 git checkout $TAG
 

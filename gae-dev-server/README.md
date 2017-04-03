@@ -8,7 +8,7 @@ https://cloud.google.com/appengine/docs/standard/java/tools/maven
 * JDK 8
 * Maven 3.3.9+
 
-More info at: 
+More info at:
 
 ## Test data
 
@@ -17,6 +17,11 @@ This file is located in the the following path:
 `./target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated/local_db.bin`
 
 If you copy a file with test data it will persist the changes across restarts.
+
+A sample data set can be located at:
+
+    https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin
+
 
 ## Start/Stop the server
 
@@ -28,4 +33,3 @@ If you copy a file with test data it will persist the changes across restarts.
 
     mvn appengine:devserver_start
     mvn appengine:devserver_stop
-
