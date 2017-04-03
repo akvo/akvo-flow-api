@@ -33,3 +33,7 @@ A sample data set can be located at:
 
     mvn appengine:devserver_start
     mvn appengine:devserver_stop
+
+## Access the local datastore
+
+You can browse the local datastore at `http://localhost:8080/_ah/admin`.
