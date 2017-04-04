@@ -1,0 +1,7 @@
+{:config
+ {:app
+  {:middleware
+   {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
+    :applied   ^:replace [:not-found :ring-defaults :stacktrace]}}
+  :http
+  {:port 3000}}}

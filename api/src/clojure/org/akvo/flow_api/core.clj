@@ -1,9 +1,9 @@
-(ns api.core
-  (:require [api.akvo-flow-server-config :as config]
-            [api.datastore :as ds]
-            [api.datastore.folder :as folder]
-            [api.datastore.form-instance :as form-instance]
-            [api.datastore.survey :as survey]
+(ns org.akvo.flow-api.core
+  (:require [org.akvo.flow-api.akvo-flow-server-config :as config]
+            [org.akvo.flow-api.datastore :as ds]
+            [org.akvo.flow-api.datastore.folder :as folder]
+            [org.akvo.flow-api.datastore.form-instance :as form-instance]
+            [org.akvo.flow-api.datastore.survey :as survey]
             [clojure.java.io :as io])
   (:import [java.util.logging LogManager]))
 

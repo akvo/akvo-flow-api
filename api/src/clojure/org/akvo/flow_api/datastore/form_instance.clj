@@ -1,7 +1,7 @@
-(ns api.datastore.form-instance
+(ns org.akvo.flow-api.datastore.form-instance
   (:require [akvo.commons.gae :as gae]
             [akvo.commons.gae.query :as q]
-            [api.datastore :as ds]
+            [org.akvo.flow-api.datastore :as ds]
             [cheshire.core :as json]
             [clojure.string :as s])
   (:refer-clojure :exclude [list])

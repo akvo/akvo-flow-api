@@ -1,4 +1,4 @@
-(ns api.datastore
+(ns org.akvo.flow-api.datastore
   (:require [clojure.java.io :as io])
   (:import [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
            [java.time.format DateTimeFormatter]
