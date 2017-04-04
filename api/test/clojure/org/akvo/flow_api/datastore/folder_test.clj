@@ -1,7 +1,7 @@
-(ns api.datastore.folder-test
-  (:require [api.datastore :as ds]
-            [api.datastore.folder :as folder]
-            [api.datastore.user :as user]
+(ns org.akvo.flow-api.datastore.folder-test
+  (:require [org.akvo.flow-api.datastore :as ds]
+            [org.akvo.flow-api.datastore.folder :as folder]
+            [org.akvo.flow-api.datastore.user :as user]
             [clojure.test :refer :all])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 

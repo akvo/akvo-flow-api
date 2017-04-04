@@ -1,7 +1,7 @@
-(ns api.datastore.survey-test
-  (:require [api.datastore :as ds]
-            [api.datastore.survey :as survey]
-            [api.datastore.user :as user]
+(ns org.akvo.flow-api.datastore.survey-test
+  (:require [org.akvo.flow-api.datastore :as ds]
+            [org.akvo.flow-api.datastore.survey :as survey]
+            [org.akvo.flow-api.datastore.user :as user]
             [clojure.test :refer :all])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 

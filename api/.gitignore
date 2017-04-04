@@ -7,5 +7,7 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
-.hgignore
-.hg/
+/.dir-locals.el
+/profiles.clj
+/dev/resources/local.edn
+/dev/src/local.clj

@@ -1,8 +1,8 @@
-(ns api.datastore.folder
+(ns org.akvo.flow-api.datastore.folder
   (:import [com.gallatinsystems.user.dao UserDao]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO])
   (:refer-clojure :exclude [list])
-  (:require [api.datastore :as ds]))
+  (:require [org.akvo.flow-api.datastore :as ds]))
 
 (defn list [user-id parent-id]
   (let [folder-dao (FolderDAO.)

@@ -1,4 +1,4 @@
-(ns api.akvo-flow-server-config
+(ns org.akvo.flow-api.akvo-flow-server-config
   (:import [com.google.apphosting.utils.config AppEngineWebXmlReader]
            [java.io ByteArrayInputStream]
            [org.apache.commons.codec.binary Base64])

@@ -2,7 +2,6 @@
 
 set -eu
 
-TEST_DATA_URL="https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
 # Flow data access classes
@@ -26,7 +25,7 @@ mvn clean install
 
 mkdir -p "${LOCAL_TEST_DATA_PATH}"
 
-curl -Lo "${LOCAL_TEST_DATA_PATH}/local_db.bin" "${TEST_DATA_URL}"
+cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
 
 mvn appengine:devserver_start
 
@@ -34,7 +33,7 @@ mvn appengine:devserver_start
 
 cd ../api
 
-lein do clean, check, test :all, eastwood '{:source-paths ["src" "test"]}'
+lein do clean, check, test :all, eastwood '{:source-paths ["src/clojure" "test/clojure"]}'
 
 cd ../gae-dev-server
 
