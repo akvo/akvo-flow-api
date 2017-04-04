@@ -19,3 +19,20 @@
         (is (= 2 (count surveys-1)))
         (is (= 2 (count surveys-2)))
         (is (= 0 (count surveys-3)))))))
+
+(deftest survey-definition-test
+  (ds/with-local-api
+    (let [user-id (user/id "akvo.flow.user.test@gmail.com")
+          survey-id "148412306"
+          survey (survey/by-id user-id survey-id)
+          form (first (:forms survey))
+          question-group (first (:question-groups form))
+          question (first (:questions question-group))]
+      (are [x required-keys] (= (disj (set (keys x))
+                                      :modified-at
+                                      :created-at)
+                                required-keys)
+        survey #{:id :name :forms}
+        form #{:id :name :question-groups}
+        question-group #{:id :name :repeatable? :questions}
+        question #{:id :name :type :order}))))
