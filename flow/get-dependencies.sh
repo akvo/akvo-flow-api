@@ -12,7 +12,9 @@ if [[ ! -d "${CACHE}" ]]; then
     mkdir "${CACHE}"
 fi
 
-sudo mount --bind "${HOME}/${CACHE}" "${CACHE}"
+if [[ "${OSTYPE}" == "linux-gnu" ]]; then
+    sudo mount --bind "${HOME}/${CACHE}" "${CACHE}"
+fi
 
 cd "${CACHE}"
 
