@@ -4,12 +4,13 @@ RUN apk add --no-cache wget unzip git
 
 RUN mkdir /opt
 
-ADD .akvo-flow-cache/*.zip /opt/
+ADD .cache/*.zip /opt/
 
 RUN cd /opt && \
     unzip apache-ant-1.10.1-bin.zip && \
     unzip apache-maven-3.0.5-bin.zip && \
-    unzip appengine-java-sdk-1.9.50.zip
+    unzip appengine-java-sdk-1.9.50.zip && \
+    rm *.zip
 
 ENV ANT_HOME=/opt/apache-ant-1.10.1
 ENV MAVEN_HOME=/opt/apache-maven-3.0.5

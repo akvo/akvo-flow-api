@@ -2,9 +2,17 @@
 
 set -eu
 
-CACHE=".akvo-flow-cache"
+CACHE=".cache"
 
-mkdir -p "${CACHE}"
+if [[ ! -d "${HOME}/${CACHE}" ]]; then
+    mkdir "${HOME}/${CACHE}"
+fi
+
+if [[ ! -d "${CACHE}" ]]; then
+    mkdir "${CACHE}"
+fi
+
+sudo mount --bind "${HOME}/${CACHE}" "${CACHE}"
 
 cd "${CACHE}"
 

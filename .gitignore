@@ -10,4 +10,4 @@
 **/.lein-plugins/
 **/.lein-failures
 **/.nrepl-port
-flow/.akvo-flow-cache/
+**/.cache/
