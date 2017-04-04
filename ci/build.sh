@@ -33,7 +33,7 @@ mvn appengine:devserver_start
 
 cd ../api
 
-lein do clean, check, test :all, eastwood '{:source-paths ["src" "test/clojure"]}'
+lein do clean, check, test :all, eastwood '{:source-paths ["src/clojure" "test/clojure"]}'
 
 cd ../gae-dev-server
 
