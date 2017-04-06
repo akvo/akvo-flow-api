@@ -1,11 +1,15 @@
 {:components
  {:app  #var duct.component.handler/handler-component
-  :http #var ring.component.jetty/jetty-server}
+  :http #var ring.component.jetty/jetty-server
+  :remote-api #var org.akvo.flow-api.component.remote-api/remote-api
+  :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config}
  :endpoints
  {}
  :dependencies
  {:http [:app]
-  :app  []}
+  :app  []
+  :remote-api [:akvo-flow-server-config]
+  :akvo-flow-server-config [:config]}
  :config
  {:app
   {:middleware
@@ -26,4 +30,5 @@
                   :content-types          true
                   :default-charset        "utf-8"}}}}}
   :http
-  {:port http-port}}}
+  {:port http-port}
+  :github-auth-token github-auth-token}}

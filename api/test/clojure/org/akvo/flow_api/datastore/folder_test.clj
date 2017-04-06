@@ -1,14 +1,25 @@
 (ns org.akvo.flow-api.datastore.folder-test
-  (:require [org.akvo.flow-api.datastore :as ds]
+  (:require [clojure.test :refer :all]
+            [com.stuartsierra.component :as component]
+            [duct.util.system :as duct]
+            [org.akvo.flow-api.component.remote-api]
+            [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.folder :as folder]
             [org.akvo.flow-api.datastore.user :as user]
-            [clojure.test :refer :all])
+            [org.akvo.flow-api.fixtures :as fixtures])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
+(def system {:components
+             {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}
+             :dependencies {:remote-api []}
+             :endpoints {}
+             :config {}})
+
+(use-fixtures :once (fixtures/system system))
+
 (deftest folder-test
-  (ds/with-local-api
-    (let [ds (DatastoreServiceFactory/getDatastoreService)
-          user-1 (user/id "akvo.flow.user.test@gmail.com")
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
+    (let [user-1 (user/id "akvo.flow.user.test@gmail.com")
           user-2 (user/id "akvo.flow.user.test2@gmail.com")
           user-3 (user/id "akvo.flow.user.test3@gmail.com")
           root-folders-1 (folder/list user-1 "0")

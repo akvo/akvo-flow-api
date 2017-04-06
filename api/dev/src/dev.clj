@@ -1,9 +1,9 @@
 (ns dev
   (:refer-clojure :exclude [test])
-  (:require [clojure.repl :refer :all]
+  (:require [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
+            [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
-            [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
             [duct.util.repl :refer [setup test cljs-repl migrate rollback]]

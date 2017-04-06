@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore
-  (:require [clojure.java.io :as io])
+  (:require [clojure.java.io :as io]
+            [org.akvo.flow-api.boundary.remote-api :as remote-api])
   (:import [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
            [java.time.format DateTimeFormatter]
            [java.util.logging LogManager]))
@@ -7,38 +8,14 @@
 (.readConfiguration (LogManager/getLogManager)
                     (io/input-stream (io/resource "logging.properties")))
 
-(defmacro with-remote-api [spec & body]
-  `(let [host# (get ~spec :host)
-         port# (get ~spec :port 443)
-         iam-account# (get ~spec :iam-account)
-         p12-path# (get ~spec :p12-path)
-         remote-path# (let [trace-path# (get ~spec :trace-path)]
-                        (if (nil? trace-path#)
-                          "/remote_api"
-                          (str "/traced_remote_api/" trace-path#)))
-         options# (-> (RemoteApiOptions.)
-                      (.server host# port#)
-                      (.remoteApiPath remote-path#))]
-     (.useServiceAccountCredential options#
-                                   iam-account#
-                                   p12-path#)
-     (let [installer# (RemoteApiInstaller.)]
-       (.install installer# options#)
-       (try
-         ~@body
-         (finally
-           (.uninstall installer#))))))
-
-(defmacro with-local-api [& body]
-  `(let [options# (-> (RemoteApiOptions.)
-                      (.server "localhost" 8080))]
-     (.useDevelopmentServerCredential options#)
-     (let [installer# (RemoteApiInstaller.)]
-       (.install installer# options#)
-       (try
-         ~@body
-         (finally
-           (.uninstall installer#))))))
+(defmacro with-remote-api [remote-api instance-id & body]
+  `(let [options# (remote-api/options ~remote-api ~instance-id)
+         installer# (RemoteApiInstaller.)]
+     (.install installer# options#)
+     (try
+       ~@body
+       (finally
+         (.uninstall installer#)))))
 
 (def ^:private date-format (.toFormat (DateTimeFormatter/ISO_INSTANT)))
 

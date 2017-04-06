@@ -1,10 +1,19 @@
 (ns org.akvo.flow-api.datastore.user-test
-  (:require  [org.akvo.flow-api.datastore :as ds]
+  (:require  [clojure.test :refer :all]
+             [org.akvo.flow-api.datastore :as ds]
              [org.akvo.flow-api.datastore.user :as user]
-             [clojure.test :refer :all]))
+             [org.akvo.flow-api.fixtures :as fixtures]))
+
+(def system {:components
+             {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}
+             :dependencies {:remote-api []}
+             :endpoints {}
+             :config {}})
+
+(use-fixtures :once (fixtures/system system))
 
 (deftest user-tests
-  (ds/with-local-api
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsanbox"
     (testing "Non existing user"
       (is (thrown? clojure.lang.ExceptionInfo
                    (user/id "no-such@user.com"))))

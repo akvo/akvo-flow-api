@@ -1,4 +1,10 @@
-{:config
+{:components
+ {:remote-api #var org.akvo.flow-api.component.remote-api/local-api
+  :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/dummy-akvo-flow-server-config}
+ :dependencies
+ {:remote-api []
+  :akvo-flow-server-config []}
+ :config
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
