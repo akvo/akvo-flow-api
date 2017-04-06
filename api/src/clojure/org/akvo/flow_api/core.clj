@@ -1,10 +1,10 @@
 (ns org.akvo.flow-api.core
-  (:require [org.akvo.flow-api.akvo-flow-server-config :as config]
+  (:require [clojure.java.io :as io]
+            [org.akvo.flow-api.akvo-flow-server-config :as config]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.folder :as folder]
             [org.akvo.flow-api.datastore.form-instance :as form-instance]
-            [org.akvo.flow-api.datastore.survey :as survey]
-            [clojure.java.io :as io])
+            [org.akvo.flow-api.datastore.survey :as survey])
   (:import [java.util.logging LogManager]))
 
 ;; Configure Datanucleus logging
@@ -12,6 +12,7 @@
                     (io/input-stream (io/resource "logging.properties")))
 
 (comment
+
   (defn remote-api-spec [instance-map instance-id]
     (let [auth-token (System/getenv "GITHUB_API_KEY")
           host (str instance-id ".appspot.com")

@@ -59,7 +59,7 @@
 
 (defn get-instance-props [auth-token instance-id]
   (let [tmp-file (get-appengine-web-xml-file auth-token instance-id)
-        ae-reader (AppEngineWebXmlReader. tmp-dir
+        ae-reader (AppEngineWebXmlReader. (format "%s%s/" tmp-dir instance-id)
                                           (.getName tmp-file))]
     (.getSystemProperties (.readAppEngineWebXml ae-reader))))
 

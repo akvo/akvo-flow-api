@@ -1,13 +1,22 @@
 (ns org.akvo.flow-api.datastore.form-instance-test
-  (:require [org.akvo.flow-api.datastore :as ds]
+  (:require [clojure.test :refer :all]
+            [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.form-instance :as form-instance]
             [org.akvo.flow-api.datastore.survey :as survey]
             [org.akvo.flow-api.datastore.user :as user]
-            [clojure.test :refer :all])
+            [org.akvo.flow-api.fixtures :as fixtures])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
+(def system {:components
+             {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}
+             :dependencies {:remote-api []}
+             :endpoints {}
+             :config {}})
+
+(use-fixtures :once (fixtures/system system))
+
 (deftest form-instance-pagination-test
-  (ds/with-local-api
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
     (let [ds (DatastoreServiceFactory/getDatastoreService)
           survey (survey/by-id (user/id "akvo.flow.user.test@gmail.com") "152342023")
           form (first (:forms survey))]
