@@ -1,4 +1,5 @@
-(ns org.akvo.flow-api.endpoint.anomaly)
+(ns org.akvo.flow-api.endpoint.anomaly
+  (:require [ring.util.response :refer [response]]))
 
 (defmulti handle
   (fn [e]
@@ -7,12 +8,17 @@
 (defmethod handle :default [e]
   (throw e))
 
+(defn body [e]
+  (-> (ex-data e)
+      (assoc :message (.getMessage e))
+      (dissoc :status)))
+
 (defmethod handle :unauthorized [e]
-  {:status 401
-   :body (assoc (dissoc (ex-data e) :status)
-                :message (.getMessage e))})
+  (-> (body e)
+      (response)
+      (assoc :status 401)))
 
 (defmethod handle :not-found [e]
-  {:status 404
-   :body (assoc (dissoc (ex-data e) :status)
-                :message (.getMessage e))})
+  (-> (body e)
+      (response)
+      (assoc :status 404)))
