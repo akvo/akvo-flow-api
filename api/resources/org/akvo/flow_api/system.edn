@@ -4,21 +4,25 @@
   :remote-api #var org.akvo.flow-api.component.remote-api/remote-api
   :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config}
  :endpoints
- {}
+ {:folder #var org.akvo.flow-api.endpoint.folder/endpoint}
  :dependencies
  {:http [:app]
-  :app  []
+  :app  [:folder]
   :remote-api [:akvo-flow-server-config]
-  :akvo-flow-server-config [:config]}
+  :akvo-flow-server-config [:github-auth-token]
+  :folder [:remote-api]}
  :config
  {:app
   {:middleware
    {:functions
     {:hide-errors   #var duct.middleware.errors/wrap-hide-errors
      :not-found     #var duct.middleware.not-found/wrap-not-found
-     :ring-defaults #var ring.middleware.defaults/wrap-defaults}
+     :ring-defaults #var ring.middleware.defaults/wrap-defaults
+     :json-response #var ring.middleware.json/wrap-json-response
+     :json-body     #var ring.middleware.json/wrap-json-body
+     :wrap-email    #var org.akvo.flow-api.middleware.email/wrap-email}
     :applied
-    [:not-found :ring-defaults :hide-errors]
+    [:not-found :json-response :ring-defaults :wrap-email :json-body :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
@@ -28,7 +32,8 @@
       :responses {:not-modified-responses true
                   :absolute-redirects     true
                   :content-types          true
-                  :default-charset        "utf-8"}}}}}
+                  :default-charset        "utf-8"}}
+     :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}}}}
   :http
   {:port http-port}
   :github-auth-token github-auth-token}}

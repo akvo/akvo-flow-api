@@ -8,6 +8,6 @@
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
-    :applied   ^:replace [:not-found :ring-defaults :stacktrace]}}
+    :applied   ^:replace [:not-found :json-response :ring-defaults :wrap-email :json-body :stacktrace]}}
   :http
   {:port 3000}}}
