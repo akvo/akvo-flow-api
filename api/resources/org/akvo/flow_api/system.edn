@@ -4,13 +4,15 @@
   :remote-api #var org.akvo.flow-api.component.remote-api/remote-api
   :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config}
  :endpoints
- {:folder #var org.akvo.flow-api.endpoint.folder/endpoint}
+ {:folder #var org.akvo.flow-api.endpoint.folder/endpoint
+  :survey #var org.akvo.flow-api.endpoint.survey/endpoint}
  :dependencies
  {:http [:app]
-  :app  [:folder]
+  :app  [:folder :survey]
   :remote-api [:akvo-flow-server-config]
   :akvo-flow-server-config [:github-auth-token]
-  :folder [:remote-api]}
+  :folder [:remote-api :api-root]
+  :survey [:remote-api :api-root]}
  :config
  {:app
   {:middleware
@@ -36,4 +38,5 @@
      :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}}}}
   :http
   {:port http-port}
-  :github-auth-token github-auth-token}}
+  :github-auth-token github-auth-token
+  :api-root api-root}}

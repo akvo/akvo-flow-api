@@ -6,8 +6,8 @@
   (:import [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
 
 (defprotocol Survey
-  (list [this user-id parent-id] "List surveys in a parent folder filtered for a particular user")
-  (by-id [this user-id survey-id] "Get the survey definition"))
+  (list [this instance-id user-id parent-id] "List surveys in a parent folder filtered for a particular user")
+  (by-id [this instance-id user-id survey-id] "Get the survey definition"))
 
 (extend-protocol Survey
   RemoteApi

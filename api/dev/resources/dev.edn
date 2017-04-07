@@ -10,4 +10,5 @@
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
     :applied   ^:replace [:not-found :json-response :ring-defaults :wrap-email :json-body :stacktrace]}}
   :http
-  {:port 3000}}}
+  {:port 3000}
+  :api-root "https://localhost:3000/flow"}}
