@@ -15,13 +15,13 @@
   (let [forms (for [form (:forms survey)]
                 (assoc form
                        :form-instances-url
-                       (format "%s/instance/%s/form-instances/%s"
-                               api-root instance-id (:id form))))]
+                       (format "%s/instance/%s/form-instances/%s/%s"
+                               api-root instance-id (:id survey) (:id form))))]
     (assoc survey :forms forms)))
 
 (defn endpoint [{:keys [remote-api api-root]}]
   (context "/instance" {:keys [email params]}
-    (let-routes [api-root "https://api.akvo.org/flow"]
+    (let-routes []
       (GET "/:instance-id/surveys/:survey-id" [instance-id survey-id]
         (-> remote-api
           (survey/by-id instance-id

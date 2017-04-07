@@ -7,7 +7,7 @@
            [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
 
 (defprotocol FormInstance
-  (list [this user-id form-definition] "List form instances for a given form definition"))
+  (list [this instance-id user-id form-definition opts] "List form instances for a given form definition"))
 
 (extend-protocol FormInstance
   RemoteApi
