@@ -4,14 +4,16 @@
   :remote-api #var org.akvo.flow-api.component.remote-api/remote-api
   :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config}
  :endpoints
- {:folder #var org.akvo.flow-api.endpoint.folder/endpoint
+ {:root #var org.akvo.flow-api.endpoint.root/endpoint
+  :folder #var org.akvo.flow-api.endpoint.folder/endpoint
   :survey #var org.akvo.flow-api.endpoint.survey/endpoint
   :form-instance #var org.akvo.flow-api.endpoint.form-instance/endpoint}
  :dependencies
  {:http [:app]
-  :app  [:folder :survey :form-instance]
+  :app  [:root :folder :survey :form-instance]
   :remote-api [:akvo-flow-server-config]
   :akvo-flow-server-config [:github-auth-token]
+  :root []
   :folder [:remote-api :api-root]
   :survey [:remote-api :api-root]
   :form-instance [:remote-api :api-root]}
