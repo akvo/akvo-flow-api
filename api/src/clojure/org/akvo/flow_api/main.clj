@@ -8,7 +8,8 @@
 
 (defn -main [& args]
   (let [bindings {'http-port (Integer/parseInt (:port env "3000"))
-                  'github-auth-token (:github-auth-token env)}
+                  'github-auth-token (:github-auth-token env)
+                  'api-root (:api-root env)}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
                       (component/start))]
     (add-shutdown-hook ::stop-system #(component/stop system))
