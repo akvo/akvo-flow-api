@@ -8,8 +8,8 @@
 (defn add-links [folders api-root instance-id]
   (for [{:keys [id] :as folder} folders]
     (assoc folder
-           :surveys-url (format "%s/instance/%s/surveys/%s" api-root instance-id id)
-           :folders-url (format "%s/instance/%s/folders/%s" api-root instance-id id))))
+           :surveys-url (format "%s/instance/%s/surveys?folderId=%s" api-root instance-id id)
+           :folders-url (format "%s/instance/%s/folders?parentId=%s" api-root instance-id id))))
 
 (defn endpoint [{:keys [remote-api api-root]}]
   (context "/instance" {:keys [email params]}

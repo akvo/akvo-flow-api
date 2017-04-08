@@ -8,7 +8,7 @@
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
     (assoc survey
-           :survey (format "%s/instance/%s/survey/%s"
+           :survey (format "%s/instance/%s/surveys/%s"
                            api-root instance-id (:id survey)))))
 
 (defn add-form-instances-links [survey api-root instance-id]

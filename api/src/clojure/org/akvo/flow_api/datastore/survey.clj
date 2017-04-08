@@ -10,7 +10,6 @@
         user-surveys (.filterByUserAuthorizationObjectId survey-dao
                                                          all-surveys
                                                          user-id)]
-
     (->> user-surveys
          (map (fn [survey]
                 {:id (str (ds/id survey))
@@ -32,7 +31,7 @@
   (let [qs (sort-by :order (map ->question questions))]
     {:id (str (ds/id question-group))
      :name (.getName question-group)
-     :repeatable? (.getRepeatable question-group)
+     :repeatable (boolean (.getRepeatable question-group))
      :questions qs
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
