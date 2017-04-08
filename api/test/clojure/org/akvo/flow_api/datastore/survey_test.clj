@@ -43,5 +43,5 @@
                                 required-keys)
         survey #{:id :name :forms}
         form #{:id :name :question-groups}
-        question-group #{:id :name :repeatable? :questions}
+        question-group #{:id :name :repeatable :questions}
         question #{:id :name :type :order}))))
