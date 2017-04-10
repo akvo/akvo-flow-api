@@ -6,7 +6,16 @@
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def tmp-dir (System/getProperty "java.io.tmpdir"))
+(defn get-tmp-dir
+  "System property is OS specific, make sure we have a trailing slash
+  http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4391434"
+  []
+  (let [tmp-dir (System/getProperty "java.io.tmpdir")]
+    (if (.endsWith tmp-dir "/")
+      tmp-dir
+      (str tmp-dir "/"))))
+
+(def tmp-dir (get-tmp-dir))
 
 (defn contents-url [path]
   (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
