@@ -6,8 +6,6 @@
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
-(def tmp-dir (System/getProperty "java.io.tmpdir"))
-
 (defn contents-url [path]
   (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
 
@@ -32,43 +30,43 @@
 (defn fetch-file
   "Fetch the file from github. Save it and return the File.
   Returns nil if the file can't be found"
-  [auth-token instance-id file-path]
-  (try
-    (let [bytes (-> (github-contents auth-token file-path)
-                    :content
-                    Base64/decodeBase64)
-          file-name (.getName (io/file file-path))
-          file (io/file tmp-dir instance-id file-name)]
-      (.mkdirs (.getParentFile file))
-      (io/copy bytes file)
-      file)
-    (catch clojure.lang.ExceptionInfo e)))
+  [auth-token tmp-dir instance-id file-path]
+  (let [bytes (-> (github-contents auth-token file-path)
+                  :content
+                  Base64/decodeBase64)
+        file-name (.getName (io/file file-path))
+        file (io/file tmp-dir instance-id file-name)]
+    (.mkdirs (.getParentFile file))
+    (io/copy bytes file)
+    file))
 
-(defn get-file [auth-token instance-id file-path]
+(defn get-file [auth-token tmp-dir instance-id file-path]
   (let [file-name (.getName (io/file file-path))
         file (io/file tmp-dir instance-id file-name)]
     (if (.exists file)
       file
-      (fetch-file auth-token instance-id file-path))))
+      (fetch-file auth-token tmp-dir instance-id file-path))))
 
-(defn get-p12-file [auth-token instance-id]
-  (get-file auth-token instance-id (format "/%1$s/%1$s.p12" instance-id)))
+(defn get-p12-file [auth-token tmp-dir instance-id]
+  (get-file auth-token tmp-dir instance-id (format "/%1$s/%1$s.p12" instance-id)))
 
-(defn get-appengine-web-xml-file [auth-token instance-id]
-  (get-file auth-token instance-id (format "/%s/appengine-web.xml" instance-id)))
+(defn get-appengine-web-xml-file [auth-token tmp-dir instance-id]
+  (get-file auth-token tmp-dir instance-id (format "/%s/appengine-web.xml" instance-id)))
 
-(defn get-instance-props [auth-token instance-id]
-  (let [tmp-file (get-appengine-web-xml-file auth-token instance-id)
-        ae-reader (AppEngineWebXmlReader. (format "%s%s/" tmp-dir instance-id)
-                                          (.getName tmp-file))]
-    (.getSystemProperties (.readAppEngineWebXml ae-reader))))
+(defn get-instance-props [auth-token tmp-dir instance-id]
+  (try
+    (let [tmp-file (get-appengine-web-xml-file auth-token tmp-dir instance-id)
+          ae-reader (AppEngineWebXmlReader. (format "%s%s/" tmp-dir instance-id)
+                                            (.getName tmp-file))]
+      (.getSystemProperties (.readAppEngineWebXml ae-reader)))
+    (catch clojure.lang.ExceptionInfo e)))
 
-(defn get-instance-map [auth-token]
+(defn get-instance-map [auth-token tmp-dir]
   (let [instance-ids (fetch-instance-ids auth-token)]
     (reduce (fn [m instance-id]
-              (try
-                (assoc m instance-id (get-instance-props auth-token instance-id))
-                (catch Exception e m)))
+              (if-let [props (get-instance-props auth-token tmp-dir instance-id)]
+                (assoc m instance-id props)
+                m))
             {}
             instance-ids)))
 
