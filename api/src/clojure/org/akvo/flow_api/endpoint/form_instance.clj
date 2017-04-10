@@ -23,7 +23,7 @@
             (if page-size
               (format "pageSize=%s&" page-size)
               "")
-            %)))
+            cursor)))
 
 (defn add-cursor [form-instances api-root instance-id survey-id form-id page-size]
   (if (empty? (:form-instances form-instances))
