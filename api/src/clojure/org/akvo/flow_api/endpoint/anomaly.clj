@@ -16,7 +16,7 @@
 (defmethod handle :unauthorized [e]
   (-> (body e)
       (response)
-      (assoc :status 401)))
+      (assoc :status 403)))
 
 (defmethod handle :not-found [e]
   (-> (body e)

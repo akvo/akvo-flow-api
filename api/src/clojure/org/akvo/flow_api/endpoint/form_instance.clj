@@ -13,21 +13,29 @@
            nil)
         forms))
 
+(defn cursor-url-fn [api-root instance-id survey-id form-id page-size]
+  (fn [cursor]
+    (format "%s/orgs/%s/form-instances/%s/%s?%scursor=%s"
+            api-root
+            instance-id
+            survey-id
+            form-id
+            (if page-size
+              (format "pageSize=%s&" page-size)
+              "")
+            %)))
+
 (defn add-cursor [form-instances api-root instance-id survey-id form-id page-size]
   (if (empty? (:form-instances form-instances))
     (dissoc form-instances :cursor)
-    (update form-instances :cursor #(format "%s/instance/%s/form-instances/%s/%s?%scursor=%s"
-                                            api-root
-                                            instance-id
-                                            survey-id
-                                            form-id
-                                            (if page-size
-                                              (format "pageSize=%s&" page-size)
-                                              "")
-                                            %))))
+    (update form-instances :cursor (cursor-url-fn api-root
+                                                  instance-id
+                                                  survey-id
+                                                  form-id
+                                                  page-size))))
 
 (defn endpoint [{:keys [remote-api api-root]}]
-  (context "/instance" {:keys [email params]}
+  (context "/orgs" {:keys [email params]}
     (let-routes []
       (GET "/:instance-id/form-instances/:survey-id/:form-id" [instance-id survey-id form-id]
         (try
