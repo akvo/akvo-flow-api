@@ -6,7 +6,8 @@
   (if-let [user (.findUserByEmail (UserDao.) email)]
     user
     (throw (ex-info (format "User %s does not exist" email)
-                    {:email email}))))
+                    {:status :unauthorized
+                     :email email}))))
 
 (defn id [email]
   (ds/id (by-email email)))

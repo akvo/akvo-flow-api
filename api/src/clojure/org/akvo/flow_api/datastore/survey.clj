@@ -10,7 +10,6 @@
         user-surveys (.filterByUserAuthorizationObjectId survey-dao
                                                          all-surveys
                                                          user-id)]
-
     (->> user-surveys
          (map (fn [survey]
                 {:id (str (ds/id survey))
@@ -32,7 +31,7 @@
   (let [qs (sort-by :order (map ->question questions))]
     {:id (str (ds/id question-group))
      :name (.getName question-group)
-     :repeatable? (.getRepeatable question-group)
+     :repeatable (boolean (.getRepeatable question-group))
      :questions qs
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
@@ -55,14 +54,23 @@
 
 (defn by-id [user-id survey-id]
   (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
-        survey (.getByKey survey-dao (Long/parseLong survey-id))
+        survey (if-let [survey (.getByKey survey-dao (Long/parseLong survey-id))]
+                 survey
+                 (throw (ex-info "Survey not found"
+                                 {:status :not-found
+                                  :survey-id survey-id})))
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        all-forms (.listSurveysByGroup form-dao (Long/parseLong survey-id))
         forms (.filterByUserAuthorizationObjectId form-dao
-                                                  (.listSurveysByGroup form-dao (Long/parseLong survey-id))
+                                                  all-forms
                                                   user-id)]
-    {:id survey-id
-     :name (.getName survey)
-     :forms (mapv #(get-form-definition (ds/id %))
-                  forms)
-     :created-at (ds/created-at survey)
-     :modified-at (ds/modified-at survey)}))
+    (if (and (not-empty all-forms) (empty? forms))
+      (throw (ex-info "Not Authorized" {:status :unauthorized
+                                        :survey-id survey-id
+                                        :user-id user-id}))
+      {:id survey-id
+       :name (.getName survey)
+       :forms (mapv #(get-form-definition (ds/id %))
+                    forms)
+       :created-at (ds/created-at survey)
+       :modified-at (ds/modified-at survey)})))

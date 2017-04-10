@@ -21,7 +21,9 @@
     443)
   (iam-account [{:keys [instances]} instance-id]
     (get-in instances [instance-id "serviceAccountId"]))
-  (p12-path [{:keys [github-auth-token]} instance-id]
-    (.getAbsolutePath (afsc/get-p12-file github-auth-token instance-id)))
+  (p12-path [{:keys [github-auth-token tmp-dir]} instance-id]
+    (.getAbsolutePath (afsc/get-p12-file github-auth-token
+                                         tmp-dir
+                                         instance-id)))
   (trace-path [this instance-id]
     nil))
