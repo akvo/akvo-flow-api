@@ -1,9 +1,11 @@
 (ns org.akvo.flow-api.endpoint.survey
   (:require [compojure.core :refer :all]
+            [org.akvo.flow-api.boundary.resolve-alias :refer [alias-resolver]]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
-            [ring.util.response :refer [response]])
-  (:import [clojure.lang ExceptionInfo]))
+            [org.akvo.flow-api.middleware.anomaly :refer [wrap-anomaly]]
+            [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
+            [ring.util.response :refer [response]]))
 
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
@@ -19,20 +21,25 @@
                                api-root instance-id (:id survey) (:id form))))]
     (assoc survey :forms forms)))
 
-(defn endpoint [{:keys [remote-api api-root]}]
-  (context "/orgs" {:keys [email params]}
-    (let-routes []
-      (GET "/:instance-id/surveys/:survey-id" [instance-id survey-id]
-        (-> remote-api
-          (survey/by-id instance-id
-                        (user/id-by-email remote-api instance-id email)
-                        survey-id)
-          (add-form-instances-links api-root instance-id)
-          (response)))
-      (GET "/:instance-id/surveys" [instance-id]
-        (-> remote-api
-          (survey/list instance-id
-                       (user/id-by-email remote-api instance-id email)
-                       (:folderId params))
-          (add-survey-links api-root instance-id)
-          (response))))))
+(defn endpoint* [{:keys [remote-api api-root]}]
+  (routes
+   (GET "/surveys/:survey-id" {:keys [email alias instance-id params]}
+     (-> remote-api
+       (survey/by-id instance-id
+                     (user/id-by-email remote-api instance-id email)
+                     (:survey-id params))
+       (add-form-instances-links api-root alias)
+       (response)))
+   (GET "/surveys" {:keys [email alias instance-id params]}
+     (-> remote-api
+       (survey/list instance-id
+                    (user/id-by-email remote-api instance-id email)
+                    (:folderId params))
+       (add-survey-links api-root alias)
+       (response)))))
+
+
+(defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
+  (-> (endpoint* deps)
+      (wrap-resolve-alias akvo-flow-server-config)
+      (wrap-anomaly)))

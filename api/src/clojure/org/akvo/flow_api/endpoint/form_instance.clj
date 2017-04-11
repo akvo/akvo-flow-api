@@ -3,9 +3,9 @@
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
-            [org.akvo.flow-api.endpoint.anomaly :as anomaly]
-            [ring.util.response :refer [response]])
-  (:import [clojure.lang ExceptionInfo]))
+            [org.akvo.flow-api.middleware.anomaly :refer [wrap-anomaly]]
+            [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
+            [ring.util.response :refer [response]]))
 
 (defn find-form [forms form-id]
   (some #(if (= (:id %) form-id)
@@ -34,21 +34,21 @@
                                                   form-id
                                                   page-size))))
 
-(defn endpoint [{:keys [remote-api api-root]}]
-  (context "/orgs" {:keys [email params]}
-    (let-routes []
-      (GET "/:instance-id/form-instances/:survey-id/:form-id" [instance-id survey-id form-id]
-        (try
-          (let [{page-size :pageSize cursor :cursor} params
-                page-size (when page-size
-                            (Long/parseLong page-size))
-                user-id (user/id-by-email remote-api instance-id email)
-                survey (survey/by-id remote-api instance-id user-id survey-id)
-                form (find-form (:forms survey) form-id)]
-            (-> remote-api
-                (form-instance/list instance-id user-id form {:page-size page-size
-                                                              :cursor cursor})
-                (add-cursor api-root instance-id survey-id form-id page-size)
-                (response)))
-          (catch ExceptionInfo e
-            (anomaly/handle e)))))))
+(defn endpoint* [{:keys [remote-api api-root]}]
+  (GET "/form-instances/:survey-id/:form-id" {:keys [email instance-id alias params]}
+    (let [{page-size :pageSize cursor :cursor survey-id :survey-id form-id :form-id} params
+          page-size (when page-size
+                      (Long/parseLong page-size))
+          user-id (user/id-by-email remote-api instance-id email)
+          survey (survey/by-id remote-api instance-id user-id survey-id)
+          form (find-form (:forms survey) form-id)]
+      (-> remote-api
+          (form-instance/list instance-id user-id form {:page-size page-size
+                                                        :cursor cursor})
+          (add-cursor api-root instance-id survey-id form-id page-size)
+          (response)))))
+
+(defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
+  (-> (endpoint* deps)
+      (wrap-resolve-alias akvo-flow-server-config)
+      (wrap-anomaly)))

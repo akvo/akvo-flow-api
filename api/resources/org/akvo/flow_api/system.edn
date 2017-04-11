@@ -14,9 +14,9 @@
   :remote-api [:akvo-flow-server-config]
   :akvo-flow-server-config []
   :root []
-  :folder [:remote-api :api-root]
-  :survey [:remote-api :api-root]
-  :form-instance [:remote-api :api-root]}
+  :folder [:remote-api :akvo-flow-server-config :api-root]
+  :survey [:remote-api :akvo-flow-server-config :api-root]
+  :form-instance [:remote-api :akvo-flow-server-config :api-root]}
  :config
  {:app
   {:middleware
