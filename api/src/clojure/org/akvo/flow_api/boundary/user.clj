@@ -4,7 +4,7 @@
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.user :as user])
-  (:import [org.akvo.flow_api.component.cache UserCache]
+  (:import [org.akvo.flow_api.component.cache TTLMemoryCache]
            [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
 
 (defprotocol IUser
@@ -15,7 +15,7 @@
   (miss [this instance-id email id] "Call on cache miss"))
 
 (extend-protocol IUserCache
-  UserCache
+  TTLMemoryCache
   (lookup [{:keys [cache]} instance-id email]
     (cache/lookup @cache [instance-id email]))
   (miss [{:keys [cache]} instance-id email id]
