@@ -1,8 +1,9 @@
 (ns org.akvo.flow-api.datastore.survey
-  (:import [com.gallatinsystems.survey.dao.SurveyDAO]
-           [org.akvo.flow.api.dao FolderDAO SurveyDAO])
   (:refer-clojure :exclude [list])
-  (:require [org.akvo.flow-api.datastore :as ds]))
+  (:require [org.akvo.flow-api.anomaly :as anomaly]
+            [org.akvo.flow-api.datastore :as ds])
+  (:import [com.gallatinsystems.survey.dao.SurveyDAO]
+           [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
 (defn list [user-id folder-id]
   (let [survey-dao (SurveyDAO.)
@@ -56,18 +57,17 @@
   (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
         survey (if-let [survey (.getByKey survey-dao (Long/parseLong survey-id))]
                  survey
-                 (throw (ex-info "Survey not found"
-                                 {:status :not-found
-                                  :survey-id survey-id})))
+                 (anomaly/not-found "Survey not found"
+                                    {:survey-id survey-id}))
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         all-forms (.listSurveysByGroup form-dao (Long/parseLong survey-id))
         forms (.filterByUserAuthorizationObjectId form-dao
                                                   all-forms
                                                   user-id)]
     (if (and (not-empty all-forms) (empty? forms))
-      (throw (ex-info "Not Authorized" {:status :unauthorized
-                                        :survey-id survey-id
-                                        :user-id user-id}))
+      (anomaly/unauthorized "Not Authorized"
+                            {:survey-id survey-id
+                             :user-id user-id})
       {:id survey-id
        :name (.getName survey)
        :forms (mapv #(get-form-definition (ds/id %))

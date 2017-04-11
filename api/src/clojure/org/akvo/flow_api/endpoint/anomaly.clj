@@ -3,7 +3,7 @@
 
 (defmulti handle
   (fn [e]
-    (:status (ex-data e))))
+    (:org.akvo.flow-api/anomaly (ex-data e))))
 
 (defmethod handle :default [e]
   (throw e))
@@ -11,14 +11,14 @@
 (defn body [e]
   (-> (ex-data e)
       (assoc :message (.getMessage e))
-      (dissoc :status)))
+      (dissoc :org.akvo.flow-api/anomaly)))
 
-(defmethod handle :unauthorized [e]
+(defmethod handle :org.akvo.flow-api.anomaly/unauthorized [e]
   (-> (body e)
       (response)
       (assoc :status 403)))
 
-(defmethod handle :not-found [e]
+(defmethod handle :org.akvo.flow-api.anomaly/not-found [e]
   (-> (body e)
       (response)
       (assoc :status 404)))

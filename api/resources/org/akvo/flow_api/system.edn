@@ -14,9 +14,9 @@
   :remote-api [:akvo-flow-server-config]
   :akvo-flow-server-config []
   :root []
-  :folder [:remote-api :api-root]
-  :survey [:remote-api :api-root]
-  :form-instance [:remote-api :api-root]}
+  :folder [:remote-api :akvo-flow-server-config :api-root]
+  :survey [:remote-api :akvo-flow-server-config :api-root]
+  :form-instance [:remote-api :akvo-flow-server-config :api-root]}
  :config
  {:app
   {:middleware
@@ -26,9 +26,10 @@
      :ring-defaults #var ring.middleware.defaults/wrap-defaults
      :json-response #var ring.middleware.json/wrap-json-response
      :json-body     #var ring.middleware.json/wrap-json-body
-     :wrap-email    #var org.akvo.flow-api.middleware.email/wrap-email}
+     :wrap-email    #var org.akvo.flow-api.middleware.email/wrap-email
+     :wrap-anomaly  #var org.akvo.flow-api.middleware.anomaly/wrap-anomaly}
     :applied
-    [:not-found :json-response :ring-defaults :wrap-email :json-body :hide-errors]
+    [:not-found :ring-defaults :wrap-email :json-body :wrap-anomaly :json-response :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
