@@ -4,7 +4,6 @@
   (:import [org.akvo.flow_api.component.akvo_flow_server_config AkvoFlowServerConfig]))
 
 (defprotocol IAkvoFlowServerConfig
-  (resolve-alias [this alias])
   (host [this instance-id])
   (port [this instance-id])
   (iam-account [this instance-id])
@@ -13,8 +12,6 @@
 
 (extend-protocol IAkvoFlowServerConfig
   AkvoFlowServerConfig
-  (resolve-alias [{:keys [aliases]} alias]
-    (get aliases alias))
   (host [this instance-id]
     (str instance-id ".appspot.com"))
   (port [this instance-id]

@@ -1,9 +1,10 @@
 (ns org.akvo.flow-api.datastore.form-instance
   (:require [akvo.commons.gae :as gae]
             [akvo.commons.gae.query :as q]
-            [org.akvo.flow-api.datastore :as ds]
             [cheshire.core :as json]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [org.akvo.flow-api.anomaly :as anomaly]
+            [org.akvo.flow-api.datastore :as ds])
   (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]
            [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]))
