@@ -1,6 +1,5 @@
 (ns org.akvo.flow-api.endpoint.survey
   (:require [compojure.core :refer :all]
-            [org.akvo.flow-api.boundary.resolve-alias :refer [alias-resolver]]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.middleware.anomaly :refer [wrap-anomaly]]

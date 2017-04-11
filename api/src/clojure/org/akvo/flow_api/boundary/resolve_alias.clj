@@ -15,14 +15,3 @@
   DummyAkvoFlowServerConfig
   (resolve [_ alias]
     alias))
-
-(defn alias-resolver
-  "Takes an argument that implements IResolveAlias and returns a function that will
-  resolve an alias or throw an exception if the alias is not found"
-  [resolver]
-  (fn [alias]
-    (if-let [instance-id (resolve resolver alias)]
-      instance-id
-      (throw (ex-info (format "Alias %s not found" alias)
-                      {:status :not-found
-                       :alias alias})))))
