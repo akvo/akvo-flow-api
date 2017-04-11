@@ -50,5 +50,4 @@
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
-      (wrap-resolve-alias akvo-flow-server-config)
-      (wrap-anomaly)))
+      (wrap-resolve-alias akvo-flow-server-config)))
