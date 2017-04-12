@@ -18,7 +18,9 @@
   containing secret files"
   [secret-key]
   (let [mount-path (ensure-trailing-slash (:secrets-mount-path env))]
-    (slurp (format "%s%s" secret-key))))
+    (-> (format "%s%s" secret-key)
+        slurp
+        str/trim)))
 
 (defn -main [& args]
   (let [bindings {'http-port (Integer/parseInt (:port env "3000"))
