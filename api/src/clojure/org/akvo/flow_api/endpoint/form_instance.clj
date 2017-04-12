@@ -3,7 +3,6 @@
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
-            [org.akvo.flow-api.middleware.anomaly :refer [wrap-anomaly]]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
