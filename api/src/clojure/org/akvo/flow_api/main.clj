@@ -12,11 +12,19 @@
     s
     (str s "/")))
 
+(defn secret-value
+  "Reads the value of a secret from a file. It expects an
+  environment variable SECRETS_MOUNT_PATH pointing to a folder
+  containing secret files"
+  [secret-key]
+  (let [mount-path (ensure-trailing-slash (:secrets-mount-path env))]
+    (slurp (format "%s%s" secret-key))))
+
 (defn -main [& args]
   (let [bindings {'http-port (Integer/parseInt (:port env "3000"))
-                  'github-auth-token (:github-auth-token env)
+                  'github-auth-token (secret-value "github-auth-token")
                   'api-root (:api-root env)
-                  'sentry-dsn (:sentry-dsn env)
+                  'sentry-dsn (secret-value "sentry-dsn")
                   'tmp-dir (ensure-trailing-slash (System/getProperty "java.io.tmpdir"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
                       (component/start))]
