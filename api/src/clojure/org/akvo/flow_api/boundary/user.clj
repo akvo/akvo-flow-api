@@ -11,25 +11,25 @@
   (id-by-email [this instance-id email] "Lookup the user id for a given email"))
 
 (defprotocol IUserCache
-  (lookup [this instance-id email] "Lookup a user id in a cache")
-  (miss [this instance-id email id] "Call on cache miss"))
+  (get-id [this instance-id email] "Get a user id from the cache")
+  (put-id [this instance-id email id] "Put a new user id in the cache"))
 
 (extend-protocol IUserCache
   TTLMemoryCache
-  (lookup [{:keys [cache]} instance-id email]
+  (get-id [{:keys [cache]} instance-id email]
     (cache/lookup @cache [instance-id email]))
-  (miss [{:keys [cache]} instance-id email id]
+  (put-id [{:keys [cache]} instance-id email id]
     (swap! cache cache/miss [instance-id email] id)))
 
 
 (extend-protocol IUser
   RemoteApi
   (id-by-email [{:keys [user-cache] :as this} instance-id email]
-    (if-let [id (lookup user-cache instance-id email)]
+    (if-let [id (get-id user-cache instance-id email)]
       id
       (ds/with-remote-api this instance-id
         (let [id (user/id email)]
-          (miss user-cache instance-id email id)
+          (put-id user-cache instance-id email id)
           id))))
 
   LocalApi

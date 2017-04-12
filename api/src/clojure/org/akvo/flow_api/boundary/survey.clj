@@ -13,15 +13,15 @@
   (by-id [this instance-id user-id survey-id] "Get the survey definition"))
 
 (defprotocol ISurveyCache
-  (lookup-survey-definition [cache instance-id user-id survey-id])
-  (miss-survey-definition [cache instance-id user-id survey-id survey-definition]))
+  (get-survey-definition [cache instance-id user-id survey-id])
+  (put-survey-definition [cache instance-id user-id survey-id survey-definition]))
 
 (extend-protocol ISurveyCache
   TTLMemoryCache
-  (lookup-survey-definition [{:keys [cache]} instance-id user-id survey-id]
+  (get-survey-definition [{:keys [cache]} instance-id user-id survey-id]
     (cache/lookup @cache [:survey-definitions instance-id user-id survey-id]))
 
-  (miss-survey-definition [{:keys [cache]} instance-id user-id survey-id survey-definition]
+  (put-survey-definition [{:keys [cache]} instance-id user-id survey-id survey-definition]
     (swap! cache cache/miss [:survey-definitions instance-id user-id survey-id] survey-definition)))
 
 (extend-protocol ISurvey
@@ -30,18 +30,18 @@
     (ds/with-remote-api this instance-id
       (survey/list user-id folder-id)))
   (by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
-    (if-let [survey-definition (lookup-survey-definition survey-cache
-                                                         instance-id
-                                                         user-id
-                                                         survey-id)]
+    (if-let [survey-definition (get-survey-definition survey-cache
+                                                      instance-id
+                                                      user-id
+                                                      survey-id)]
       survey-definition
       (ds/with-remote-api this instance-id
         (let [survey-definition (survey/by-id user-id survey-id)]
-          (miss-survey-definition survey-cache
-                                  instance-id
-                                  user-id
-                                  survey-id
-                                  survey-definition)
+          (put-survey-definition survey-cache
+                                 instance-id
+                                 user-id
+                                 survey-id
+                                 survey-definition)
           survey-definition))))
 
   LocalApi
