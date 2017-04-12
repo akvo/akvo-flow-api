@@ -2,7 +2,9 @@
  {:app  #var duct.component.handler/handler-component
   :http #var ring.component.jetty/jetty-server
   :remote-api #var org.akvo.flow-api.component.remote-api/remote-api
-  :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config}
+  :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config
+  :user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
+  :survey-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache}
  :endpoints
  {:root #var org.akvo.flow-api.endpoint.root/endpoint
   :folder #var org.akvo.flow-api.endpoint.folder/endpoint
@@ -11,9 +13,11 @@
  :dependencies
  {:http [:app]
   :app  [:root :folder :survey :form-instance]
-  :remote-api [:akvo-flow-server-config]
+  :remote-api [:akvo-flow-server-config :user-cache :survey-cache]
   :akvo-flow-server-config []
   :root []
+  :user-cache []
+  :survey-cache []
   :folder [:remote-api :akvo-flow-server-config :api-root]
   :survey [:remote-api :akvo-flow-server-config :api-root]
   :form-instance [:remote-api :akvo-flow-server-config :api-root]}
@@ -41,9 +45,9 @@
                   :content-types          true
                   :default-charset        "utf-8"}}
      :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}}}}
-  :http
-  {:port http-port}
-  :akvo-flow-server-config
-  {:github-auth-token github-auth-token
-   :tmp-dir tmp-dir}
+  :http {:port http-port}
+  :akvo-flow-server-config {:github-auth-token github-auth-token
+                            :tmp-dir tmp-dir}
+  :user-cache {:ttl 86400000} ;; 1 day
+  :survey-cache {:ttl 3600000} ;; 1 hr
   :api-root api-root}}
