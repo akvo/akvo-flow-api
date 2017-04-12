@@ -16,6 +16,7 @@
   (let [bindings {'http-port (Integer/parseInt (:port env "3000"))
                   'github-auth-token (:github-auth-token env)
                   'api-root (:api-root env)
+                  'sentry-dsn (:sentry-dsn env)
                   'tmp-dir (ensure-trailing-slash (System/getProperty "java.io.tmpdir"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
                       (component/start))]

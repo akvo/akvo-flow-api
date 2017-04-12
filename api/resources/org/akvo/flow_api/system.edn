@@ -31,9 +31,10 @@
      :json-response #var ring.middleware.json/wrap-json-response
      :json-body     #var ring.middleware.json/wrap-json-body
      :wrap-email    #var org.akvo.flow-api.middleware.email/wrap-email
-     :wrap-anomaly  #var org.akvo.flow-api.middleware.anomaly/wrap-anomaly}
+     :wrap-anomaly  #var org.akvo.flow-api.middleware.anomaly/wrap-anomaly
+     :wrap-sentry   #var raven-clj.ring/wrap-sentry}
     :applied
-    [:not-found :ring-defaults :wrap-email :json-body :wrap-anomaly :json-response :hide-errors]
+    [:not-found :ring-defaults :wrap-email :json-body :wrap-anomaly :json-response :wrap-sentry :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
@@ -44,7 +45,8 @@
                   :absolute-redirects     true
                   :content-types          true
                   :default-charset        "utf-8"}}
-     :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}}}}
+     :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}
+     :wrap-sentry sentry-dsn}}}
   :http {:port http-port}
   :akvo-flow-server-config {:github-auth-token github-auth-token
                             :tmp-dir tmp-dir}

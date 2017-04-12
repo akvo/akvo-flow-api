@@ -1,6 +1,6 @@
 (defproject org.akvo/flow-api "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "Akvo Flow API"
+  :url "https://github.com/akvo/akvo-flow-api"
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/core.cache "0.6.5"]
@@ -14,6 +14,7 @@
                  [ring-jetty-component "0.3.1"]
                  [org.akvo.flow/data-access "v1.9.15"]
                  [org.akvo/commons "0.4.2"]
+                 [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
                  [com.google.appengine/appengine-tools-sdk "1.9.50"]
                  [com.google.appengine/appengine-remote-api "1.9.50"]
