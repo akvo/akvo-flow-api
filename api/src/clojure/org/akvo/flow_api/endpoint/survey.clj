@@ -2,7 +2,6 @@
   (:require [compojure.core :refer :all]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
-            [org.akvo.flow-api.middleware.anomaly :refer [wrap-anomaly]]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
@@ -24,18 +23,18 @@
   (routes
    (GET "/surveys/:survey-id" {:keys [email alias instance-id params]}
      (-> remote-api
-       (survey/by-id instance-id
-                     (user/id-by-email remote-api instance-id email)
-                     (:survey-id params))
-       (add-form-instances-links api-root alias)
-       (response)))
+         (survey/by-id instance-id
+                       (user/id-by-email remote-api instance-id email)
+                       (:survey-id params))
+         (add-form-instances-links api-root alias)
+         (response)))
    (GET "/surveys" {:keys [email alias instance-id params]}
      (-> remote-api
-       (survey/list instance-id
-                    (user/id-by-email remote-api instance-id email)
-                    (:folderId params))
-       (add-survey-links api-root alias)
-       (response)))))
+         (survey/list instance-id
+                      (user/id-by-email remote-api instance-id email)
+                      (:folderId params))
+         (add-survey-links api-root alias)
+         (response)))))
 
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
