@@ -2,6 +2,7 @@
 
 set -eu
 
+BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
 # Flow data access classes
@@ -40,3 +41,24 @@ cd ../gae-dev-server
 mvn appengine:devserver_stop
 
 cd ..
+
+# Build docker image if branch is `develop`
+
+if [[ "${BRANCH_NAME}" != "develop" ]]; then
+    echo "Skipping docker build"
+    exit 0
+fi
+
+cd api
+
+lein uberjar
+
+find "${HOME}/.m2" \
+     \( \
+     -name 'datanucleus-core-1.1.5.jar' -or \
+     -name 'datanucleus-jpa-1.1.5.jar' -or \
+     -name 'datanucleus-appengine-1.0.10.final.jar' \
+     \) \
+     -exec cp -v {} target/uberjar/ \;
+
+docker build -t "${DOCKER_IMAGE_NAME:=akvo/flow-api-backend}" .

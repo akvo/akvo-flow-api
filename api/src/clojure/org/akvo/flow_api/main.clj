@@ -18,7 +18,7 @@
   containing secret files"
   [secret-key]
   (let [mount-path (ensure-trailing-slash (:secrets-mount-path env))]
-    (-> (format "%s%s" secret-key)
+    (-> (format "%s%s" mount-path secret-key)
         slurp
         str/trim)))
 

@@ -32,6 +32,7 @@
   :main ^:skip-aot org.akvo.flow-api.main
   :target-path "target/%s/"
   :aliases {"setup"  ["run" "-m" "duct.util.repl/setup"]}
+  :uberjar-name "akvo-flow-api.jar"
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]
