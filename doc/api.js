@@ -13,7 +13,7 @@
 */
 
 // List folders:
-// /instance/{instanceId}/folders?parentId={parentId}
+// /orgs/{instanceId}/folders?parentId={parentId}
 // parentId=0 (or missing) means root folders
 {
     folders: [
@@ -38,7 +38,7 @@
 }
 
 // List surveys
-// /instance/{instanceId}/surveys?folderId={folderId}
+// /orgs/{instanceId}/surveys?folderId={folderId}
 
 {
     surveys: [
@@ -61,7 +61,7 @@
 }
 
 // Full survey definition
-// /instance/{instanceId}/survey/223
+// /orgs/{instanceId}/surveys/223
 
 {
     id: "223",
@@ -120,11 +120,31 @@
     ]
 }
 
+// Fetch data points
+// Request /orgs/{instanceId}/data-points/{surveyId}
+{
+    nextPageUrl: "https://.../data-points/{surveyId}?pageSize=N&cursor=32jfiosdjdf"
+    dataPoints: [
+	{
+	    id: "23124",
+	    displayName: "foo",
+	    identifier: "fkdos-dso-dofks"
+	    latitude: 56.2,
+	    longitude: 23.6,
+	    createdAt: "2017-02-23T03:30:58",
+	    modifiedAt: "2017-02-23T03:30:58",
+	},
+	{
+	    // ...
+	}
+    ]
+}
+
 // Fetch form instances
-// Request /instance/{instanceId}/form-instances/{formId}?pageSize=N
+// Request /orgs/{instanceId}/form-instances/{surveyId}/{formId}?pageSize=N
 // Page size is optional with some default value used if missing.
 {
-    nextPageUrl: "https://.../form-instances/{formId}?pageSize=N&cursor=32jifso543jggifa",
+    nextPageUrl: "https://.../form-instances/{surveyId}/{formId}?pageSize=N&cursor=32jifso543jggifa",
     formInstances: [
 	{
 	    id: "3456",
