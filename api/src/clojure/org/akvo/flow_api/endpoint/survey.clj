@@ -19,6 +19,12 @@
                                api-root instance-id (:id survey) (:id form))))]
     (assoc survey :forms forms)))
 
+(defn add-data-points-link [survey api-root instance-id]
+  (assoc survey
+         :data-points-url
+         (format "%s/orgs/%s/data-points/%s"
+                 api-root instance-id (:id survey))))
+
 (defn endpoint* [{:keys [remote-api api-root]}]
   (routes
    (GET "/surveys/:survey-id" {:keys [email alias instance-id params]}
@@ -27,6 +33,7 @@
                        (user/id-by-email remote-api instance-id email)
                        (:survey-id params))
          (add-form-instances-links api-root alias)
+         (add-data-points-link api-root alias)
          (response)))
    (GET "/surveys" {:keys [email alias instance-id params]}
      (-> remote-api
