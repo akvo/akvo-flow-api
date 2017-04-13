@@ -13,13 +13,19 @@
 
 ### Build
 
-    $ make buid
+    $ ./ci/build.sh
 
 ### Start
 
 	$ make start # assumes lumen-keycloak container is running
 	$ # or #
 	$ make start-full # wait few seconds to Keycloak starts and imports the Akvo realm
+
+#### Starting API backend (WIP)
+
+Assuming a `secrets` folder is in the current directory
+
+    $ docker run --rm -p 3000:3000 --interactive --tty --volume "$PWD/secrets":/secrets akvo/flow-api-backend
 
 
 ### Test
