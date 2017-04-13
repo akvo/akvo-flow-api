@@ -23,9 +23,9 @@
         str/trim)))
 
 (defn -main [& args]
-  (let [bindings {'http-port (Integer/parseInt (:port env "3000"))
+  (let [bindings {'http-port (Integer/parseInt (:http-port env "3000"))
                   'github-auth-token (secret-value "github-auth-token")
-                  'api-root (:api-root env)
+                  'api-root (ensure-trailing-slash (:api-root env))
                   'sentry-dsn (secret-value "sentry-dsn")
                   'tmp-dir (ensure-trailing-slash (System/getProperty "java.io.tmpdir"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)

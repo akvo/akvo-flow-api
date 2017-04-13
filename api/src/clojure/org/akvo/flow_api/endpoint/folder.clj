@@ -8,8 +8,8 @@
 (defn add-links [folders api-root instance-id]
   (for [{:keys [id] :as folder} folders]
     (assoc folder
-           :surveys-url (format "%s/orgs/%s/surveys?folderId=%s" api-root instance-id id)
-           :folders-url (format "%s/orgs/%s/folders?parentId=%s" api-root instance-id id))))
+           :surveys-url (format "%sorgs/%s/surveys?folderId=%s" api-root instance-id id)
+           :folders-url (format "%sorgs/%s/folders?parentId=%s" api-root instance-id id))))
 
 (defn endpoint* [{:keys [remote-api akvo-flow-server-config api-root]}]
   (GET "/folders" {:keys [email instance-id alias params]}

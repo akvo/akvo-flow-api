@@ -14,7 +14,7 @@
 
 (defn cursor-url-fn [api-root instance-id survey-id form-id page-size]
   (fn [cursor]
-    (format "%s/orgs/%s/form-instances/%s/%s?%scursor=%s"
+    (format "%sorgs/%s/form-instances/%s/%s?%scursor=%s"
             api-root
             instance-id
             survey-id

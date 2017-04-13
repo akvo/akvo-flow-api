@@ -8,14 +8,14 @@
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
     (assoc survey
-           :survey (format "%s/orgs/%s/surveys/%s"
+           :survey (format "%sorgs/%s/surveys/%s"
                            api-root instance-id (:id survey)))))
 
 (defn add-form-instances-links [survey api-root instance-id]
   (let [forms (for [form (:forms survey)]
                 (assoc form
                        :form-instances-url
-                       (format "%s/orgs/%s/form-instances/%s/%s"
+                       (format "%sorgs/%s/form-instances/%s/%s"
                                api-root instance-id (:id survey) (:id form))))]
     (assoc survey :forms forms)))
 
