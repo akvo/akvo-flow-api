@@ -15,9 +15,9 @@ script:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "develop" ]; then
-  docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-  docker push akvo/flow-api-backend;
-  fi
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push akvo/flow-api-backend;
+    fi
 
 env:
   matrix:
