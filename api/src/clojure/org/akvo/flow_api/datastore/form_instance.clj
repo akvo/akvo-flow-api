@@ -150,7 +150,7 @@
             (partition-all 30 form-instances))))
 
 (defn form-instance-entity->map [^Entity form-instance]
-  {:id (-> form-instance .getKey .getId str)
+  {:id (str (ds/id form-instance))
    :form-id (str (.getProperty form-instance "surveyId"))
    :surveyal-time (.getProperty form-instance "surveyalTime")
    :submitter (.getProperty form-instance "submitterName")
@@ -158,7 +158,9 @@
    :device-identifier (.getProperty form-instance "deviceIdentifier")
    :data-point-id (str (.getProperty form-instance "surveyedLocaleId"))
    :identifier (.getProperty form-instance "surveyedLocaleIdentifier")
-   :display-name (.getProperty form-instance "surveyedLocaleDisplayName")})
+   :display-name (.getProperty form-instance "surveyedLocaleDisplayName")
+   :created-at (ds/created-at form-instance)
+   :modified-at (ds/modified-at form-instance)})
 
 (defn list
   ([ds form-definition]
