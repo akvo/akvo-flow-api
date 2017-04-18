@@ -27,8 +27,9 @@ before_install:
   - which gcloud kubectl
   - gcloud auth activate-service-account --key-file ci/gcloud-service-account.json
   - gcloud config set project akvo-lumen
-  - gcloud --quiet config set container/cluster europe-west1-d
-  - gcloud --quiet container clusters get-credentials dev-cluster
+  - gcloud config set container/cluster europe-west1-d
+  - gcloud config set compute/zone europe-west1-d
+  - gcloud container clusters get-credentials dev-cluster
   - kubectl cluster-info
 
 script:
