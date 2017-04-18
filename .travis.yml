@@ -10,19 +10,28 @@ services:
 
 cache:
   directories:
-    - $HOME/.cache
-    - $HOME/.m2
+    - "${HOME}/.cache"
+    - "${HOME}/.m2"
+    - "${HOME}/google-cloud-sdk"
+
+
+before_install:
+  - if [[ ! -d "${HOME}/google-cloud-sdk" ]]; then
+      curl https://sdk.cloud.google.com | bash;
+    fi
 
 script:
   - ./ci/build.sh
 
 after_success:
-  - if [[ "$TRAVIS_BRANCH" == "develop" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  - if [[ "${TRAVIS_BRANCH}" == "develop" ]] && [[ "${TRAVIS_PULL_REQUEST}" == "false" ]]; then
+      docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}";
       docker push akvo/flow-api-backend;
     fi
 
 env:
   global:
-  - secure: ZamwjxvBloyiF/SNnT5a0GAgPFtsF2SHwLYCfP/0XdEPW+P+doDF9TuTQlswniclFV5RrH5PbJf/Au+qmiwl6V57wFTIUdmNU6vaydmQME1iYPkmmqO7US83YjBzJi1E28alBO5OrMQvS+88x1YqApxLUVoZAiwa4yDiufGnT2WVl2dYi67R6eBQuRJivJ/sdRxPlihrdgLCYN5GBqTG+FeQHKx3muFikW60tdNNqQjveJEh3QZlYA9Al2Da1pTs4OjoPJo6ILI4AbnMoCF6HV52P6ViFcAZYhxOvdINwqHmdqD1feXZKPWERFIKJPEZb0hA76hLKe0MySb3WdHIpaMqrFlaIOaXkwtTWf/SwkZBwc7MLjU2kesqz3ybkxvdIuDXYC8zGeuDuS8smQtPWjcGMikE7Hc7lnQnogKktdPjhoyRLQ2KV2n4+I1FhfIvmgwTE46R965E5dQNaAHkCpEkJ7JUh6iAaaqi35XdDDY4n9779MmdbueQWaU+pCxLV50NlriODnA2cgu4/rLFs0xpZ+wIUGNYxBkDGwHEqaFfJ6wiLUFXdWH7miGrL44PYNI8x9B3vdzS2rHg0tHXpqqOV7zOghxEVtXHD258JDVg4mGxE89SppAQtkw2pFZNo6hnQykgKWrVVg6IsYu95ahHIGsuwSGUit1BiSBupxk=
-  - secure: gOZMFfC6rv9Z88tzJQcKbFeSZge2yOgVvlUCz8Z3uUIvuv/ORbCAdh8T+hrSOHpFcO+Wa3nlCnjT999hxgZEWYDuXwJHXhbVRNAAtUbeSk8Ut/ICMGB9NC31+1KYiD3amlPniK30MwCybA017JBKf6hhYIhmWxc07lgIb4ZMoP7wBb3x8fXrdBia0gLc+JtZJ/qbEuTw6z73tfyHAcF7o0HhQrtwr7Ji+3TiVsLpV42dEaoZhh8+ImfSlgKVDDm3ME6unG6F1FIAeLLKOmMrO6V5zuzuhuqSOoQu+wcQptwDFDFy97rbi6hHeY7bUJHQxI5XS/vzjQbYWRqRvv95ZU8EognpaFkKLonx29Fu1Tdiqdg85X8lZ+nmco7mjPDxbnxeLo/YgALbNkRIl8rgm8/S14km+8jn0nd9yxgxWjlDsDCbNEGWrHnpWqPX70wrJ5IP0Ukc/tqdtnfiq73jluZpNB8tES0YdtNqfJgEyxIO8W+wU6iSEF4wGUwUJ5HvocBiN6LZH0/My6vrRxPSnA4O/ss1DENXr8zqrKPSOhYx2cuI+cMlvvBRTqxke0Ihu1GAhkn8KpzxxJfltoe3E8myjCWslBndXErbAP0dv3XQsyTfDfhMW9Rki5r6vzVf8OF9Nfy7F2oMb2etXMUE9zdU0KaO5OlZPxPmNzqX2d8=
+    - PATH=$PATH:${HOME}/google-cloud-sdk/bin
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+    - secure: ZamwjxvBloyiF/SNnT5a0GAgPFtsF2SHwLYCfP/0XdEPW+P+doDF9TuTQlswniclFV5RrH5PbJf/Au+qmiwl6V57wFTIUdmNU6vaydmQME1iYPkmmqO7US83YjBzJi1E28alBO5OrMQvS+88x1YqApxLUVoZAiwa4yDiufGnT2WVl2dYi67R6eBQuRJivJ/sdRxPlihrdgLCYN5GBqTG+FeQHKx3muFikW60tdNNqQjveJEh3QZlYA9Al2Da1pTs4OjoPJo6ILI4AbnMoCF6HV52P6ViFcAZYhxOvdINwqHmdqD1feXZKPWERFIKJPEZb0hA76hLKe0MySb3WdHIpaMqrFlaIOaXkwtTWf/SwkZBwc7MLjU2kesqz3ybkxvdIuDXYC8zGeuDuS8smQtPWjcGMikE7Hc7lnQnogKktdPjhoyRLQ2KV2n4+I1FhfIvmgwTE46R965E5dQNaAHkCpEkJ7JUh6iAaaqi35XdDDY4n9779MmdbueQWaU+pCxLV50NlriODnA2cgu4/rLFs0xpZ+wIUGNYxBkDGwHEqaFfJ6wiLUFXdWH7miGrL44PYNI8x9B3vdzS2rHg0tHXpqqOV7zOghxEVtXHD258JDVg4mGxE89SppAQtkw2pFZNo6hnQykgKWrVVg6IsYu95ahHIGsuwSGUit1BiSBupxk=
+    - secure: gOZMFfC6rv9Z88tzJQcKbFeSZge2yOgVvlUCz8Z3uUIvuv/ORbCAdh8T+hrSOHpFcO+Wa3nlCnjT999hxgZEWYDuXwJHXhbVRNAAtUbeSk8Ut/ICMGB9NC31+1KYiD3amlPniK30MwCybA017JBKf6hhYIhmWxc07lgIb4ZMoP7wBb3x8fXrdBia0gLc+JtZJ/qbEuTw6z73tfyHAcF7o0HhQrtwr7Ji+3TiVsLpV42dEaoZhh8+ImfSlgKVDDm3ME6unG6F1FIAeLLKOmMrO6V5zuzuhuqSOoQu+wcQptwDFDFy97rbi6hHeY7bUJHQxI5XS/vzjQbYWRqRvv95ZU8EognpaFkKLonx29Fu1Tdiqdg85X8lZ+nmco7mjPDxbnxeLo/YgALbNkRIl8rgm8/S14km+8jn0nd9yxgxWjlDsDCbNEGWrHnpWqPX70wrJ5IP0Ukc/tqdtnfiq73jluZpNB8tES0YdtNqfJgEyxIO8W+wU6iSEF4wGUwUJ5HvocBiN6LZH0/My6vrRxPSnA4O/ss1DENXr8zqrKPSOhYx2cuI+cMlvvBRTqxke0Ihu1GAhkn8KpzxxJfltoe3E8myjCWslBndXErbAP0dv3XQsyTfDfhMW9Rki5r6vzVf8OF9Nfy7F2oMb2etXMUE9zdU0KaO5OlZPxPmNzqX2d8=
