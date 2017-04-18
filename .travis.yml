@@ -16,11 +16,14 @@ cache:
 
 
 before_install:
-  - if [[ ! -d "${HOME}/google-cloud-sdk/bin" ]]; then
+  - if [[ ! -f "${HOME}/google-cloud-sdk/bin/gcloud" ]]; then
       rm -rf "${HOME}/google-cloud-sdk";
       curl https://sdk.cloud.google.com | bash;
     fi
   - gcloud components install kubectl
+  - gcloud components update
+  - gcloud version
+  - which gcloud kubectl
 
 script:
   - ./ci/build.sh
