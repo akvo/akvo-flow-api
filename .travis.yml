@@ -1,5 +1,8 @@
 language: java
 
+jdk:
+  - oraclejdk8
+
 sudo: required
 
 services:
@@ -14,7 +17,7 @@ script:
   - ./ci/build.sh
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "develop" ]; then
+  - if [[ "$TRAVIS_BRANCH" == "develop" -a "$TRAVIS_PULL_REQUEST" == "false"]]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push akvo/flow-api-backend;
     fi
