@@ -16,7 +16,7 @@ cache:
 
 
 before_install:
-  - if [[ ! -d "${HOME}/google-cloud-sdk" ]]; then
+  - if [[ ! -d "${HOME}/google-cloud-sdk/bin" ]]; then
       curl https://sdk.cloud.google.com | bash;
     fi
 
