@@ -42,12 +42,18 @@ mvn appengine:devserver_stop
 
 cd ..
 
-# Build docker image if branch is `develop`
+# Build docker images if branch is `develop`
 
-if [[ "${BRANCH_NAME}" != "develop" ]]; then
-    echo "Skipping docker build"
-    exit 0
-fi
+#if [[ "${BRANCH_NAME}" != "develop" ]]; then
+#    echo "Skipping docker build"
+#    exit 0
+#fi
+
+cd nginx
+
+docker build -t "${PROXY_IMAGE_NAME:=akvo/flow-api-proxy}" .
+
+cd ..
 
 cd api
 
@@ -61,4 +67,4 @@ find "${HOME}/.m2" \
      \) \
      -exec cp -v {} target/uberjar/ \;
 
-docker build -t "${DOCKER_IMAGE_NAME:=akvo/flow-api-backend}" .
+docker build -t "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}" .
