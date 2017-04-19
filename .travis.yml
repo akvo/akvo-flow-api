@@ -21,16 +21,6 @@ before_install:
       rm -rf "${HOME}/google-cloud-sdk";
       curl https://sdk.cloud.google.com | bash;
     fi
-  - gcloud components install kubectl
-  - gcloud components update
-  - gcloud version
-  - which gcloud kubectl
-  - gcloud auth activate-service-account --key-file ci/gcloud-service-account.json
-  - gcloud config set project akvo-lumen
-  - gcloud config set container/cluster europe-west1-d
-  - gcloud config set compute/zone europe-west1-d
-  - gcloud container clusters get-credentials dev-cluster
-  - kubectl cluster-info
 
 script:
   - ./ci/build.sh
