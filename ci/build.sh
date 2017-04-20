@@ -5,13 +5,15 @@ set -eu
 BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
-# Flow data access classes
+# Flow data access classes, only if not present in $HOME/.m2
 
-cd flow
+DATA_ACCESS_VERSION=$(sed -n -e 's|.*org\.akvo\.flow/data-access "\(.*\)"]$|\1|p' api/project.clj)
 
-./build.sh
-
-cd ..
+if [[ ! -f "${HOME}/.m2/repository/org/akvo/flow/data-access/${DATA_ACCESS_VERSION}/data-access-${DATA_ACCESS_VERSION}.jar" ]]; then
+    cd flow
+    ./build.sh
+    cd ..
+fi
 
 # Lein
 
@@ -44,10 +46,10 @@ cd ..
 
 # Build docker images if branch is `develop`
 
-#if [[ "${BRANCH_NAME}" != "develop" ]]; then
-#    echo "Skipping docker build"
-#    exit 0
-#fi
+if [[ "${BRANCH_NAME}" != "develop" ]]; then
+    echo "Skipping docker build"
+    exit 0
+fi
 
 cd nginx
 
