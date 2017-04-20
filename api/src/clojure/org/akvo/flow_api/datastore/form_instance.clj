@@ -7,7 +7,8 @@
             [org.akvo.flow-api.datastore :as ds])
   (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]
-           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]))
+           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
+           [java.text SimpleDateFormat DateFormat]))
 
 (set! *warn-on-reflection* true)
 
@@ -103,9 +104,14 @@
   [_ response-str]
   response-str)
 
+(def ^DateFormat sdf (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z"))
+
 (defmethod parse-response "DATE"
   [_ response-str]
-  (ds/to-iso-8601 (java.util.Date. (Long/parseLong response-str))))
+  (let [date (try (java.util.Date. (Long/parseLong response-str))
+                  (catch NumberFormatException e
+                    (.parse sdf response-str)))]
+    (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
   [_ response-str]
