@@ -23,4 +23,8 @@ gcloud config set project akvo-lumen
 gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 gcloud container clusters get-credentials dev-cluster
-kubectl cluster-info
+
+# Deploying
+
+kubectl delete -f ci/k8s/deployment.yml
+kubectl create -f ci/k8s/deployment.yml
