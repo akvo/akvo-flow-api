@@ -5,13 +5,15 @@ set -eu
 BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
-# Flow data access classes
+# Flow data access classes, only if not present in $HOME/.m2
 
-cd flow
+DATA_ACCESS_VERSION=$(sed -n -e 's|.*org\.akvo\.flow/data-access "\(.*\)"]$|\1|p' api/project.clj)
 
-./build.sh
-
-cd ..
+if [[ ! -f "${HOME}/.m2/repository/org/akvo/flow/data-access/${DATA_ACCESS_VERSION}/data-access-${DATA_ACCESS_VERSION}.jar" ]]; then
+    cd flow
+    ./build.sh
+    cd ..
+fi
 
 # Lein
 
@@ -42,12 +44,18 @@ mvn appengine:devserver_stop
 
 cd ..
 
-# Build docker image if branch is `develop`
+# Build docker images if branch is `develop`
 
 if [[ "${BRANCH_NAME}" != "develop" ]]; then
     echo "Skipping docker build"
     exit 0
 fi
+
+cd nginx
+
+docker build -t "${PROXY_IMAGE_NAME:=akvo/flow-api-proxy}" .
+
+cd ..
 
 cd api
 
@@ -61,4 +69,4 @@ find "${HOME}/.m2" \
      \) \
      -exec cp -v {} target/uberjar/ \;
 
-docker build -t "${DOCKER_IMAGE_NAME:=akvo/flow-api-backend}" .
+docker build -t "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}" .
