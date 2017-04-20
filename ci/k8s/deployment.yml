@@ -21,10 +21,13 @@ spec:
         env:
         - name: SECRETS_MOUNT_PATH
           value: "/secrets"
-        - name: FLOW_BACKEND_URL
+        - name: FLOW_API_BACKEND_URL
           value: "http://localhost:3000"
         - name: TOKEN_INTROSPECTION_URL
-          value: "https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token/introspect"
+          valueFrom:
+            configMapKeyRef:
+              name: flow-api
+              key: token.introspection.url
       - name: flow-api-backend
         image: akvo/flow-api-backend
         imagePullPolicy: Always
@@ -48,7 +51,10 @@ spec:
         - name: HTTP_PORT
           value: "3000"
         - name: API_ROOT
-          value: "https://api.akvotest.org/flow"
+          valueFrom:
+            configMapKeyRef:
+              name: flow-api
+              key: api.root
       volumes:
       - name: secrets
         secret:

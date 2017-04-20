@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: flow-api
+  namespace: default
+data:
+  token.introspection.url: https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token/introspect
+  api.root: https://api.akvotest.org/flow
