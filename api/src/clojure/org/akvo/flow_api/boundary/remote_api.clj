@@ -30,6 +30,6 @@
   LocalApi
   (options [this instance-id]
     (let [options (-> (RemoteApiOptions.)
-                      (.server "localhost" 8080))]
+                      (.server "localhost" 8888))]
       (.useDevelopmentServerCredential options)
       options)))

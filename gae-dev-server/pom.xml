@@ -110,7 +110,7 @@
                     <enableJarClasses>false</enableJarClasses>
                     <version>${app.version}</version>
                     <address>0.0.0.0</address>
-                    <port>8080</port>
+                    <port>8888</port>
                     <jvmFlags>
                       <jvmFlag>-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=n</jvmFlag>
                     </jvmFlags>
