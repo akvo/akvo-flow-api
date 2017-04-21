@@ -8,7 +8,7 @@
   (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]
            [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
-           [java.text SimpleDateFormat DateFormat]))
+           [java.text SimpleDateFormat]))
 
 (set! *warn-on-reflection* true)
 
@@ -104,13 +104,14 @@
   [_ response-str]
   response-str)
 
-(def ^DateFormat sdf (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z"))
-
 (defmethod parse-response "DATE"
   [_ response-str]
   (let [date (try (java.util.Date. (Long/parseLong response-str))
                   (catch NumberFormatException e
-                    (.parse sdf response-str)))]
+                    (let [;; SimpleDateFormat is not thread safe so we create a
+                          ;; new one every time.
+                          date-format (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z")]
+                      (.parse date-format response-str))))]
     (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
