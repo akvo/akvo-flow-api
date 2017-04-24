@@ -36,4 +36,4 @@ A sample data set can be located at:
 
 ## Access the local datastore
 
-You can browse the local datastore at `http://localhost:8080/_ah/admin`.
+You can browse the local datastore at `http://localhost:8888/_ah/admin`.
