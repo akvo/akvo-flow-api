@@ -13,7 +13,7 @@
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
                  [org.akvo.flow/data-access "v1.9.15"]
-                 [org.akvo/commons "0.4.2"]
+                 [org.akvo/commons "0.4.5"]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
                  [com.google.appengine/appengine-tools-sdk "1.9.50"]
