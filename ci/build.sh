@@ -18,7 +18,6 @@ fi
 # Lein
 
 mkdir -p $HOME/.lein
-echo '{:user {:plugins [[jonase/eastwood "0.2.3"]]}}' > $HOME/.lein/profiles.clj
 
 # GAE dev server test data
 
@@ -36,7 +35,7 @@ mvn appengine:devserver_start
 
 cd ../api
 
-lein do clean, check, test :all, eastwood '{:source-paths ["src/clojure" "test/clojure"]}'
+lein do clean, check, test :all
 
 cd ../gae-dev-server
 

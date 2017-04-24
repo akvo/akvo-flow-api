@@ -1,14 +1,17 @@
 (ns org.akvo.flow-api.endpoint.data-point
-  (:require [compojure.core :refer :all]
+  (:require [clojure.set :refer [rename-keys]]
+            [clojure.spec]
+            [compojure.core :refer :all]
             [org.akvo.flow-api.boundary.data-point :as data-point]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
+            [org.akvo.flow-api.endpoint.spec :as spec]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
 (defn cursor-url-fn [api-root instance-id survey-id page-size]
   (fn [cursor]
-    (format "%s/orgs/%s/data-points/%s?%scursor=%s"
+    (format "%sorgs/%s/data-points/%s?%scursor=%s"
             api-root
             instance-id
             survey-id
@@ -25,9 +28,16 @@
                                                survey-id
                                                page-size))))
 
+(def params-spec (clojure.spec/keys :req-un [::spec/survey-id]
+                                    :opt-un [::spec/page-size ::spec/cursor]))
+
 (defn endpoint* [{:keys [remote-api api-root]}]
   (GET "/data-points/:survey-id" {:keys [email instance-id alias params]}
-    (let [{page-size :pageSize cursor :cursor survey-id :survey-id} params
+    (let [{:keys [survey-id
+                  page-size
+                  cursor]} (spec/validate-params params-spec
+                                                 (rename-keys params
+                                                              {:pageSize :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
           user-id (user/id-by-email remote-api instance-id email)
