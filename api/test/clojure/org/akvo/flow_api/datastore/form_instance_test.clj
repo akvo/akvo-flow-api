@@ -42,3 +42,10 @@
           (is (= 150 (count (:form-instances page-1))))
           (is (= 17 (count (:form-instances page-2))))
           (is (empty? (:form-instances page-3))))))))
+
+(deftest response-parsing
+  (testing "date question type"
+    (is (= (form-instance/parse-response "DATE" "1493039527580")
+           "2017-04-24T13:12:07.580Z"))
+    (is (= (form-instance/parse-response "DATE" "29-08-2013 02:00:00 CEST")
+           "2013-08-29T00:00:00Z"))))
