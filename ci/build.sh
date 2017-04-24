@@ -43,6 +43,14 @@ mvn appengine:devserver_stop
 
 cd ..
 
+# Check nginx configuration
+
+docker run \
+       --rm \
+       --volume "$PWD/nginx/":"/conf" \
+       --entrypoint /usr/local/openresty/bin/openresty \
+       openresty/openresty:1.11.2.3-alpine-fat -t -c /conf/nginx.conf
+
 # Build docker images if branch is `develop`
 
 if [[ "${BRANCH_NAME}" != "develop" ]]; then
