@@ -1,8 +1,12 @@
 (ns org.akvo.flow-api.endpoint.form-instance
-  (:require [compojure.core :refer :all]
+  (:require [clojure.set :refer [rename-keys]]
+            [clojure.spec]
+            [compojure.core :refer :all]
+            [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
+            [org.akvo.flow-api.endpoint.spec :as spec]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
@@ -33,9 +37,17 @@
                                                   form-id
                                                   page-size))))
 
+(def params-spec (clojure.spec/keys :req-un [::spec/survey-id ::spec/form-id]
+                                    :opt-un [::spec/cursor ::spec/page-size]))
+
 (defn endpoint* [{:keys [remote-api api-root]}]
   (GET "/form-instances/:survey-id/:form-id" {:keys [email instance-id alias params]}
-    (let [{page-size :pageSize cursor :cursor survey-id :survey-id form-id :form-id} params
+    (let [{:keys [survey-id
+                  form-id
+                  page-size
+                  cursor]} (spec/validate-params params-spec
+                                                 (rename-keys params
+                                                              {:pageSize :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
           user-id (user/id-by-email remote-api instance-id email)
