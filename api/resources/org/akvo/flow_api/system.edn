@@ -44,9 +44,7 @@
      {:params    {:urlencoded true
                   :keywordize true}
       :responses {:not-modified-responses true
-                  :absolute-redirects     true
-                  :content-types          true
-                  :default-charset        "utf-8"}}
+                  :absolute-redirects     true}}
      :json-response {:key-fn #var org.akvo.flow-api.utils/kebab->camel}
      :wrap-sentry sentry-dsn}}}
   :http {:port http-port}
