@@ -3,9 +3,11 @@
    Flow API sketch
 
    * Only GET requests for now at https://api.akvo.org/flow/
-   * Request headers
+   * Required request headers
+     * User-Agent: curl/7.54.0
+     * Accept: application/vnd.akvo.flow.v2+json
      * Authorization: Bearer <token>
-     * Content-Type: application/json
+
    * Response headers
      * Content-Type: application/json
      * Content-Encoding: gzip (chunked?)
