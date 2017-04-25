@@ -1,6 +1,7 @@
 
 ## Akvo FLOW API
 
+[![Build Status](https://travis-ci.org/akvo/akvo-flow-api.svg?branch=develop)](https://travis-ci.org/akvo/akvo-flow-api)
 
 ## Building and testing
 
