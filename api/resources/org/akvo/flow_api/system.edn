@@ -36,7 +36,7 @@
      :wrap-anomaly  #var org.akvo.flow-api.middleware.anomaly/wrap-anomaly
      :wrap-sentry   #var raven-clj.ring/wrap-sentry}
     :applied
-    [:not-found :ring-defaults :wrap-email :json-body :wrap-anomaly :json-response :wrap-sentry :hide-errors]
+    [:not-found :json-response :ring-defaults :wrap-email :json-body :wrap-anomaly :wrap-sentry :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"
