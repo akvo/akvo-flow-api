@@ -45,7 +45,7 @@
       (-> remote-api
           (data-point/list instance-id user-id survey {:page-size page-size
                                                        :cursor cursor})
-          (add-cursor api-root instance-id survey-id page-size)
+          (add-cursor api-root alias survey-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]

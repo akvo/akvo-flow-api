@@ -56,7 +56,7 @@
       (-> remote-api
           (form-instance/list instance-id user-id form {:page-size page-size
                                                         :cursor cursor})
-          (add-cursor api-root instance-id survey-id form-id page-size)
+          (add-cursor api-root alias survey-id form-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
