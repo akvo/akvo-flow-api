@@ -12,6 +12,7 @@ git fetch --tags
 TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 
 git checkout $TAG
+git reset --hard
 
 patch -p1 < /usr/local/src/patches/base-dao.diff
 
