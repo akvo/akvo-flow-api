@@ -12,7 +12,7 @@
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
-                 [org.akvo.flow/data-access "v1.9.15"]
+                 [org.akvo.flow/data-access "v1.9.16"]
                  [org.akvo/commons "0.4.5"]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
