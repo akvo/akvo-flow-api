@@ -13,6 +13,8 @@ TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 
 git checkout $TAG
 
+patch -p1 < /usr/local/src/patches/base-dao.diff
+
 cd GAE
 cp build.properties.template build.properties
 sed -i 's/^sdk\.dir=.*/sdk\.dir=\/opt\/appengine-java-sdk-1.9.50/g' build.properties
