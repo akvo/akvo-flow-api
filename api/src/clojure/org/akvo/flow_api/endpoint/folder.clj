@@ -14,6 +14,9 @@
            :surveys-url (format "%sorgs/%s/surveys?folderId=%s" api-root instance-id id)
            :folders-url (format "%sorgs/%s/folders?parentId=%s" api-root instance-id id))))
 
+(defn folders-response [folders]
+  (response {:folders folders}))
+
 (def params-spec (clojure.spec/keys :opt-un [::spec/parent-id]))
 
 (defn endpoint* [{:keys [remote-api akvo-flow-server-config api-root]}]
@@ -26,7 +29,7 @@
                        (user/id-by-email remote-api instance-id email)
                        (or parent-id "0"))
           (add-links api-root alias)
-          (response)))))
+          (folders-response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

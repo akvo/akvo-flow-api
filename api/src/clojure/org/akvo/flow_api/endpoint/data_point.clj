@@ -9,24 +9,27 @@
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
-(defn cursor-url-fn [api-root instance-id survey-id page-size]
-  (fn [cursor]
-    (format "%sorgs/%s/data-points/%s?%scursor=%s"
-            api-root
-            instance-id
-            survey-id
-            (if page-size
-              (format "pageSize=%s&" page-size)
-              "")
-            cursor)))
+(defn next-page-url [api-root instance-id survey-id page-size cursor]
+  (format "%sorgs/%s/data-points/%s?%scursor=%s"
+          api-root
+          instance-id
+          survey-id
+          (if page-size
+            (format "pageSize=%s&" page-size)
+            "")
+          cursor))
 
-(defn add-cursor [data-points api-root instance-id survey-id page-size]
+(defn add-next-page-url [data-points api-root instance-id survey-id page-size]
   (if (empty? (:data-points data-points))
     (dissoc data-points :cursor)
-    (update data-points :cursor (cursor-url-fn api-root
-                                               instance-id
-                                               survey-id
-                                               page-size))))
+    (-> data-points
+        (assoc :next-page-url
+               (next-page-url api-root
+                              instance-id
+                              survey-id
+                              page-size
+                              (:cursor data-points)))
+        (dissoc :cursor))))
 
 (def params-spec (clojure.spec/keys :req-un [::spec/survey-id]
                                     :opt-un [::spec/page-size ::spec/cursor]))
@@ -45,7 +48,7 @@
       (-> remote-api
           (data-point/list instance-id user-id survey {:page-size page-size
                                                        :cursor cursor})
-          (add-cursor api-root alias survey-id page-size)
+          (add-next-page-url api-root alias survey-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]

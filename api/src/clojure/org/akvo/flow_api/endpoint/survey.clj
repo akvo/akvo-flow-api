@@ -11,8 +11,8 @@
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
     (assoc survey
-           :survey (format "%sorgs/%s/surveys/%s"
-                           api-root instance-id (:id survey)))))
+           :survey-url (format "%sorgs/%s/surveys/%s"
+                               api-root instance-id (:id survey)))))
 
 (defn add-form-instances-links [survey api-root instance-id]
   (let [forms (for [form (:forms survey)]
@@ -27,6 +27,9 @@
          :data-points-url
          (format "%sorgs/%s/data-points/%s"
                  api-root instance-id (:id survey))))
+
+(defn surveys-response [surveys]
+  (response {:surveys surveys}))
 
 (def survey-definition-params-spec (clojure.spec/keys :req-un [::spec/survey-id]))
 
@@ -53,7 +56,7 @@
                         (user/id-by-email remote-api instance-id email)
                         folder-id)
            (add-survey-links api-root alias)
-           (response))))))
+           (surveys-response))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
