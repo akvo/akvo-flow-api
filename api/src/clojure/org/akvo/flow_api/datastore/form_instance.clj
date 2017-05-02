@@ -4,7 +4,8 @@
             [cheshire.core :as json]
             [clojure.string :as s]
             [org.akvo.flow-api.anomaly :as anomaly]
-            [org.akvo.flow-api.datastore :as ds])
+            [org.akvo.flow-api.datastore :as ds]
+            [org.akvo.flow-api.utils :as utils])
   (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]
            [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
@@ -42,14 +43,14 @@
 
 ;; FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
 ;; NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
-(defmulti parse-response (fn [type response-str] type))
+(defmulti parse-response (fn [type response-str opts] type))
 
 (defmethod parse-response "FREE_TEXT"
-  [_ response-str]
+  [_ response-str opts]
   response-str)
 
 (defmethod parse-response "OPTION"
-  [_ response-str]
+  [_ response-str opts]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
@@ -58,54 +59,64 @@
        (catch NumberFormatException _)))
 
 (defmethod parse-response "NUMBER"
-  [_ response-str]
+  [_ response-str opts]
   (parse-double response-str))
 
 ;; 52.40376391|-1.75630525|189.6|6oqmgtjv
 (defmethod parse-response "GEO"
-  [_ response-str]
+  [_ response-str opts]
   (let [[lat long elev code] (s/split response-str #"\|")]
     {:lat (parse-double lat)
      :long (parse-double long)
      :elev (parse-double elev)
      :code code}))
 
+(defn replace-path [response-str asset-url-root]
+  (if (nil? asset-url-root)
+    response-str
+    (str (utils/ensure-trailing-slash asset-url-root)
+         (last (s/split response-str #"/")))))
+
 ;; {"filename":"/storage/.../.jpg","location":null}
 ;; or
 ;; /storage/.../.jpg
 ;; TODO: If location is non-null, what is the format?
 (defmethod parse-response "PHOTO"
-  [_ response-str]
-  (try (json/parse-string response-str)
-       (catch JsonParseException _
-         {"filename" response-str
-          "location" nil})))
+  [_ response-str {:keys [asset-url-root]}]
+  (let [photo (try (json/parse-string response-str)
+                   (catch JsonParseException _
+                     {"filename" response-str
+                      "location" nil}))]
+    (when (map? photo)
+      (update photo "filename" replace-path asset-url-root))))
 
 (defmethod parse-response "VIDEO"
-  [_ response-str]
-  (try (json/parse-string response-str)
-       (catch JsonParseException _
-         {"filename" response-str
-          "location" nil})))
+  [_ response-str {:keys [asset-url-root]}]
+  (let [video (try (json/parse-string response-str)
+                   (catch JsonParseException _
+                     {"filename" response-str
+                      "location" nil}))]
+    (when (map? video)
+      (update video "filename" replace-path asset-url-root)) ))
 
 (defmethod parse-response "SCAN"
-  [_ response-str]
+  [_ response-str opts]
   response-str)
 
 (defmethod parse-response "TRACK"
-  [_ response-str]
+  [_ response-str opts]
   response-str)
 
 (defmethod parse-response "NAME"
-  [_ response-str]
+  [_ response-str opts]
   response-str)
 
 (defmethod parse-response "STRENGTH"
-  [_ response-str]
+  [_ response-str opts]
   response-str)
 
 (defmethod parse-response "DATE"
-  [_ response-str]
+  [_ response-str opts]
   (let [date (try (java.util.Date. (Long/parseLong response-str))
                   (catch NumberFormatException e
                     (let [;; SimpleDateFormat is not thread safe so we create a
@@ -115,21 +126,21 @@
     (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
-  [_ response-str]
+  [_ response-str opts]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
 (defmethod parse-response "GEOSHAPE"
-  [_ response-str]
+  [_ response-str opts]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
 (defmethod parse-response "SIGNATURE"
-  [_ response-str]
+  [_ response-str opts]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
-(defn fetch-answers [ds form-definition form-instances]
+(defn fetch-answers [ds form-definition form-instances opts]
   (let [question-types (question-type-map form-definition)]
     (reduce (fn [form-instance-answers form-instance-batch]
               (reduce (fn [fia ^Entity answer]
@@ -140,7 +151,8 @@
                               iteration (or (.getProperty answer "iteration") 0)
                               response (when response-str
                                          (parse-response (get question-types question-id)
-                                                         response-str))]
+                                                         response-str
+                                                         opts))]
                           (assoc-in fia
                                     [form-instance-id
                                      question-id
@@ -178,7 +190,7 @@
          cursor (let [cursor (.toWebSafeString (.getCursor form-instances-iterator))]
                   (when-not (empty? cursor)
                     cursor))
-         answers (fetch-answers ds form-definition form-instances)]
+         answers (fetch-answers ds form-definition form-instances opts)]
      {:form-instances (mapv (fn [form-instance]
                               (assoc form-instance
                                      :responses
