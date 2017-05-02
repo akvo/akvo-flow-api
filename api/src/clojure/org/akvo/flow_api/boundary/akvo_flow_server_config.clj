@@ -8,7 +8,8 @@
   (port [this instance-id])
   (iam-account [this instance-id])
   (p12-path [this instance-id])
-  (trace-path [this instance-id]))
+  (trace-path [this instance-id])
+  (asset-url-root [this instance-id]))
 
 (extend-protocol IAkvoFlowServerConfig
   AkvoFlowServerConfig
@@ -23,4 +24,6 @@
                                          tmp-dir
                                          instance-id)))
   (trace-path [this instance-id]
-    nil))
+    nil)
+  (asset-url-root [{:keys [instances]} instance-id]
+    (get-in instances [instance-id "photo_url_root"])))
