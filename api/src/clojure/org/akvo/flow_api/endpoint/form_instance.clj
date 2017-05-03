@@ -16,26 +16,29 @@
            nil)
         forms))
 
-(defn cursor-url-fn [api-root instance-id survey-id form-id page-size]
-  (fn [cursor]
-    (format "%sorgs/%s/form-instances/%s/%s?%scursor=%s"
-            api-root
-            instance-id
-            survey-id
-            form-id
-            (if page-size
-              (format "pageSize=%s&" page-size)
-              "")
-            cursor)))
+(defn next-page-url [api-root instance-id survey-id form-id page-size cursor]
+  (format "%sorgs/%s/form-instances/%s/%s?%scursor=%s"
+          api-root
+          instance-id
+          survey-id
+          form-id
+          (if page-size
+            (format "pageSize=%s&" page-size)
+            "")
+          cursor))
 
-(defn add-cursor [form-instances api-root instance-id survey-id form-id page-size]
+(defn add-next-page-url [form-instances api-root instance-id survey-id form-id page-size]
   (if (empty? (:form-instances form-instances))
     (dissoc form-instances :cursor)
-    (update form-instances :cursor (cursor-url-fn api-root
-                                                  instance-id
-                                                  survey-id
-                                                  form-id
-                                                  page-size))))
+    (-> form-instances
+        (assoc :next-page-url
+               (next-page-url api-root
+                              instance-id
+                              survey-id
+                              form-id
+                              page-size
+                              (:cursor form-instances)))
+        (dissoc :cursor))))
 
 (def params-spec (clojure.spec/keys :req-un [::spec/survey-id ::spec/form-id]
                                     :opt-un [::spec/cursor ::spec/page-size]))
@@ -56,7 +59,7 @@
       (-> remote-api
           (form-instance/list instance-id user-id form {:page-size page-size
                                                         :cursor cursor})
-          (add-cursor api-root alias survey-id form-id page-size)
+          (add-next-page-url api-root alias survey-id form-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
