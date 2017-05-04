@@ -66,10 +66,11 @@
 (defmethod parse-response "GEO"
   [_ response-str opts]
   (let [[lat long elev code] (s/split response-str #"\|")]
-    {:lat (parse-double lat)
-     :long (parse-double long)
-     :elev (parse-double elev)
-     :code code}))
+    (when-not (and (nil? lat) (nil? long))
+      {:lat (parse-double lat)
+       :long (parse-double long)
+       :elev (when elev (parse-double elev))
+       :code code})))
 
 (defn replace-path [response-str asset-url-root]
   (if (nil? asset-url-root)
