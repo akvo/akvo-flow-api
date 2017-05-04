@@ -71,7 +71,7 @@
             :long 2.0
             :elev 3.0
             :code "foo"}))
-    (is (= (form-instance/parse-response "GEO" "||||" {})
+    (is (= (form-instance/parse-response "GEO" "|||" {})
            nil))
     (is (= (form-instance/parse-response "GEO" "1.0|2.0||" {})
            {:lat 1.0
