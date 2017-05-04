@@ -64,4 +64,17 @@
     (is (= (form-instance/parse-response "VIDEO" "{\"filename\": \"/storage/foo.mpeg\", \"location\": null}"
                                          {:asset-url-root "http://localhost/"})
            {"filename" "http://localhost/foo.mpeg"
-            "location" nil}))))
+            "location" nil})))
+  (testing "geo question type"
+    (is (= (form-instance/parse-response "GEO" "1.0|2.0|3.0|foo" {})
+           {:lat 1.0
+            :long 2.0
+            :elev 3.0
+            :code "foo"}))
+    (is (= (form-instance/parse-response "GEO" "||||" {})
+           nil))
+    (is (= (form-instance/parse-response "GEO" "1.0|2.0||" {})
+           {:lat 1.0
+            :long 2.0
+            :elev nil
+            :code nil}))))
