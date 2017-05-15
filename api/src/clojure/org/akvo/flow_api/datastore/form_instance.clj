@@ -141,6 +141,10 @@
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
+(defmethod parse-response "CADDISFLY"
+  [_ response-str opts]
+  (json/parse-string response-str))
+
 (defn fetch-answers [ds form-definition form-instances opts]
   (let [question-types (question-type-map form-definition)]
     (reduce (fn [form-instance-answers form-instance-batch]
