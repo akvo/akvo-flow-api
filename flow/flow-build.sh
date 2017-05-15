@@ -9,9 +9,13 @@ git pull
 git fetch --tags
 
 # Last released tag
-TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+#TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+TAG=v1.9.16
 
 git checkout $TAG
+git reset --hard
+
+patch -p1 < /usr/local/src/patches/base-dao.diff
 
 cd GAE
 cp build.properties.template build.properties

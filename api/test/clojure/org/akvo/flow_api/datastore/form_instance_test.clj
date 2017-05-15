@@ -42,3 +42,39 @@
           (is (= 150 (count (:form-instances page-1))))
           (is (= 17 (count (:form-instances page-2))))
           (is (empty? (:form-instances page-3))))))))
+
+(deftest response-parsing
+  (testing "date question type"
+    (is (= (form-instance/parse-response "DATE" "1493039527580" {})
+           "2017-04-24T13:12:07.580Z"))
+    (is (= (form-instance/parse-response "DATE" "29-08-2013 02:00:00 CEST" {})
+           "2013-08-29T00:00:00Z")))
+  (testing "photo question type"
+    (is (= (form-instance/parse-response "PHOTO" "/storage/foo.png" {:asset-url-root "http://localhost"})
+           {"filename" "http://localhost/foo.png"
+            "location" nil}))
+    (is (= (form-instance/parse-response "PHOTO" "{\"filename\": \"/storage/foo.png\", \"location\": null}"
+                                         {:asset-url-root "http://localhost/"})
+           {"filename" "http://localhost/foo.png"
+            "location" nil})))
+  (testing "video question type"
+    (is (= (form-instance/parse-response "VIDEO" "/storage/foo.mpeg" {:asset-url-root "http://localhost"})
+           {"filename" "http://localhost/foo.mpeg"
+            "location" nil}))
+    (is (= (form-instance/parse-response "VIDEO" "{\"filename\": \"/storage/foo.mpeg\", \"location\": null}"
+                                         {:asset-url-root "http://localhost/"})
+           {"filename" "http://localhost/foo.mpeg"
+            "location" nil})))
+  (testing "geo question type"
+    (is (= (form-instance/parse-response "GEO" "1.0|2.0|3.0|foo" {})
+           {:lat 1.0
+            :long 2.0
+            :elev 3.0
+            :code "foo"}))
+    (is (= (form-instance/parse-response "GEO" "|||" {})
+           nil))
+    (is (= (form-instance/parse-response "GEO" "1.0|2.0||" {})
+           {:lat 1.0
+            :long 2.0
+            :elev nil
+            :code nil}))))

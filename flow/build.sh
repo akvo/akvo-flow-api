@@ -7,7 +7,8 @@ set -eu
 docker pull akvo/flow-api-build
 
 docker run --rm \
+       --volume "$PWD":/usr/local/src \
        --volume "$PWD/.cache/akvo-flow":/opt/akvo-flow \
        --volume "$HOME/.m2/repository":/opt/.m2/repository \
        --user `id -u`:`id -g` \
-       akvo/flow-api-build
+       akvo/flow-api-build /usr/local/src/flow-build.sh

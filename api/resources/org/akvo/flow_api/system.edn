@@ -9,10 +9,11 @@
  {:root #var org.akvo.flow-api.endpoint.root/endpoint
   :folder #var org.akvo.flow-api.endpoint.folder/endpoint
   :survey #var org.akvo.flow-api.endpoint.survey/endpoint
+  :data-point #var org.akvo.flow-api.endpoint.data-point/endpoint
   :form-instance #var org.akvo.flow-api.endpoint.form-instance/endpoint}
  :dependencies
  {:http [:app]
-  :app  [:root :folder :survey :form-instance]
+  :app  [:root :folder :survey :data-point :form-instance]
   :remote-api [:akvo-flow-server-config :user-cache :survey-cache]
   :akvo-flow-server-config []
   :root []
@@ -20,6 +21,7 @@
   :survey-cache []
   :folder [:remote-api :akvo-flow-server-config :api-root]
   :survey [:remote-api :akvo-flow-server-config :api-root]
+  :data-point [:remote-api :akvo-flow-server-config :api-root]
   :form-instance [:remote-api :akvo-flow-server-config :api-root]}
  :config
  {:app
@@ -34,7 +36,7 @@
      :wrap-anomaly  #var org.akvo.flow-api.middleware.anomaly/wrap-anomaly
      :wrap-sentry   #var raven-clj.ring/wrap-sentry}
     :applied
-    [:not-found :ring-defaults :wrap-email :json-body :wrap-anomaly :json-response :wrap-sentry :hide-errors]
+    [:not-found :wrap-anomaly :json-response :ring-defaults :wrap-email :json-body :wrap-sentry :hide-errors]
     :arguments
     {:not-found   "Resource Not Found"
      :hide-errors "Internal Server Error"

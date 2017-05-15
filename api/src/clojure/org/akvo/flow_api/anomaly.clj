@@ -11,3 +11,6 @@
 
 (defn unauthorized [message m]
   (throw-anomaly ::unauthorized message m))
+
+(defn bad-request [message m]
+  (throw-anomaly ::bad-request message m))

@@ -22,3 +22,8 @@
   (-> (body e)
       (response)
       (assoc :status 404)))
+
+(defmethod handle :org.akvo.flow-api.anomaly/bad-request [e]
+  (-> (body e)
+      (response)
+      (assoc :status 400)))

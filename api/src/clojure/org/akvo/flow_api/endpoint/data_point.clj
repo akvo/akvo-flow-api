@@ -1,52 +1,42 @@
-(ns org.akvo.flow-api.endpoint.form-instance
+(ns org.akvo.flow-api.endpoint.data-point
   (:require [clojure.set :refer [rename-keys]]
             [clojure.spec]
             [compojure.core :refer :all]
-            [org.akvo.flow-api.anomaly :as anomaly]
-            [org.akvo.flow-api.boundary.form-instance :as form-instance]
+            [org.akvo.flow-api.boundary.data-point :as data-point]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
-(defn find-form [forms form-id]
-  (some #(if (= (:id %) form-id)
-           %
-           nil)
-        forms))
-
-(defn next-page-url [api-root instance-id survey-id form-id page-size cursor]
-  (format "%sorgs/%s/form-instances/%s/%s?%scursor=%s"
+(defn next-page-url [api-root instance-id survey-id page-size cursor]
+  (format "%sorgs/%s/data-points/%s?%scursor=%s"
           api-root
           instance-id
           survey-id
-          form-id
           (if page-size
             (format "pageSize=%s&" page-size)
             "")
           cursor))
 
-(defn add-next-page-url [form-instances api-root instance-id survey-id form-id page-size]
-  (if (empty? (:form-instances form-instances))
-    (dissoc form-instances :cursor)
-    (-> form-instances
+(defn add-next-page-url [data-points api-root instance-id survey-id page-size]
+  (if (empty? (:data-points data-points))
+    (dissoc data-points :cursor)
+    (-> data-points
         (assoc :next-page-url
                (next-page-url api-root
                               instance-id
                               survey-id
-                              form-id
                               page-size
-                              (:cursor form-instances)))
+                              (:cursor data-points)))
         (dissoc :cursor))))
 
-(def params-spec (clojure.spec/keys :req-un [::spec/survey-id ::spec/form-id]
-                                    :opt-un [::spec/cursor ::spec/page-size]))
+(def params-spec (clojure.spec/keys :req-un [::spec/survey-id]
+                                    :opt-un [::spec/page-size ::spec/cursor]))
 
 (defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/form-instances/:survey-id/:form-id" {:keys [email instance-id alias params]}
+  (GET "/data-points/:survey-id" {:keys [email instance-id alias params]}
     (let [{:keys [survey-id
-                  form-id
                   page-size
                   cursor]} (spec/validate-params params-spec
                                                  (rename-keys params
@@ -54,12 +44,11 @@
           page-size (when page-size
                       (Long/parseLong page-size))
           user-id (user/id-by-email remote-api instance-id email)
-          survey (survey/by-id remote-api instance-id user-id survey-id)
-          form (find-form (:forms survey) form-id)]
+          survey (survey/by-id remote-api instance-id user-id survey-id)]
       (-> remote-api
-          (form-instance/list instance-id user-id form {:page-size page-size
-                                                        :cursor cursor})
-          (add-next-page-url api-root alias survey-id form-id page-size)
+          (data-point/list instance-id user-id survey {:page-size page-size
+                                                       :cursor cursor})
+          (add-next-page-url api-root alias survey-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]

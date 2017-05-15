@@ -1,8 +1,8 @@
-FROM openresty/openresty:alpine-fat
+FROM openresty/openresty:1.11.2.3-alpine-fat
 
 RUN apk add --no-cache build-base openssl-dev git
 
-RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-openidc
+RUN /usr/local/openresty/luajit/bin/luarocks install lua-resty-openidc 1.3.1-1
 
 EXPOSE 8081
 

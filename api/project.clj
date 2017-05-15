@@ -2,7 +2,7 @@
   :description "Akvo Flow API"
   :url "https://github.com/akvo/akvo-flow-api"
   :min-lein-version "2.0.0"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
                  [org.clojure/core.cache "0.6.5"]
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.1"]
@@ -12,8 +12,8 @@
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
-                 [org.akvo.flow/data-access "v1.9.15"]
-                 [org.akvo/commons "0.4.2"]
+                 [org.akvo.flow/data-access "v1.9.16"]
+                 [org.akvo/commons "0.4.5"]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
                  [com.google.appengine/appengine-tools-sdk "1.9.50"]
@@ -32,6 +32,7 @@
   :main ^:skip-aot org.akvo.flow-api.main
   :target-path "target/%s/"
   :aliases {"setup"  ["run" "-m" "duct.util.repl/setup"]}
+  :uberjar-name "akvo-flow-api.jar"
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]
