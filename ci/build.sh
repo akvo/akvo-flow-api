@@ -53,7 +53,7 @@ docker run \
 
 # Build docker images if branch is `develop`
 
-if [[ "${BRANCH_NAME}" != "develop" ]]; then
+if [[ "${BRANCH_NAME}" != "develop" ]] && [[ "${BRANCH_NAME}" != "master" ]]; then
     echo "Skipping docker build"
     exit 0
 fi
