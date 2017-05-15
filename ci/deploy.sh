@@ -2,7 +2,11 @@
 
 set -eu
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] || [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
+if [[ "${TRAVIS_BRANCH}" != "develop" ]] || [[ "${TRAVIS_BRANCH}" != "master" ]]; then
+    exit 0
+fi
+
+if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
@@ -22,7 +26,12 @@ gcloud auth activate-service-account --key-file ci/gcloud-service-account.json
 gcloud config set project akvo-lumen
 gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
-gcloud container clusters get-credentials dev-cluster
+
+if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+    gcloud container clusters get-credentials lumen
+else
+    gcloud container clusters get-credentials dev-cluster
+fi
 
 # Deploying
 
