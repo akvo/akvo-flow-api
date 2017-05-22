@@ -35,5 +35,5 @@ fi
 
 # Deploying
 
-kubectl delete -f ci/k8s/deployment.yml
+kubectl delete --ignore-not-found=true -f ci/k8s/deployment.yml
 kubectl create -f ci/k8s/deployment.yml
