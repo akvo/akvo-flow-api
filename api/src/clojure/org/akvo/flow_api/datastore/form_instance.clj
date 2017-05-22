@@ -41,6 +41,16 @@
           {}
           (mapcat :questions (:question-groups form-definition))))
 
+(defn question-group-map
+  "Builds a map from question id to question group id"
+  [form-definition]
+  (apply merge
+         (for [{question-group-id :id questions :questions} (:question-groups form-definition)]
+           (reduce (fn [qg-map {:keys [id]}]
+                     (assoc qg-map id question-group-id))
+                   {}
+                   questions))))
+
 ;; FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
 ;; NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
 (defmulti parse-response (fn [type response-str opts] type))
@@ -145,33 +155,55 @@
   [_ response-str opts]
   (json/parse-string response-str))
 
-(defn fetch-answers [ds form-definition form-instances opts]
-  (let [question-types (question-type-map form-definition)]
-    (reduce (fn [form-instance-answers form-instance-batch]
-              (reduce (fn [fia ^Entity answer]
-                        (let [form-instance-id (str (.getProperty answer "surveyInstanceId"))
-                              question-id (.getProperty answer "questionID")
-                              response-str (or (.getProperty answer "value")
-                                               (.getValue ^Text (.getProperty answer "valueText")))
-                              iteration (or (.getProperty answer "iteration") 0)
-                              response (when response-str
-                                         (parse-response (get question-types question-id)
-                                                         response-str
-                                                         opts))]
-                          (assoc-in fia
-                                    [form-instance-id
-                                     question-id
-                                     iteration]
-                                    response)))
-                      form-instance-answers
-                      (q/result ds
-                                {:kind "QuestionAnswerStore"
-                                 :filter (q/in "surveyInstanceId"
-                                               (map (comp #(Long/parseLong %) :id)
-                                                    form-instance-batch))}
-                                {:chunk-size 300})))
-            {}
-            (partition-all 30 form-instances))))
+(defn map-vals
+  "Apply f to every value in the map, producing a new map with the same keys"
+  [f map]
+  (reduce-kv (fn [m k v]
+               (assoc m k (f v)))
+             {}
+             map))
+
+(defn vectorize-response-iterations [form-instances]
+  (map-vals (fn [question-group-map]
+              (map-vals (fn [iterations]
+                          (->> iterations
+                               (sort-by key)
+                               (map val)
+                               vec))
+                        question-group-map))
+            form-instances))
+
+(defn fetch-responses [ds form-definition form-instances opts]
+  (let [question-types (question-type-map form-definition)
+        question-groups (question-group-map form-definition)]
+    (vectorize-response-iterations
+     (reduce (fn [form-instance-responses form-instance-batch]
+               (reduce (fn [fia ^Entity response]
+                         (let [form-instance-id (str (.getProperty response "surveyInstanceId"))
+                               question-id (.getProperty response "questionID")
+                               question-group-id (get question-groups question-id)
+                               response-str (or (.getProperty response "value")
+                                                (.getValue ^Text (.getProperty response "valueText")))
+                               iteration (or (.getProperty response "iteration") 0)
+                               response (when response-str
+                                          (parse-response (get question-types question-id)
+                                                          response-str
+                                                          opts))]
+                           (assoc-in fia
+                                     [form-instance-id
+                                      question-group-id
+                                      iteration
+                                      question-id]
+                                     response)))
+                       form-instance-responses
+                       (q/result ds
+                                 {:kind "QuestionAnswerStore"
+                                  :filter (q/in "surveyInstanceId"
+                                                (map (comp #(Long/parseLong %) :id)
+                                                     form-instance-batch))}
+                                 {:chunk-size 300})))
+             {}
+             (partition-all 30 form-instances)))))
 
 (defn form-instance-entity->map [^Entity form-instance]
   {:id (str (ds/id form-instance))
@@ -195,10 +227,10 @@
          cursor (let [cursor (.toWebSafeString (.getCursor form-instances-iterator))]
                   (when-not (empty? cursor)
                     cursor))
-         answers (fetch-answers ds form-definition form-instances opts)]
+         responses (fetch-responses ds form-definition form-instances opts)]
      {:form-instances (mapv (fn [form-instance]
                               (assoc form-instance
                                      :responses
-                                     (get answers (:id form-instance))))
+                                     (get responses (:id form-instance))))
                             form-instances)
       :cursor cursor})))
