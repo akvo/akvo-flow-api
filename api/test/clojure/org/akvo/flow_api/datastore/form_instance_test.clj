@@ -81,7 +81,7 @@
 
 (deftest response-for-missing-question-test
   (testing "Response for missing question (regression #82)"
-    (with-redefs [form-instance/response-entity
+    (with-redefs [form-instance/response-entity->map
                   (constantly {:form-instance-id "1"
                                :question-id "2"
                                :response-str "42"
