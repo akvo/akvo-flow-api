@@ -145,15 +145,21 @@
   [_ response-str opts]
   (json/parse-string response-str))
 
+(defn response-entity [^Entity response]
+  {:form-instance-id (str (.getProperty response "surveyInstanceId"))
+   :question-id (.getProperty response "questionID")
+   :response-str (or (.getProperty response "value")
+                     (.getValue ^Text (.getProperty response "valueText")))
+   :iteration (or (.getProperty response "iteration") 0)})
+
 (defn update-form-instances-fn [question-types opts]
   (fn [form-instances ^Entity answer]
-    (let [form-instance-id (str (.getProperty answer "surveyInstanceId"))
-          question-id (.getProperty answer "questionID")]
+    (let [{:keys [form-instance-id
+                  question-id
+                  response-str
+                  iteration]} (response-entity answer)]
       (if-let [question-type (get question-types question-id)]
-        (let [response-str (or (.getProperty answer "value")
-                               (.getValue ^Text (.getProperty answer "valueText")))
-              iteration (or (.getProperty answer "iteration") 0)
-              response (when response-str
+        (let [response (when response-str
                          (parse-response question-type
                                          response-str
                                          opts))]

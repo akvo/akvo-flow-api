@@ -78,3 +78,17 @@
             :long 2.0
             :elev nil
             :code nil}))))
+
+(deftest response-for-missing-question-test
+  (testing "Response for missing question (regression #82)"
+    (with-redefs [form-instance/response-entity
+                  (constantly {:form-instance-id "1"
+                               :question-id "2"
+                               :response-str "42"
+                               :iteration 0})]
+      (let [update-form-instances (form-instance/update-form-instances-fn {} {})]
+        (is (= (update-form-instances {} 'entity)
+               {})))
+      (let [update-form-instances (form-instance/update-form-instances-fn {"2" "NUMBER"} {})]
+        (is (= (update-form-instances {} 'entity)
+               {"1" {"2" {0 42.0}}}))))))
