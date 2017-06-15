@@ -15,6 +15,10 @@ if [[ ! -f "${HOME}/.m2/repository/org/akvo/flow/data-access/${DATA_ACCESS_VERSI
     cd ..
 fi
 
+# Make sure we attempt to refresh dependencies
+
+./flow/get-dependencies.sh
+
 # Lein
 
 mkdir -p $HOME/.lein
