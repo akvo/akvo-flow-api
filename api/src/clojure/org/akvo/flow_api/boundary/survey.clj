@@ -28,7 +28,7 @@
   RemoteApi
   (list [this instance-id user-id folder-id]
     (ds/with-remote-api this instance-id
-      (survey/list user-id folder-id)))
+      (doall (survey/list user-id folder-id))))
   (by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
     (if-let [survey-definition (get-survey-definition survey-cache
                                                       instance-id
@@ -47,7 +47,7 @@
   LocalApi
   (list [this instance-id user-id folder-id]
     (ds/with-remote-api this instance-id
-      (survey/list user-id folder-id)))
+      (doall (survey/list user-id folder-id))))
   (by-id [this instance-id user-id survey-id]
     (ds/with-remote-api this instance-id
       (survey/by-id user-id survey-id))))
