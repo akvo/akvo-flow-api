@@ -145,24 +145,35 @@
   [_ response-str opts]
   (json/parse-string response-str))
 
+(defn response-entity->map [^Entity response]
+  {:form-instance-id (str (.getProperty response "surveyInstanceId"))
+   :question-id (.getProperty response "questionID")
+   :response-str (or (.getProperty response "value")
+                     (.getValue ^Text (.getProperty response "valueText")))
+   :iteration (or (.getProperty response "iteration") 0)})
+
+(defn update-form-instances-fn [question-types opts]
+  (fn [form-instances ^Entity response]
+    (let [{:keys [form-instance-id
+                  question-id
+                  response-str
+                  iteration]} (response-entity->map response)]
+      (if-let [question-type (get question-types question-id)]
+        (let [response (when response-str
+                         (parse-response question-type
+                                         response-str
+                                         opts))]
+          (assoc-in form-instances
+                    [form-instance-id
+                     question-id
+                     iteration]
+                    response))
+        form-instances))))
+
 (defn fetch-answers [ds form-definition form-instances opts]
   (let [question-types (question-type-map form-definition)]
     (reduce (fn [form-instance-answers form-instance-batch]
-              (reduce (fn [fia ^Entity answer]
-                        (let [form-instance-id (str (.getProperty answer "surveyInstanceId"))
-                              question-id (.getProperty answer "questionID")
-                              response-str (or (.getProperty answer "value")
-                                               (.getValue ^Text (.getProperty answer "valueText")))
-                              iteration (or (.getProperty answer "iteration") 0)
-                              response (when response-str
-                                         (parse-response (get question-types question-id)
-                                                         response-str
-                                                         opts))]
-                          (assoc-in fia
-                                    [form-instance-id
-                                     question-id
-                                     iteration]
-                                    response)))
+              (reduce (update-form-instances-fn question-types opts)
                       form-instance-answers
                       (q/result ds
                                 {:kind "QuestionAnswerStore"
