@@ -51,8 +51,11 @@
 
 (defmethod parse-response "OPTION"
   [_ response-str opts]
-  (try (json/parse-string response-str)
-       (catch JsonParseException _)))
+  (let [response-str (s/trim response-str)]
+    (if (s/starts-with? response-str "[")
+      (json/parse-string response-str)
+      (let [texts (s/split response-str #"\|")]
+        (map (fn [text] {"text" text}) texts)))))
 
 (defn parse-double [s]
   (try (Double/parseDouble s)
