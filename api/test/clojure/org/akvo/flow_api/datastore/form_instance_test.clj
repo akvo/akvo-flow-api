@@ -92,3 +92,17 @@
       (let [update-form-instances (form-instance/update-form-instances-fn {"2" "NUMBER"} {})]
         (is (= (update-form-instances {} 'entity)
                {"1" {"2" {0 42.0}}}))))))
+
+(deftest option-response-format
+  (testing "Responses for option questions (regression #86)"
+    (are [str-response api-response] (= (form-instance/parse-response "OPTION"
+                                                                      str-response
+                                                                      {})
+                                        api-response)
+      "6" [{"text" "6"}]
+      "A|B" [{"text" "A"} {"text" "B"}]
+      "[{\"text\": \"A\"}, {\"text\": \"B\"}]" [{"text" "A"} {"text" "B"}]
+      "[{\"text\": \"A\", \"code\": \"a\"},
+        {\"text\": \"B\", \"code\": \"b\", \"isOther\": true}]"
+      [{"text" "A" "code" "a"}
+       {"text" "B" "code" "b" "isOther" true}])))
