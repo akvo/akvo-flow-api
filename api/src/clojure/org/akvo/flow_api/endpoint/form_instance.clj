@@ -18,13 +18,13 @@
         forms))
 
 (defn next-page-url [api-root instance-id survey-id form-id page-size cursor]
-  (format "%sorgs/%s/form_instances?%s"
-          api-root
-          instance-id
-          (utils/query-params-str {"survey_id" survey-id
-                                   "form_id" form-id
-                                   "page_size" page-size
-                                   "cursor" cursor})))
+  (utils/url-builder api-root
+                     instance-id
+                     "form_instances"
+                     {"survey_id" survey-id
+                      "form_id" form-id
+                      "page_size" page-size
+                      "cursor" cursor}))
 
 (defn add-next-page-url [form-instances api-root instance-id survey-id form-id page-size]
   (if (empty? (:form-instances form-instances))

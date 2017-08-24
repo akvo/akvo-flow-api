@@ -12,14 +12,8 @@
 (defn add-links [folders api-root instance-id]
   (for [{:keys [id] :as folder} folders]
     (assoc folder
-           :surveys-url (format "%sorgs/%s/surveys?%s"
-                                api-root
-                                instance-id
-                                (utils/query-params-str {"folder_id" id}))
-           :folders-url (format "%sorgs/%s/folders?%s"
-                                api-root
-                                instance-id
-                                (utils/query-params-str {"parent_id" id})))))
+           :surveys-url (utils/url-builder api-root instance-id "surveys" {"folder_id" id})
+           :folders-url (utils/url-builder api-root instance-id "folders" {"parent_id" id}))))
 
 (defn folders-response [folders]
   (response {:folders folders}))

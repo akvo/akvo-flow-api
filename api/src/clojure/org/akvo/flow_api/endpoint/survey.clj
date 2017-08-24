@@ -12,27 +12,26 @@
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
     (assoc survey
-           :survey-url (format "%sorgs/%s/surveys/%s"
-                               api-root instance-id (:id survey)))))
+           :survey-url (utils/url-builder api-root instance-id (str "surveys/" (:id survey))))))
 
 (defn add-form-instances-links [survey api-root instance-id]
   (let [forms (for [form (:forms survey)]
                 (assoc form
                        :form-instances-url
-                       (format "%sorgs/%s/form_instances?%s"
-                               api-root
-                               instance-id
-                               (utils/query-params-str {"survey_id" (:id survey)
-                                                        "form_id" (:id form)}))))]
+                       (utils/url-builder api-root
+                                          instance-id
+                                          "form_instances"
+                                          {"survey_id" (:id survey)
+                                           "form_id" (:id form)})))]
     (assoc survey :forms forms)))
 
 (defn add-data-points-link [survey api-root instance-id]
   (assoc survey
          :data-points-url
-         (format "%sorgs/%s/data_points?%s"
-                 api-root
-                 instance-id
-                 (utils/query-params-str {"survey_id" (:id survey)}))))
+         (utils/url-builder api-root
+                            instance-id
+                            "data_points"
+                            {"survey_id" (:id survey)})))
 
 (defn surveys-response [surveys]
   (response {:surveys surveys}))

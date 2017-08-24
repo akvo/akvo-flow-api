@@ -11,12 +11,9 @@
             [ring.util.response :refer [response]]))
 
 (defn next-page-url [api-root instance-id survey-id page-size cursor]
-  (format "%sorgs/%s/data_points?%s"
-          api-root
-          instance-id
-          (utils/query-params-str {"survey_id" survey-id
-                                   "page_size" page-size
-                                   "cursor" cursor})))
+  (utils/url-builder api-root instance-id "data_points" {"survey_id" survey-id
+                                                         "page_size" page-size
+                                                         "cursor" cursor}))
 
 (defn add-next-page-url [data-points api-root instance-id survey-id page-size]
   (if (empty? (:data-points data-points))
