@@ -5,6 +5,8 @@ set -eu
 BRANCH_NAME="${TRAVIS_BRANCH:=unknown}"
 LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
+mkdir -p "$HOME/.m2/repository"
+
 # Flow data access classes, only if not present in $HOME/.m2
 
 DATA_ACCESS_VERSION=$(sed -n -e 's|.*org\.akvo\.flow/data-access "\(.*\)"]$|\1|p' api/project.clj)

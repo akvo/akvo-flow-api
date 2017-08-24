@@ -24,7 +24,7 @@ FILE_LIST=(https://www-eu.apache.org/dist/maven/binaries/apache-maven-3.0.5-bin.
 	   https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin)
 
 for i in "${FILE_LIST[@]}"; do
-    wget --timestamping "${i}"
+    wget --quiet --timestamping "${i}"
 done
 
 if [[ ! -d "akvo-flow" ]]; then
