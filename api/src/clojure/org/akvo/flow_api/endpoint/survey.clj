@@ -5,6 +5,7 @@
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
+            [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
@@ -18,15 +19,20 @@
   (let [forms (for [form (:forms survey)]
                 (assoc form
                        :form-instances-url
-                       (format "%sorgs/%s/form-instances/%s/%s"
-                               api-root instance-id (:id survey) (:id form))))]
+                       (format "%sorgs/%s/form_instances?%s"
+                               api-root
+                               instance-id
+                               (utils/query-params-str {"survey_id" (:id survey)
+                                                        "form_id" (:id form)}))))]
     (assoc survey :forms forms)))
 
 (defn add-data-points-link [survey api-root instance-id]
   (assoc survey
          :data-points-url
-         (format "%sorgs/%s/data-points/%s"
-                 api-root instance-id (:id survey))))
+         (format "%sorgs/%s/data_points?%s"
+                 api-root
+                 instance-id
+                 (utils/query-params-str {"survey_id" (:id survey)}))))
 
 (defn surveys-response [surveys]
   (response {:surveys surveys}))
@@ -50,7 +56,7 @@
    (GET "/surveys" {:keys [email alias instance-id params]}
      (let [{:keys [folder-id]} (spec/validate-params survey-list-params-spec
                                                      (rename-keys params
-                                                                  {:folderId :folder-id}))]
+                                                                  {:folder_id :folder-id}))]
        (-> remote-api
            (survey/list instance-id
                         (user/id-by-email remote-api instance-id email)

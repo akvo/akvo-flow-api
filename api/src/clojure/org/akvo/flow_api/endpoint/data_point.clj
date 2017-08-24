@@ -6,18 +6,17 @@
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
+            [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
 (defn next-page-url [api-root instance-id survey-id page-size cursor]
-  (format "%sorgs/%s/data-points/%s?%scursor=%s"
+  (format "%sorgs/%s/data_points?%s"
           api-root
           instance-id
-          survey-id
-          (if page-size
-            (format "pageSize=%s&" page-size)
-            "")
-          cursor))
+          (utils/query-params-str {"survey_id" survey-id
+                                   "page_size" page-size
+                                   "cursor" cursor})))
 
 (defn add-next-page-url [data-points api-root instance-id survey-id page-size]
   (if (empty? (:data-points data-points))
@@ -35,12 +34,13 @@
                                     :opt-un [::spec/page-size ::spec/cursor]))
 
 (defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/data-points/:survey-id" {:keys [email instance-id alias params]}
+  (GET "/data_points" {:keys [email instance-id alias params]}
     (let [{:keys [survey-id
                   page-size
                   cursor]} (spec/validate-params params-spec
                                                  (rename-keys params
-                                                              {:pageSize :page-size}))
+                                                              {:survey_id :survey-id
+                                                               :page_size :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
           user-id (user/id-by-email remote-api instance-id email)

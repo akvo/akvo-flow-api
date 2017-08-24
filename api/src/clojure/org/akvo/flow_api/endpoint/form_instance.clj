@@ -7,6 +7,7 @@
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
+            [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
@@ -17,15 +18,13 @@
         forms))
 
 (defn next-page-url [api-root instance-id survey-id form-id page-size cursor]
-  (format "%sorgs/%s/form-instances/%s/%s?%scursor=%s"
+  (format "%sorgs/%s/form_instances?%s"
           api-root
           instance-id
-          survey-id
-          form-id
-          (if page-size
-            (format "pageSize=%s&" page-size)
-            "")
-          cursor))
+          (utils/query-params-str {"survey_id" survey-id
+                                   "form_id" form-id
+                                   "page_size" page-size
+                                   "cursor" cursor})))
 
 (defn add-next-page-url [form-instances api-root instance-id survey-id form-id page-size]
   (if (empty? (:form-instances form-instances))
@@ -44,13 +43,15 @@
                                     :opt-un [::spec/cursor ::spec/page-size]))
 
 (defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/form-instances/:survey-id/:form-id" {:keys [email instance-id alias params]}
+  (GET "/form_instances" {:keys [email instance-id alias params]}
     (let [{:keys [survey-id
                   form-id
                   page-size
                   cursor]} (spec/validate-params params-spec
                                                  (rename-keys params
-                                                              {:pageSize :page-size}))
+                                                              {:survey_id :survey-id
+                                                               :form_id :form-id
+                                                               :page_size :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
           user-id (user/id-by-email remote-api instance-id email)

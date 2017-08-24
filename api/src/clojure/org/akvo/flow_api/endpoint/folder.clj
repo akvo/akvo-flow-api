@@ -5,14 +5,21 @@
             [org.akvo.flow-api.boundary.folder :as folder]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
+            [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [ring.util.response :refer [response]]))
 
 (defn add-links [folders api-root instance-id]
   (for [{:keys [id] :as folder} folders]
     (assoc folder
-           :surveys-url (format "%sorgs/%s/surveys?folderId=%s" api-root instance-id id)
-           :folders-url (format "%sorgs/%s/folders?parentId=%s" api-root instance-id id))))
+           :surveys-url (format "%sorgs/%s/surveys?%s"
+                                api-root
+                                instance-id
+                                (utils/query-params-str {"folder_id" id}))
+           :folders-url (format "%sorgs/%s/folders?%s"
+                                api-root
+                                instance-id
+                                (utils/query-params-str {"parent_id" id})))))
 
 (defn folders-response [folders]
   (response {:folders folders}))
@@ -23,7 +30,7 @@
   (GET "/folders" {:keys [email instance-id alias params]}
     (let [{:keys [parent-id]} (spec/validate-params params-spec
                                                     (rename-keys params
-                                                                 {:parentId :parent-id}))]
+                                                                 {:parent_id :parent-id}))]
       (-> remote-api
           (folder/list instance-id
                        (user/id-by-email remote-api instance-id email)
