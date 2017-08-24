@@ -78,3 +78,35 @@
             :long 2.0
             :elev nil
             :code nil}))))
+
+(deftest response-for-missing-question-test
+  (testing "Response for missing question (regression #82)"
+    (with-redefs [form-instance/response-entity->map
+                  (constantly {:form-instance-id "1"
+                               :question-id "2"
+                               :response-str "42"
+                               :iteration 0})]
+      (let [update-form-instances (form-instance/update-form-instances-fn {} {} {})]
+        (is (= (update-form-instances {} 'entity)
+               {})))
+      (let [update-form-instances (form-instance/update-form-instances-fn
+                                   {"2" "NUMBER"} ;; Question id -> Question type
+                                   {"2" "4"} ;; Question id -> Question group id
+                                   {} ;; Opts
+                                   )]
+        (is (= (form-instance/vectorize-response-iterations (update-form-instances {} 'entity))
+               {"1" {"4" [{"2" 42.0}]}}))))))
+
+(deftest option-response-format
+  (testing "Responses for option questions (regression #86)"
+    (are [str-response api-response] (= (form-instance/parse-response "OPTION"
+                                                                      str-response
+                                                                      {})
+                                        api-response)
+      "6" [{"text" "6"}]
+      "A|B" [{"text" "A"} {"text" "B"}]
+      "[{\"text\": \"A\"}, {\"text\": \"B\"}]" [{"text" "A"} {"text" "B"}]
+      "[{\"text\": \"A\", \"code\": \"a\"},
+        {\"text\": \"B\", \"code\": \"b\", \"isOther\": true}]"
+      [{"text" "A" "code" "a"}
+       {"text" "B" "code" "b" "isOther" true}])))

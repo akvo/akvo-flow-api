@@ -12,9 +12,9 @@
   RemoteApi
   (list [this instance-id user-id parent-id]
     (ds/with-remote-api this instance-id
-      (folder/list user-id parent-id)))
+      (doall (folder/list user-id parent-id))))
 
   LocalApi
   (list [this instance-id user-id parent-id]
     (ds/with-remote-api this instance-id
-      (folder/list user-id parent-id))))
+      (doall (folder/list user-id parent-id)))))
