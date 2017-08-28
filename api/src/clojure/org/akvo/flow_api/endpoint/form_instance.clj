@@ -57,11 +57,15 @@
           user-id (user/id-by-email remote-api instance-id email)
           survey (survey/by-id remote-api instance-id user-id survey-id)
           form (find-form (:forms survey) form-id)]
-      (-> remote-api
-          (form-instance/list instance-id user-id form {:page-size page-size
-                                                        :cursor cursor})
-          (add-next-page-url api-root alias survey-id form-id page-size)
-          (response)))))
+      (if (some? form)
+        (-> remote-api
+            (form-instance/list instance-id user-id form {:page-size page-size
+                                                          :cursor cursor})
+            (add-next-page-url api-root alias survey-id form-id page-size)
+            (response))
+        {:status 404
+         :body {"formId" form-id
+                "message" "Form not found"}}))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
