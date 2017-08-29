@@ -204,6 +204,7 @@
   ([ds form-definition]
    (list ds form-definition {}))
   ([ds form-definition opts]
+   {:pre [(some? (:id form-definition))]}
    (let [form-instances-iterator (form-instances-query ds form-definition opts)
          form-instances (mapv form-instance-entity->map (iterator-seq form-instances-iterator))
          cursor (let [cursor (.toWebSafeString (.getCursor form-instances-iterator))]
