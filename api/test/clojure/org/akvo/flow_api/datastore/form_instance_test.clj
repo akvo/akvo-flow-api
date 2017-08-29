@@ -86,12 +86,16 @@
                                :question-id "2"
                                :response-str "42"
                                :iteration 0})]
-      (let [update-form-instances (form-instance/update-form-instances-fn {} {})]
+      (let [update-form-instances (form-instance/update-form-instances-fn {} {} {})]
         (is (= (update-form-instances {} 'entity)
                {})))
-      (let [update-form-instances (form-instance/update-form-instances-fn {"2" "NUMBER"} {})]
-        (is (= (update-form-instances {} 'entity)
-               {"1" {"2" {0 42.0}}}))))))
+      (let [update-form-instances (form-instance/update-form-instances-fn
+                                   {"2" "NUMBER"} ;; Question id -> Question type
+                                   {"2" "4"} ;; Question id -> Question group id
+                                   {} ;; Opts
+                                   )]
+        (is (= (form-instance/vectorize-response-iterations (update-form-instances {} 'entity))
+               {"1" {"4" [{"2" 42.0}]}}))))))
 
 (deftest option-response-format
   (testing "Responses for option questions (regression #86)"
