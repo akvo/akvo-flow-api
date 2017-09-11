@@ -177,11 +177,12 @@
             form-instances))
 
 (defn response-entity->map [^Entity response]
-    {:form-instance-id (str (.getProperty response "surveyInstanceId"))
-     :question-id (.getProperty response "questionID")
-     :response-str (or (.getProperty response "value")
-                       (.getValue ^Text (.getProperty response "valueText")))
-     :iteration (or (.getProperty response "iteration") 0)})
+  {:form-instance-id (str (.getProperty response "surveyInstanceId"))
+   :question-id (.getProperty response "questionID")
+   :response-str (or (.getProperty response "value")
+                     (when-let [^Text value-text (.getProperty response "valueText")]
+                       (.getValue value-text)))
+   :iteration (or (.getProperty response "iteration") 0)})
 
 (defn update-form-instances-fn [question-types question-groups opts]
   (fn [form-instances response]
