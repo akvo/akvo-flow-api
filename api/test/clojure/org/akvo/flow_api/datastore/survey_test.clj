@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore.survey-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.set :as set]
+            [clojure.test :refer :all]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.survey :as survey]
             [org.akvo.flow-api.datastore.user :as user]
@@ -37,10 +38,10 @@
           form (first (:forms survey))
           question-group (first (:question-groups form))
           question (first (:questions question-group))]
-      (are [x required-keys] (= (disj (set (keys x))
-                                      :modified-at
-                                      :created-at)
-                                required-keys)
+      (are [x required-keys] (set/subset? required-keys
+                                          (disj (set (keys x))
+                                                :modified-at
+                                                :created-at))
         survey #{:id :name :forms}
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
