@@ -2,7 +2,9 @@
   (:refer-clojure :exclude [list])
   (:require [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
-  (:import [com.gallatinsystems.survey.dao.SurveyDAO]
+  (:import [com.gallatinsystems.survey.dao.QuestionOptionDao]
+           [com.gallatinsystems.survey.dao.SurveyDAO]
+           [com.gallatinsystems.survey.domain Question Question$Type]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
 (defn list [user-id folder-id]
@@ -20,13 +22,29 @@
                  :modified-at (ds/modified-at survey)}))
          (filter #(= (:folder-id %) folder-id)))))
 
+(defmulti extra-question-fields (fn [^Question question] (.getType question)))
+
+(defmethod extra-question-fields :default [question]
+  {})
+
+(defmethod extra-question-fields Question$Type/OPTION [question]
+  (let [question-option-dao (com.gallatinsystems.survey.dao.QuestionOptionDao.)
+        question-option-map (.listOptionByQuestion question-option-dao
+                                                   (ds/id question))]
+    {:options (->> question-option-map
+                   (map val)
+                   (mapv (fn [question-option]
+                           {:text (.getText question-option)
+                            :code (.getCode question-option)})))}))
+
 (defn ->question [question]
-  {:id (str (ds/id question))
-   :name (.getText question)
-   :type (str (.getType question))
-   :order (.getOrder question)
-   :created-at (ds/created-at question)
-   :modified-at (ds/modified-at question)})
+  (merge {:id (str (ds/id question))
+          :name (.getText question)
+          :type (str (.getType question))
+          :order (.getOrder question)
+          :created-at (ds/created-at question)
+          :modified-at (ds/modified-at question)}
+         (extra-question-fields question)))
 
 (defn question-group-definition [question-group questions]
   (let [qs (sort-by :order (map ->question questions))]
