@@ -3,6 +3,7 @@
   (:require [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
   (:import [com.gallatinsystems.survey.dao.SurveyDAO]
+           [com.gallatinsystems.survey.dao.SurveyGroupDAO]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
 (defn list [user-id folder-id]
@@ -37,15 +38,16 @@
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
 
-(defn get-form-definition [form-id]
+(defn get-form-definition [form-id registration-form-id]
   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         ;; Includes question groups, but contrary to docstring does not contain questions
         form (.loadFullSurvey form-dao form-id)
         question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
         questions (group-by #(.getQuestionGroupId %)
                             (.listQuestionsBySurvey question-dao form-id))]
-    {:id (str (ds/id form))
+    {:id (str form-id)
      :name (.getName form)
+     :registration-form (= form-id registration-form-id)
      :question-groups (mapv (fn [question-group]
                               (question-group-definition question-group
                                                          (get questions (ds/id question-group))))
@@ -59,6 +61,7 @@
                  survey
                  (anomaly/not-found "Survey not found"
                                     {:survey-id survey-id}))
+        registration-form-id (.getNewLocaleSurveyId survey)
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         all-forms (.listSurveysByGroup form-dao (Long/parseLong survey-id))
         forms (.filterByUserAuthorizationObjectId form-dao
@@ -70,7 +73,7 @@
                              :user-id user-id})
       {:id survey-id
        :name (.getName survey)
-       :forms (mapv #(get-form-definition (ds/id %))
+       :forms (mapv #(get-form-definition (ds/id %) registration-form-id)
                     forms)
        :created-at (ds/created-at survey)
        :modified-at (ds/modified-at survey)})))
