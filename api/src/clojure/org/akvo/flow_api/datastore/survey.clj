@@ -38,7 +38,7 @@
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
 
-(defn get-form-definition [form-id registration-form-id]
+(defn get-form-definition [form-id]
   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         ;; Includes question groups, but contrary to docstring does not contain questions
         form (.loadFullSurvey form-dao form-id)
@@ -47,7 +47,6 @@
                             (.listQuestionsBySurvey question-dao form-id))]
     {:id (str form-id)
      :name (.getName form)
-     :registration-form (= form-id registration-form-id)
      :question-groups (mapv (fn [question-group]
                               (question-group-definition question-group
                                                          (get questions (ds/id question-group))))
@@ -73,7 +72,7 @@
                              :user-id user-id})
       {:id survey-id
        :name (.getName survey)
-       :forms (mapv #(get-form-definition (ds/id %) registration-form-id)
-                    forms)
+       :registration-form-id (str registration-form-id)
+       :forms (mapv #(get-form-definition (ds/id %)) forms)
        :created-at (ds/created-at survey)
        :modified-at (ds/modified-at survey)})))

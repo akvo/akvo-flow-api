@@ -41,7 +41,7 @@
                                       :modified-at
                                       :created-at)
                                 required-keys)
-        survey #{:id :name :forms}
+        survey #{:id :name :forms :registration-form-id}
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
         question #{:id :name :type :order}))))
