@@ -4,6 +4,7 @@
             [org.akvo.flow-api.datastore :as ds])
   (:import [com.gallatinsystems.survey.dao.QuestionOptionDao]
            [com.gallatinsystems.survey.dao.SurveyDAO]
+           [com.gallatinsystems.survey.dao.SurveyGroupDAO]
            [com.gallatinsystems.survey.domain Question Question$Type]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
@@ -62,7 +63,7 @@
         question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
         questions (group-by #(.getQuestionGroupId %)
                             (.listQuestionsBySurvey question-dao form-id))]
-    {:id (str (ds/id form))
+    {:id (str form-id)
      :name (.getName form)
      :question-groups (mapv (fn [question-group]
                               (question-group-definition question-group
@@ -77,6 +78,7 @@
                  survey
                  (anomaly/not-found "Survey not found"
                                     {:survey-id survey-id}))
+        registration-form-id (.getNewLocaleSurveyId survey)
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         all-forms (.listSurveysByGroup form-dao (Long/parseLong survey-id))
         forms (.filterByUserAuthorizationObjectId form-dao
@@ -88,7 +90,7 @@
                              :user-id user-id})
       {:id survey-id
        :name (.getName survey)
-       :forms (mapv #(get-form-definition (ds/id %))
-                    forms)
+       :registration-form-id (str registration-form-id)
+       :forms (mapv #(get-form-definition (ds/id %)) forms)
        :created-at (ds/created-at survey)
        :modified-at (ds/modified-at survey)})))

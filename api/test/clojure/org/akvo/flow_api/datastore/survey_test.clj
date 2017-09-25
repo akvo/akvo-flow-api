@@ -42,7 +42,7 @@
                                           (disj (set (keys x))
                                                 :modified-at
                                                 :created-at))
-        survey #{:id :name :forms}
+        survey #{:id :name :forms :registration-form-id}
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
         question #{:id :name :type :order}))))
