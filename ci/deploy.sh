@@ -30,7 +30,7 @@ gcloud config set compute/zone europe-west1-d
 if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
     gcloud container clusters get-credentials lumen
 else
-    gcloud container clusters get-credentials dev-cluster
+    gcloud container clusters get-credentials test
 fi
 
 # Deploying
