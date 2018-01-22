@@ -38,6 +38,7 @@
           question-group (first (:question-groups form))
           question (first (:questions question-group))]
       (are [x required-keys] (= (disj (set (keys x))
+                                      :variable-name
                                       :modified-at
                                       :created-at)
                                 required-keys)
