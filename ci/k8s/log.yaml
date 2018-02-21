@@ -13,7 +13,6 @@ spec:
     code: response.code | 0
     size: response.size | 0
     latency: response.duration | "0ms"
-    he: request.headers["authorization"] | "no hedader"
     principal: request.auth.principal | "no principal"
     presenter: request.auth.presenter | "no presenter"
   monitored_resource_type: '"UNSPECIFIED"'
