@@ -1,0 +1,28 @@
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: denier
+metadata:
+  name: flow-api-handler
+  namespace: default
+spec:
+  status:
+    code: 16
+    message: You are not authorized to access the service
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: checknothing
+metadata:
+  name: flow-api-denyrequest
+  namespace: default
+spec:
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: flow-api-deny
+  namespace: default
+spec:
+  match: destination.labels["run"] == "dantest-flow-api" && (request.auth.principal|"unauthorized") == "unauthorized"
+  actions:
+  - handler: flow-api-handler.denier.default
+    instances: [flow-api-denyrequest.checknothing.default]
