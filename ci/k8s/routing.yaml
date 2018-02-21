@@ -1,0 +1,36 @@
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: flow-api-route
+spec:
+  precedence: 1
+  destination:
+    name: dantest-flow-api
+  match:
+    request:
+      headers:
+        uri:
+          prefix: /flow/ #must match the path specified in ingress spec
+  rewrite:
+    uri: /
+  route:
+  - weight: 100
+  corsPolicy:
+      allowOrigin:
+      - "*"
+      allowMethods:
+      - OPTIONS
+      - GET
+      allowCredentials: true
+      allowHeaders:
+      - Accept
+      - Accept-Encoding
+      - Accept-Language
+      - Authorization
+      - Connection
+      - DNT
+      - Host
+      - Origin
+      - Referer
+      - User-Agent
+      maxAge: 1728000s

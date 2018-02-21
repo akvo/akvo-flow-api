@@ -1,0 +1,44 @@
+apiVersion: "config.istio.io/v1alpha2"
+kind: logentry
+metadata:
+  name: newlog
+  namespace: istio-system
+spec:
+  severity: '"warning"'
+  timestamp: request.time
+  variables:
+    source: source.service | "unknown"
+    user: source.user | "unknown"
+    destination: destination.service | "unknown"
+    code: response.code | 0
+    size: response.size | 0
+    latency: response.duration | "0ms"
+    he: request.headers["authorization"] | "no hedader"
+    principal: request.auth.principal | "no principal"
+    presenter: request.auth.presenter | "no presenter"
+  monitored_resource_type: '"UNSPECIFIED"'
+---
+# Configuration for a stdio handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: stdio
+metadata:
+  name: newhandler
+  namespace: istio-system
+spec:
+ severity_levels:
+   warning: 1 # Params.Level.WARNING
+ outputAsJson: true
+---
+# Rule to send logentry instances to a stdio handler
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: newlogstdio
+  namespace: istio-system
+spec:
+  match: "true" # match for all requests
+  actions:
+   - handler: newhandler.stdio
+     instances:
+     - newlog.logentry
+---

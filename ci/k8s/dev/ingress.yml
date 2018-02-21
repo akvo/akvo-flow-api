@@ -1,16 +1,16 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: flow-api
+  name: api-gateway
+  annotations:
+    kubernetes.io/ingress.class: "istio"
 spec:
   tls:
-  - hosts:
-    - "api.akvotest.org"
-    secretName: tls
+  - secretName: tls
   rules:
-    - host: "api.akvotest.org"
-      http:
-        paths:
-        - backend:
-            serviceName: flow-api
-            servicePort: 80
+  - http:
+      paths:
+      - path: /flow/.*
+        backend:
+          serviceName: dantest-flow-api
+          servicePort: 80

@@ -1,71 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-    name: flow-api
+    name: dantest-flow-api
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        run: flow-api
+        run: dantest-flow-api
     spec:
       containers:
-      - name: flow-api-proxy
-        image: akvo/flow-api-proxy
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8081
-        volumeMounts:
-        - name: secrets
-          mountPath: /secrets
-        resources:
-          requests:
-            cpu: "50m"
-          limits:
-            cpu: "1000m"
-        env:
-        - name: SECRETS_MOUNT_PATH
-          value: "/secrets"
-        - name: FLOW_API_BACKEND_URL
-          value: "http://localhost:3000"
-        - name: TOKEN_INTROSPECTION_URL
-          valueFrom:
-            configMapKeyRef:
-              name: flow-api
-              key: token.introspection.url
       - name: flow-api-backend
-        image: akvo/flow-api-backend
+        image: jmalloc/echo-server:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 3000
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3000
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 1
-          successThreshold: 1
-          failureThreshold: 10
-        volumeMounts:
-        - name: secrets
-          mountPath: /secrets
-        resources:
-          requests:
-            cpu: "50m"
-          limits:
-            cpu: "1000m"
-        env:
-        - name: SECRETS_MOUNT_PATH
-          value: "/secrets"
-        - name: HTTP_PORT
-          value: "3000"
-        - name: API_ROOT
-          valueFrom:
-            configMapKeyRef:
-              name: flow-api
-              key: api.root
-      volumes:
-      - name: secrets
-        secret:
-          secretName: flow-api-secrets
+        - containerPort: 8080
