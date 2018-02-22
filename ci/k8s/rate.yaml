@@ -1,0 +1,64 @@
+---
+apiVersion: config.istio.io/v1alpha2
+kind: QuotaSpec
+metadata:
+  name: flow-api-quota
+  namespace: default
+spec:
+  rules:
+    - quotas:
+        - quota: requestcount.quota.istio-system
+          charge: 1
+---
+apiVersion: config.istio.io/v1alpha2
+kind: QuotaSpecBinding
+metadata:
+  name: flow-api-quota-binding
+  namespace: default
+spec:
+  quotaSpecs:
+    - name: flow-api-quota
+      namespace: default
+  services:
+    - name: dantest-flow-api
+      namespace: default
+---
+apiVersion: config.istio.io/v1alpha2
+kind: memquota
+metadata:
+  name: handler
+  namespace: istio-system
+spec:
+  quotas:
+  - name: requestcount.quota.istio-system
+    maxAmount: 4000
+    validDuration: 1s
+    # The first matching override is applied.
+    # A requestcount instance is checked against override dimensions.
+    overrides:
+    - dimensions:
+        destination: dantest-flow-api
+      maxAmount: 10
+      validDuration: 23s
+---
+apiVersion: config.istio.io/v1alpha2
+kind: quota
+metadata:
+  name: requestcount
+  namespace: istio-system
+spec:
+  match: "true"
+  dimensions:
+    source: source.labels["run"] | source.service | "unknown"
+    destination: destination.labels["run"] | destination.service | "unknown"
+---
+apiVersion: config.istio.io/v1alpha2
+kind: rule
+metadata:
+  name: quota
+  namespace: istio-system
+spec:
+  actions:
+  - handler: handler.memquota
+    instances:
+    - requestcount.quota
