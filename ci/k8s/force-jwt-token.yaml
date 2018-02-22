@@ -26,3 +26,46 @@ spec:
   actions:
   - handler: flow-api-handler.denier.default
     instances: [flow-api-denyrequest.checknothing.default]
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: denier
+metadata:
+  name: flow-api-accept-handler
+  namespace: default
+spec:
+  status:
+    code: 3
+    message: Invalid Accept request header
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: flow-api-accept-deny
+  namespace: default
+spec:
+  match: destination.labels["run"] == "dantest-flow-api" && (request.headers["accept"]|"nothing") != "application/vnd.akvo.flow.v2+json"
+  actions:
+  - handler: flow-api-accept-handler.denier.default
+    instances: [flow-api-denyrequest.checknothing.default]
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: denier
+metadata:
+  name: flow-api-user-agent-handler
+  namespace: default
+spec:
+  status:
+    code: 3
+    message: Invalid user agent
+---
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: flow-api-user-agent-deny
+  namespace: default
+spec:
+  match: destination.labels["run"] == "dantest-flow-api" && (request.headers["user-agent"]|"nothing") == "nothing"
+  actions:
+  - handler: flow-api-user-agent-handler.denier.default
+    instances: [flow-api-denyrequest.checknothing.default]
+---
