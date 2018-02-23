@@ -39,7 +39,7 @@ spec:
     - dimensions:
         destination: dantest-flow-api
       maxAmount: 10
-      validDuration: 23s
+      validDuration: 30s
 ---
 apiVersion: config.istio.io/v1alpha2
 kind: quota
@@ -48,8 +48,8 @@ metadata:
   namespace: istio-system
 spec:
   dimensions:
-    source: source.labels["run"] | source.service | "unknown"
     destination: destination.labels["run"] | destination.service | "unknown"
+    user: request.auth.principal|"unauthorized"
 ---
 apiVersion: config.istio.io/v1alpha2
 kind: rule
