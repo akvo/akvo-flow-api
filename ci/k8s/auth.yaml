@@ -10,6 +10,7 @@ spec:
       jwks_uri: https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/certs
       audiences:
       - akvo-flow-maps-ci-client
+      - akvo-lumen-confidential
 ---
 apiVersion: config.istio.io/v1alpha2
 kind: EndUserAuthenticationPolicySpecBinding
