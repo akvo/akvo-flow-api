@@ -47,7 +47,6 @@ metadata:
   name: requestcount
   namespace: istio-system
 spec:
-  match: "true"
   dimensions:
     source: source.labels["run"] | source.service | "unknown"
     destination: destination.labels["run"] | destination.service | "unknown"
