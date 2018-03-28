@@ -8,7 +8,7 @@ git checkout develop
 git pull
 git fetch --tags
 
-TAG=v1.9.21
+TAG=v1.9.29
 
 git checkout $TAG
 git reset --hard
