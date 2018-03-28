@@ -26,7 +26,7 @@
    :name (.getText question)
    :type (str (.getType question))
    :order (.getOrder question)
-   :variable-name (.getQuestionId question)
+   :variable-name (.getVariableName question)
    :created-at (ds/created-at question)
    :modified-at (ds/modified-at question)})
 
