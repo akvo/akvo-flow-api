@@ -38,4 +38,5 @@ fi
 # Deploying
 
 kubectl apply -f ci/k8s/deployment.yml
+kubectl apply -f ci/k8s/service.yml
 kubectl apply -f "ci/k8s/${CONFIG_MAP}/config-map.yml"
