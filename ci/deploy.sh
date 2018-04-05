@@ -28,7 +28,7 @@ gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 
 if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
-    gcloud container clusters get-credentials lumen
+    gcloud container clusters get-credentials production
 else
     gcloud container clusters get-credentials test
 fi
