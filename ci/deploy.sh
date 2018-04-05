@@ -29,11 +29,13 @@ gcloud config set compute/zone europe-west1-d
 
 if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
     gcloud container clusters get-credentials production
+    CONFIG_MAP=prod
 else
     gcloud container clusters get-credentials test
+    CONFIG_MAP=dev
 fi
 
 # Deploying
 
-kubectl delete --ignore-not-found=true -f ci/k8s/deployment.yml
-kubectl create -f ci/k8s/deployment.yml
+kubectl apply -f ci/k8s/deployment.yml
+kubectl apply -f "ci/k8s/${CONFIG_MAP}/config-map.yml"
