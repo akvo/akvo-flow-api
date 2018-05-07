@@ -39,10 +39,7 @@
    :uberjar {:aot :all}
    :profiles/dev  {}
    :profiles/test {}
-   :project/dev   {:dependencies [[org.datanucleus/datanucleus-jpa "1.1.5"]
-                                  [org.datanucleus/datanucleus-core "1.1.5"]
-                                  [com.google.appengine.orm/datanucleus-appengine "1.0.10"]
-                                  [duct/generate "0.8.2"]
+   :project/dev   {:dependencies [[duct/generate "0.8.2"]
                                   [reloaded.repl "0.2.3"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
