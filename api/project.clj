@@ -49,8 +49,10 @@
                                   [eftest "0.1.1"]
                                   [com.gearswithingears/shrubbery "0.4.1"]
                                   [kerodon "0.8.0"]]
+                   :repl-options   {:init-ns user
+                                    :host    "0.0.0.0"
+                                    :port    47480}
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources"]
-                   :repl-options {:init-ns user}
                    :env {:port "3000"}}
    :project/test  {}})

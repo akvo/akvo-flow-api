@@ -1,0 +1,14 @@
+version: "3"
+services:
+ mainnetwork:
+    image: alpine
+    command: tail -f /dev/null
+ gae-dev-server:
+   build: gae-dev-server
+   network_mode: service:mainnetwork
+   volumes:
+     - ~/.m2:/opt/m2/
+ flow-api:
+   network_mode: service:mainnetwork
+ wiremock-proxy:
+   image: rodolpheche/wiremock:2.16.0-alpine
