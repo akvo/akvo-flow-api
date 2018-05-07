@@ -8,6 +8,6 @@ EXPOSE ${HTTP_PORT}
 
 WORKDIR /app
 
-COPY target/uberjar/akvo-flow-api.jar target/uberjar/*datanucleus*.jar /app/
+COPY target/uberjar/akvo-flow-api.jar /app/
 
 CMD ["java", "-cp", "./*", "org.akvo.flow_api.main"]
