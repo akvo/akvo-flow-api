@@ -7,20 +7,6 @@ LOCAL_TEST_DATA_PATH="target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generate
 
 mkdir -p "$HOME/.m2/repository"
 
-# Flow data access classes, only if not present in $HOME/.m2
-
-DATA_ACCESS_VERSION=$(sed -n -e 's|.*org\.akvo\.flow/data-access "\(.*\)"]$|\1|p' api/project.clj)
-
-if [[ ! -f "${HOME}/.m2/repository/org/akvo/flow/data-access/${DATA_ACCESS_VERSION}/data-access-${DATA_ACCESS_VERSION}.jar" ]]; then
-    cd flow
-    ./build.sh
-    cd ..
-fi
-
-# Make sure we attempt to refresh dependencies
-
-./flow/get-dependencies.sh
-
 # Lein
 
 mkdir -p $HOME/.lein
@@ -73,13 +59,5 @@ cd ..
 cd api
 
 lein uberjar
-
-find "${HOME}/.m2" \
-     \( \
-     -name 'datanucleus-core-1.1.5.jar' -or \
-     -name 'datanucleus-jpa-1.1.5.jar' -or \
-     -name 'datanucleus-appengine-1.0.10.final.jar' \
-     \) \
-     -exec cp -v {} target/uberjar/ \;
 
 docker build -t "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}" .
