@@ -8,7 +8,10 @@ services:
    network_mode: service:mainnetwork
    volumes:
      - ~/.m2:/opt/m2/
+     - ./gae-dev-server:/app
  flow-api:
    network_mode: service:mainnetwork
+   volumes:
+     - ~/.m2:/home/akvo/.m2
  wiremock-proxy:
    image: rodolpheche/wiremock:2.16.0-alpine
