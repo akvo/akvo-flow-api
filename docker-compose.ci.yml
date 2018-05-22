@@ -1,0 +1,29 @@
+version: "3"
+services:
+ mainnetwork:
+ flow-api:
+   build:
+     context: .
+     dockerfile: api/Dockerfile-dev
+   volumes:
+      - ./api:/app
+      - ~/.m2:/root/.m2
+      - ~/.lein:/root/.lein
+ wiremock-proxy:
+#   volumes:
+#     - ./record:/home/wiremock
+#   command: --proxy-all="http://192.168.0.100:8888" --record-mappings --verbose
+ tests:
+   build:
+     context: .
+     dockerfile: api/Dockerfile-dev
+   network_mode: service:mainnetwork
+   volumes:
+      - ./api:/app
+      - ~/.m2:/root/.m2
+      - ~/.m2:/home/akvo/.m2
+      - ~/.lein:/root/.lein
+   depends_on:
+      - flow-api
+   command: "true"
+
