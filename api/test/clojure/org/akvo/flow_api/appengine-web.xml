@@ -17,7 +17,7 @@
         <property name="aws_secret_key" value="a secret" />
         <property name="aws_identifier" value="an identifier" />
         <property name="photo_url_root" value="http://s3/images/" />
-        <property name="alias" value="akvoflowsandbox.appspot.com" />
+        <property name="alias" value="aliastobechanged.appspot.com" />
         <property name="flowServices" value="http://fake-flow-services/" />
         <property name="s3bucket" value="s3/" />
         <property name="surveyuploadurl" value="http://s3/" />
