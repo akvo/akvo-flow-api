@@ -64,19 +64,22 @@
     (setup-p12-file instance)))
 
 (deftest github-integration
-  (let [instances [{:name            "akvoflow-instance-2323"
-                    :appengine-alias "some-alias"
-                    :p12-content     "some content"}]]
+  (let [instance-name (str "akvoflow-instance-" (System/currentTimeMillis))
+        instance-alias (str instance-name "-alias")
+        p12-content (str instance-name "-p12-content")
+        instances [{:name            instance-name
+                    :appengine-alias instance-alias
+                    :p12-content     p12-content}]]
     (setup-github instances)
     (binding [org.akvo.flow-api.akvo-flow-server-config/*github-host* wiremock-url]
       (let [server-conf (component/start (server-config-component/akvo-flow-server-config {:github-auth-token "any token" :tmp-dir "/tmp/"}))]
 
         (testing "initial load"
-          (is (= "some content" (slurp (server-config/p12-path server-conf "akvoflow-instance-2323"))))
-          (is (= "this is a hack to force the remote API to use localhost" (server-config/iam-account server-conf "akvoflow-instance-2323")))
-          (is (= "http://s3/images/" (server-config/asset-url-root server-conf "akvoflow-instance-2323")))
-          (is (= "akvoflow-instance-2323" (resolve-alias/resolve server-conf "akvoflow-instance-2323")))
-          (is (= "akvoflow-instance-2323" (resolve-alias/resolve server-conf "some-alias"))))
+          (is (= p12-content (slurp (server-config/p12-path server-conf instance-name))))
+          (is (= "this is a hack to force the remote API to use localhost" (server-config/iam-account server-conf instance-name)))
+          (is (= "http://s3/images/" (server-config/asset-url-root server-conf instance-name)))
+          (is (= instance-name (resolve-alias/resolve server-conf instance-name)))
+          (is (= instance-name (resolve-alias/resolve server-conf instance-alias))))
 
         #_(testing "refresh appengine xml"
             (setup-appengine-xml))
