@@ -5,8 +5,10 @@
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
+(def ^:dynamic *github-host* "https://api.github.com")
+
 (defn contents-url [path]
-  (format "http://wiremock-proxy:8080/repos/akvo/akvo-flow-server-config/contents%s" path))
+  (format  "%s/repos/akvo/akvo-flow-server-config/contents%s" *github-host* path))
 
 (defn headers [auth-token]
   {"Authorization" (format "token %s" auth-token)
