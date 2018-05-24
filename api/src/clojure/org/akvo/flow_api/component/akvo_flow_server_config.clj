@@ -1,6 +1,14 @@
 (ns org.akvo.flow-api.component.akvo-flow-server-config
   (:require [com.stuartsierra.component :as component]
-            [org.akvo.flow-api.akvo-flow-server-config :as afsc]))
+            [org.akvo.flow-api.akvo-flow-server-config :as afsc]
+            [clojure.java.io :as io])
+  (:import (org.apache.commons.io FileUtils)))
+
+(defn delete-old-tmp-dir [tmp-subdir]
+  (when tmp-subdir
+    (future
+      (Thread/sleep 60000)
+      (FileUtils/deleteDirectory (io/file tmp-subdir)))))
 
 (defn- flow-config-map [github-auth-token tmp-dir]
   (let [new-tmp-subdir (str tmp-dir "/" (System/currentTimeMillis) "/")
@@ -11,7 +19,9 @@
      :aliases   aliases}))
 
 (defn refresh! [{:keys [flow-config github-auth-token tmp-dir]}]
-  (reset! flow-config (flow-config-map github-auth-token tmp-dir)))
+  (let [old-tmp-dir (:tmp-subdir @flow-config)]
+    (reset! flow-config (flow-config-map github-auth-token tmp-dir))
+    (delete-old-tmp-dir old-tmp-dir)))
 
 (defrecord AkvoFlowServerConfig [github-auth-token tmp-dir]
   component/Lifecycle
