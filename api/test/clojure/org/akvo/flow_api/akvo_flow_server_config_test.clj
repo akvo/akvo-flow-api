@@ -73,7 +73,6 @@
     (setup-github instances)
     (binding [org.akvo.flow-api.akvo-flow-server-config/*github-host* wiremock-url]
       (let [server-conf (component/start (server-config-component/akvo-flow-server-config {:github-auth-token "any token" :tmp-dir "/tmp/"}))]
-
         (testing "initial load"
           (is (= p12-content (slurp (server-config/p12-path server-conf instance-name))))
           (is (= "this is a hack to force the remote API to use localhost" (server-config/iam-account server-conf instance-name)))
@@ -81,15 +80,29 @@
           (is (= instance-name (resolve-alias/resolve server-conf instance-name)))
           (is (= instance-name (resolve-alias/resolve server-conf instance-alias))))
 
-        #_(testing "refresh appengine xml"
-            (setup-appengine-xml))
+        (testing "refresh appengine xml"
+          (setup-github [{:name            instance-name
+                          :appengine-alias "updated-alias"
+                          :p12-content     p12-content}])
+          (server-config-component/refresh! server-conf)
+          (is (= instance-name (resolve-alias/resolve server-conf "updated-alias")))
+          (is (nil? (resolve-alias/resolve server-conf instance-alias))))
 
-        #_(testing "refresh p12 file"
-            (setup-p12-file))
+        (testing "refresh p12 file"
+          (setup-github [{:name            instance-name
+                          :appengine-alias instance-alias
+                          :p12-content     "new p12 content"}])
+          (server-config-component/refresh! server-conf)
+          (is (= "new p12 content" (slurp (server-config/p12-path server-conf instance-name)))))
 
-        #_(testing "new instance"
-            (setup-folders)
-            (setup-appengine-xml)
-            (setup-p12-file)
-            )
-        ))))
+        (testing "new instance"
+          (setup-github [{:name            instance-name
+                          :appengine-alias instance-alias
+                          :p12-content     p12-content}
+                         {:name            "new-instance"
+                          :appengine-alias "new-instance-alias"
+                          :p12-content     "new p12 content"}])
+          (server-config-component/refresh! server-conf)
+          (is (= "new p12 content" (slurp (server-config/p12-path server-conf "new-instance"))))
+          (is (= "new-instance" (resolve-alias/resolve server-conf "new-instance")))
+          (is (= "new-instance" (resolve-alias/resolve server-conf "new-instance-alias"))))))))
