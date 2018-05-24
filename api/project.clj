@@ -12,6 +12,7 @@
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
+                 [commons-fileupload "1.3.1"]
                  [org.akvo.flow/akvo-flow "v1.9.29-52-g4bc8f24" :classifier "classes"]
                  [org.akvo/commons "0.4.5"]
                  [raven-clj "1.5.0"]
