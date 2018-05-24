@@ -48,6 +48,9 @@
                                   [com.gearswithingears/shrubbery "0.4.1"]
                                   [kerodon "0.8.0"]]
                    :repl-options   {:init-ns dev
+                                    :init (do
+                                            (println "Starting BackEnd ...")
+                                            (go))
                                     :host    "0.0.0.0"
                                     :port    47480}
                    :source-paths   ["dev/src"]
