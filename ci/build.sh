@@ -16,7 +16,7 @@ fi
 cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
 
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh 'lein do clean, check, test :all'
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein do clean, check, test :all
 
 # Check nginx configuration
 
