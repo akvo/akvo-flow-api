@@ -1,6 +1,11 @@
 FROM clojure:lein-2.8.1
-MAINTAINER Akvo Foundation <devops@akvo.org>
+
+RUN set -ex; \
+    apt-get update && apt-get install -y --no-install-recommends \
+    gosu && \
+    rm -rf /var/lib/apt/lists/* && \
+    useradd -d /home/akvo -m -s /bin/bash akvo
 
 WORKDIR /app
 
-CMD [ "dev/setup-dev-user-in-container.sh", "dev/start-dev-env.sh" ]
+CMD [ "dev/run-as-user.sh", "dev/start-dev-env.sh" ]

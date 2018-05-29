@@ -12,10 +12,7 @@ services:
    volumes:
       - ./api:/app
       - ~/.m2:/root/.m2
-      - ~/.lein:/root/.lein
+      - ~/.m2:/home/akvo/.m2
  wiremock-proxy:
    ports:
      - 8081:8080
-#   volumes:
-#     - ./record:/home/wiremock
-#   command: --proxy-all="http://192.168.0.100:8888" --record-mappings --verbose
