@@ -1,13 +1,14 @@
 (ns org.akvo.flow-api.akvo-flow-server-config
   (:import [com.google.apphosting.utils.config AppEngineWebXmlReader]
-           [java.io ByteArrayInputStream]
            [org.apache.commons.codec.binary Base64])
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
+(def ^:dynamic *github-host* "https://api.github.com")
+
 (defn contents-url [path]
-  (format "https://api.github.com/repos/akvo/akvo-flow-server-config/contents%s" path))
+  (format  "%s/repos/akvo/akvo-flow-server-config/contents%s" *github-host* path))
 
 (defn headers [auth-token]
   {"Authorization" (format "token %s" auth-token)

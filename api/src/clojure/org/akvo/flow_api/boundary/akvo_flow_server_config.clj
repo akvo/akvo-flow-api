@@ -17,13 +17,15 @@
     (str instance-id ".appspot.com"))
   (port [this instance-id]
     443)
-  (iam-account [{:keys [instances]} instance-id]
-    (get-in instances [instance-id "serviceAccountId"]))
-  (p12-path [{:keys [github-auth-token tmp-dir]} instance-id]
+  (iam-account [{:keys [flow-config]} instance-id]
+    (let [{:keys [instances]} @flow-config]
+      (get-in instances [instance-id "serviceAccountId"])))
+  (p12-path [{:keys [github-auth-token flow-config]} instance-id]
     (.getAbsolutePath (afsc/get-p12-file github-auth-token
-                                         tmp-dir
+                                         (-> flow-config deref :tmp-subdir)
                                          instance-id)))
   (trace-path [this instance-id]
     nil)
-  (asset-url-root [{:keys [instances]} instance-id]
-    (get-in instances [instance-id "photo_url_root"])))
+  (asset-url-root [{:keys [flow-config]} instance-id]
+    (let [{:keys [instances]} @flow-config]
+      (get-in instances [instance-id "photo_url_root"]))))

@@ -6,12 +6,18 @@
             [clojure.tools.namespace.repl :refer [refresh]]
             [com.stuartsierra.component :as component]
             [duct.generate :as gen]
-            [duct.util.repl :refer [setup test cljs-repl migrate rollback]]
+            [eftest.runner :as eftest]
+            [duct.util.repl :refer [setup cljs-repl migrate rollback]]
             [duct.util.system :refer [load-system]]
             [reloaded.repl :refer [system init start stop go reset]]))
 
 (defn new-system []
   (load-system (keep io/resource ["org/akvo/flow_api/system.edn" "dev.edn" "local.edn"])))
+
+(defn test []
+  (eftest/run-tests (->> (eftest/find-tests "test")
+                         (remove (fn [t] (or (-> t meta :kubernetes-test)
+                                             (-> t meta :ns meta :kubernetes-test)))))))
 
 (when (io/resource "local.clj")
   (load "local"))

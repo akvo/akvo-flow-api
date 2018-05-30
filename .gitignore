@@ -1,7 +1,6 @@
 **/*service*account*.json
 **/*secret*.yml
 **/*secret*.yaml
-**/pom.xml
 **/pom.xml.asc
 **/*jar
 **/lib/

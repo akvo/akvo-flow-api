@@ -19,7 +19,7 @@ docker push "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}"
 gcloud components install kubectl
 gcloud components update
 gcloud version
-which gcloud kubectl
+command -v gcloud kubectl
 
 # Authentication with gcloud and kubectl
 gcloud auth activate-service-account --key-file ci/gcloud-service-account.json
@@ -27,7 +27,8 @@ gcloud config set project akvo-lumen
 gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 
-ENVIRONMENT=test
+ENVIRONMENT="test"
+
 if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
     gcloud container clusters get-credentials production
     CONFIG_MAP=prod

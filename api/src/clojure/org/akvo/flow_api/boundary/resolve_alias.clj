@@ -8,10 +8,11 @@
 
 (extend-protocol IResolveAlias
   AkvoFlowServerConfig
-  (resolve [{:keys [instances aliases]} alias]
-    (if (contains? instances alias)
-      alias
-      (get aliases alias)))
+  (resolve [{:keys [flow-config]} alias]
+    (let [{:keys [instances aliases]} @flow-config]
+      (if (contains? instances alias)
+        alias
+        (get aliases alias))))
   DummyAkvoFlowServerConfig
   (resolve [_ alias]
     alias))

@@ -12,7 +12,8 @@
                  [ring/ring-defaults "0.2.1"]
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
-                 [org.akvo.flow/data-access "v1.9.29"]
+                 [commons-fileupload "1.3.1"]
+                 [org.akvo.flow/akvo-flow "v1.9.32-84-g435c4e2" :classifier "classes"]
                  [org.akvo/commons "0.4.5"]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
@@ -39,18 +40,20 @@
    :uberjar {:aot :all}
    :profiles/dev  {}
    :profiles/test {}
-   :project/dev   {:dependencies [[org.datanucleus/datanucleus-jpa "1.1.5"]
-                                  [org.datanucleus/datanucleus-core "1.1.5"]
-                                  [com.google.appengine.orm/datanucleus-appengine "1.0.10"]
-                                  [duct/generate "0.8.2"]
+   :project/dev   {:dependencies [[duct/generate "0.8.2"]
                                   [reloaded.repl "0.2.3"]
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [eftest "0.1.1"]
                                   [com.gearswithingears/shrubbery "0.4.1"]
                                   [kerodon "0.8.0"]]
+                   :repl-options   {:init-ns dev
+                                    :init (do
+                                            (println "Starting BackEnd ...")
+                                            (go))
+                                    :host    "0.0.0.0"
+                                    :port    47480}
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources"]
-                   :repl-options {:init-ns user}
                    :env {:port "3000"}}
    :project/test  {}})
