@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: flow-api-proxy
-        image: akvo/flow-api-proxy
+        image: akvo/flow-api-proxy:${TRAVIS_COMMIT}
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
@@ -37,7 +37,7 @@ spec:
               name: flow-api
               key: token.introspection.url
       - name: flow-api-backend
-        image: akvo/flow-api-backend
+        image: akvo/flow-api-backend:${TRAVIS_COMMIT}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

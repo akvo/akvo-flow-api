@@ -2,6 +2,9 @@
 
 set -eu
 
+if [ -z "$TRAVIS_COMMIT" ]; then
+    export TRAVIS_COMMIT=local
+fi
 
 LOCAL_TEST_DATA_PATH="gae-dev-server/target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
@@ -28,6 +31,7 @@ docker run \
 (
     cd nginx
     docker build -t "${PROXY_IMAGE_NAME:=akvo/flow-api-proxy}" .
+    docker tag akvo/flow-api-proxy akvo/flow-api-proxy:$TRAVIS_COMMIT
 )
 
 
@@ -36,4 +40,5 @@ docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.ym
 (
     cd api
     docker build -t "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}" .
+    docker tag akvo/flow-api-backend akvo/flow-api-backend:$TRAVIS_COMMIT
 )
