@@ -6,6 +6,7 @@
             [duct.util.runtime :refer [add-shutdown-hook]]
             [duct.util.system :refer [load-system]]
             [environ.core :refer [env]]
+            [clojure.tools.nrepl.server :as repl]
             [org.akvo.flow-api.utils :as utils]))
 
 (defn secret-value
@@ -27,4 +28,6 @@
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
                       (component/start))]
     (add-shutdown-hook ::stop-system #(component/stop system))
-    (println "Started HTTP server on port" (-> system :http :port))))
+    (println "Started HTTP server on port" (-> system :http :port))
+    (let [repl-server (repl/start-server :port (:nrepl-port env 0))]
+      (println "REPL started on port" (:port repl-server)))))
