@@ -31,14 +31,15 @@
   :java-source-paths ["src/java"]
   :test-paths ["test/clojure"]
   :plugins [[lein-environ "1.0.3"]]
-  :main ^:skip-aot org.akvo.flow-api.main
-  :target-path "target/%s/"
   :aliases {"setup"  ["run" "-m" "duct.util.repl/setup"]}
-  :uberjar-name "akvo-flow-api.jar"
   :profiles
   {:dev  [:project/dev  :profiles/dev]
    :test [:project/test :profiles/test]
-   :uberjar {:aot :all}
+   :assemble {:plugins [[com.chartbeat.cljbeat/lein-assemble "0.1.4"]]
+              :aot :all
+              :omit-source true
+              :assemble {:jar {:dest "lib" :uberjar false}
+                         :deps {:dest "lib"}}}
    :profiles/dev  {}
    :profiles/test {}
    :project/dev   {:dependencies [[duct/generate "0.8.2"]
