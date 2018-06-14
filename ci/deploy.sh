@@ -65,7 +65,7 @@ sed -e "s/\${ENVIRONMENT}/${ENVIRONMENT}/" \
   -e "s/\${PROXY_POD_MEM_REQUESTS}/${PROXY_POD_MEM_REQUESTS}/" \
   -e "s/\${PROXY_POD_CPU_LIMITS}/${PROXY_POD_CPU_LIMITS}/" \
   -e "s/\${PROXY_POD_MEM_LIMITS}/${PROXY_POD_MEM_LIMITS}/" \
-  ci/k8s/deployment.yaml.template > ci/k8s/deployment.yaml
+  ci/k8s/deployment.yaml.template > ci/k8s/deployment.yml
 
 kubectl apply -f ci/k8s/deployment.yml
 kubectl apply -f ci/k8s/service.yml
