@@ -6,7 +6,7 @@
 
 (defn endpoint* [akvo-flow-server-config]
   (POST "/config-refresh" _
-    (server-config-component/refresh! akvo-flow-server-config)
+    (future (server-config-component/refresh! akvo-flow-server-config))
     (response "ok")))
 
 (defn endpoint [{:keys [akvo-flow-server-config]}]
