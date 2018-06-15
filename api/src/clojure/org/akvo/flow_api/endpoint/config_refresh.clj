@@ -5,7 +5,7 @@
     [ring.util.response :refer [response]]))
 
 (defn endpoint* [akvo-flow-server-config]
-  (GET "/config-refresh" _
+  (POST "/config-refresh" _
     (server-config-component/refresh! akvo-flow-server-config)
     (response "ok")))
 
