@@ -5,6 +5,7 @@
     <sessions-enabled>true</sessions-enabled>
     <threadsafe>true</threadsafe>
     <auto-id-policy>legacy</auto-id-policy>
+    <runtime>java8</runtime>
     <static-files>
         <include path="/**.png" expiration="1000d 5h" />
         <include path="/**.jpg" expiration="1000d 5h" />
