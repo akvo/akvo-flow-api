@@ -10,4 +10,8 @@ WORKDIR /app
 
 COPY target/assembly/* /app/
 
-CMD ["java", "-cp", "./*", "org.akvo.flow_api.main"]
+CMD ["java", \
+     "-XX:+HeapDumpOnOutOfMemoryError", \
+     "-XX:HeapDumpPath=/dumps", \
+     "-cp", "./*", \
+     "org.akvo.flow_api.main"]
