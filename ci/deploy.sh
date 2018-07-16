@@ -2,7 +2,7 @@
 
 set -eu
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ "${TRAVIS_BRANCH}" != "master" ]] && [[ "${TRAVIS_BRANCH}" != "issue/134-liveness" ]]; then
+if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ "${TRAVIS_BRANCH}" != "master" ]]; then
     exit 0
 fi
 
