@@ -47,6 +47,8 @@ spec:
         volumeMounts:
         - name: heap-dumps
           mountPath: /dumps
+        - name: secrets
+          mountPath: /secrets
       - name: flow-api-backend
         image: akvo/flow-api-backend:${TRAVIS_COMMIT}
         imagePullPolicy: Always
