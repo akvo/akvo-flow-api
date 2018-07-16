@@ -36,6 +36,17 @@ spec:
             configMapKeyRef:
               name: flow-api
               key: token.introspection.url
+      - name: flow-api-monitor
+        image: google/cloud-sdk:206.0.0-alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          apk add --no-cache inotify-tools &&
+          gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
+          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; done;
+        volumeMounts:
+        - name: heap-dumps
+          mountPath: /dumps
       - name: flow-api-backend
         image: akvo/flow-api-backend:${TRAVIS_COMMIT}
         imagePullPolicy: Always
@@ -53,6 +64,8 @@ spec:
         volumeMounts:
         - name: secrets
           mountPath: /secrets
+        - name: heap-dumps
+          mountPath: /dumps
         resources:
           requests:
             cpu: ${BACKEND_POD_CPU_REQUESTS}
@@ -74,3 +87,5 @@ spec:
       - name: secrets
         secret:
           secretName: flow-api-secrets
+      - name: heap-dumps
+        emptyDir: {}
