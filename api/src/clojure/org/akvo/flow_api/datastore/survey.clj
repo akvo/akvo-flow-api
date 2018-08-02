@@ -22,13 +22,17 @@
          (filter #(= (:folder-id %) folder-id)))))
 
 (defn ->question [question]
-  {:id (str (ds/id question))
-   :name (.getText question)
-   :type (str (.getType question))
-   :order (.getOrder question)
-   :variable-name (.getVariableName question)
-   :created-at (ds/created-at question)
-   :modified-at (ds/modified-at question)})
+  (let [type* (str (.getType question))]
+    (merge
+     {:id (str (ds/id question))
+      :name (.getText question)
+      :type type*
+      :order (.getOrder question)
+      :variable-name (.getVariableName question)
+      :created-at (ds/created-at question)
+      :modified-at (ds/modified-at question)}
+     (when (= type* "CADDISFLY")
+       {:caddisfly-resource-uuid (.getCaddisflyResourceUuid question)}))))
 
 (defn question-group-definition [question-group questions]
   (let [qs (sort-by :order (map ->question questions))]
