@@ -11,6 +11,8 @@ WORKDIR /app
 COPY target/assembly/* /app/
 
 CMD ["java", \
+     "-XX:+UnlockExperimentalVMOptions", \
+     "-XX:+UseCGroupMemoryLimitForHeap", \
      "-XX:+HeapDumpOnOutOfMemoryError", \
      "-XX:HeapDumpPath=/dumps", \
      "-cp", "./*", \
