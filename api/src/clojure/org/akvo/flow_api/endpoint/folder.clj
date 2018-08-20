@@ -7,6 +7,7 @@
             [org.akvo.flow-api.endpoint.spec :as spec]
             [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
+            [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
             [ring.util.response :refer [response]]))
 
 (defn add-links [folders api-root instance-id]
@@ -34,4 +35,5 @@
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
-      (wrap-resolve-alias akvo-flow-server-config)))
+      (wrap-resolve-alias akvo-flow-server-config)
+      (jdo-pm/wrap-close-persistent-manager)))
