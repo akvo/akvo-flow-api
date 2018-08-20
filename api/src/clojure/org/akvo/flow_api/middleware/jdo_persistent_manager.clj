@@ -1,5 +1,5 @@
 (ns org.akvo.flow-api.middleware.jdo-persistent-manager
-  (:import (com.gallatinsystems.framework.servlet PersistenceFilter)))
+  (:import [com.gallatinsystems.framework.servlet PersistenceFilter]))
 
 (defn wrap-close-persistent-manager [handler]
   (fn [request]
