@@ -10,12 +10,6 @@ WORKDIR /app
 
 COPY target/assembly/* /app/
 
-CMD ["java", \
-     "-XshowSettings:vm", \
-     "-XX:+UnlockExperimentalVMOptions", \
-     "-XX:+UseCGroupMemoryLimitForHeap", \
-     "-XX:MaxRAMFraction=2", \
-     "-XX:+HeapDumpOnOutOfMemoryError", \
-     "-XX:HeapDumpPath=/dumps", \
-     "-cp", "./*", \
-     "org.akvo.flow_api.main"]
+COPY run.sh /app/run.sh
+
+CMD ["./run.sh"]
