@@ -44,7 +44,7 @@ spec:
         - |
           apk add --no-cache inotify-tools &&
           gcloud auth activate-service-account --key-file=/secrets/jvm-debug.json &&
-          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; done;
+          inotifywait -m /dumps -e close_write | while read path action file; do gsutil cp "$path$file" "gs://heap-dump/$file"; rm -f "$path$file"; done;
         volumeMounts:
         - name: heap-dumps
           mountPath: /dumps
