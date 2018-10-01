@@ -13,7 +13,7 @@ mkdir -p "$HOME/.m2/repository"
 mkdir -p "${LOCAL_TEST_DATA_PATH}"
 
 if ! [ -f "${HOME}/.cache/local_db.bin" ]; then
-    wget "https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin" -O "${HOME}/.cache/local_db.bin"
+    wget -q "https://s3-eu-west-1.amazonaws.com/akvoflow/test-data/local_db.bin" -O "${HOME}/.cache/local_db.bin"
 fi
 
 cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
