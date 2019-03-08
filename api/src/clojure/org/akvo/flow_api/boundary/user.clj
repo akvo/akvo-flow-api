@@ -3,36 +3,18 @@
             org.akvo.flow-api.component.cache
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
-            [org.akvo.flow-api.datastore.user :as user])
-  (:import [org.akvo.flow_api.component.cache TTLMemoryCache]
-           [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
+            [org.akvo.flow-api.datastore.user :as user]))
 
-(defprotocol IUser
-  (id-by-email [this instance-id email] "Lookup the user id for a given email"))
+(defn get-id [{:keys [cache]} instance-id email]
+  (cache/lookup @cache [instance-id email]))
 
-(defprotocol IUserCache
-  (get-id [this instance-id email] "Get a user id from the cache")
-  (put-id [this instance-id email id] "Put a new user id in the cache"))
+(defn put-id [{:keys [cache]} instance-id email id]
+  (swap! cache cache/miss [instance-id email] id))
 
-(extend-protocol IUserCache
-  TTLMemoryCache
-  (get-id [{:keys [cache]} instance-id email]
-    (cache/lookup @cache [instance-id email]))
-  (put-id [{:keys [cache]} instance-id email id]
-    (swap! cache cache/miss [instance-id email] id)))
-
-
-(extend-protocol IUser
-  RemoteApi
-  (id-by-email [{:keys [user-cache] :as this} instance-id email]
-    (if-let [id (get-id user-cache instance-id email)]
-      id
-      (ds/with-remote-api this instance-id
-        (let [id (user/id email)]
-          (put-id user-cache instance-id email id)
-          id))))
-
-  LocalApi
-  (id-by-email [this instance-id email]
+(defn id-by-email [{:keys [user-cache] :as this} instance-id email]
+  (if-let [id (get-id user-cache instance-id email)]
+    id
     (ds/with-remote-api this instance-id
-      (user/id email))))
+      (let [id (user/id email)]
+        (put-id user-cache instance-id email id)
+        id))))
