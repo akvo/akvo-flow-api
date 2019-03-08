@@ -4,7 +4,8 @@
             org.akvo.flow-api.component.cache
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
-            [org.akvo.flow-api.datastore.survey :as survey]))
+            [org.akvo.flow-api.datastore.survey :as survey]
+            [org.akvo.flow-api.boundary.user :as user]))
 
 (defn get-survey-definition [{:keys [cache]} instance-id user-id survey-id]
   (cache/lookup @cache [:survey-definitions instance-id user-id survey-id]))
@@ -12,9 +13,9 @@
 (defn put-survey-definition [{:keys [cache]} instance-id user-id survey-id survey-definition]
   (swap! cache cache/miss [:survey-definitions instance-id user-id survey-id] survey-definition))
 
-(defn list [this instance-id user-id folder-id]
-  (ds/with-remote-api this instance-id
-    (doall (survey/list user-id folder-id))))
+(defn list-by-folder [remote-api instance-id user-id folder-id]
+  (ds/with-remote-api remote-api instance-id
+    (doall (survey/list-by-folder user-id folder-id))))
 
 (defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
   (if-let [survey-definition (get-survey-definition survey-cache
@@ -30,3 +31,16 @@
           survey-id
           survey-definition)
         survey-definition))))
+
+(defn filter-surveys
+  "Given a list of surveys, returns the ones that the user has access to"
+  [user-email surveys remote-api]
+  (let [instances (into #{} (map :instance-id surveys))]
+    (survey/keep-allowed-to-see
+      surveys
+      (pmap (fn [instance]
+             (let [user-id (user/id-by-email remote-api instance user-email)]
+               (ds/with-remote-api remote-api instance
+                 {:instance-id instance
+                  :survey-ids (doall (survey/list-ids user-id))})))
+        instances))))

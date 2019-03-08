@@ -1,25 +1,33 @@
 (ns org.akvo.flow-api.datastore.survey
-  (:refer-clojure :exclude [list])
+  (:refer-clojure :exclude [list list*])
   (:require [org.akvo.flow-api.anomaly :as anomaly]
-            [org.akvo.flow-api.datastore :as ds])
+            [org.akvo.flow-api.datastore :as ds]
+            clojure.set)
   (:import [com.gallatinsystems.survey.dao.SurveyDAO]
            [com.gallatinsystems.survey.dao.SurveyGroupDAO]
            [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
-(defn list [user-id folder-id]
+(defn list* [user-id]
   (let [survey-dao (SurveyDAO.)
-        all-surveys (.listAll survey-dao)
-        user-surveys (.filterByUserAuthorizationObjectId survey-dao
-                                                         all-surveys
-                                                         user-id)]
-    (->> user-surveys
-         (map (fn [survey]
-                {:id (str (ds/id survey))
-                 :name (.getName survey)
-                 :folder-id (str (.getParentId survey))
-                 :created-at (ds/created-at survey)
-                 :modified-at (ds/modified-at survey)}))
-         (filter #(= (:folder-id %) folder-id)))))
+        all-surveys (.listAll survey-dao)]
+    (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
+
+(defn list-ids [user-id]
+  (->>
+    (list* user-id)
+    (map (fn [survey]
+           (str (ds/id survey))))))
+
+(defn list-by-folder [user-id folder-id]
+  (->>
+    (list* user-id)
+    (map (fn [survey]
+           {:id (str (ds/id survey))
+            :name (.getName survey)
+            :folder-id (str (.getParentId survey))
+            :created-at (ds/created-at survey)
+            :modified-at (ds/modified-at survey)}))
+    (filter #(= (:folder-id %) folder-id))))
 
 (defn ->question [question]
   (let [type* (str (.getType question))]
@@ -81,3 +89,13 @@
        :forms (mapv #(get-form-definition (ds/id %)) forms)
        :created-at (ds/created-at survey)
        :modified-at (ds/modified-at survey)})))
+
+(defn keep-allowed-to-see [surveys-to-permission surveys-allowed-per-instance]
+  (let [surveys-to-permission (set surveys-to-permission)]
+    (mapcat (fn [{:keys [instance-id survey-ids]}]
+              (let [allowed-surveys (set (map (fn [survey-id]
+                                                {:instance-id instance-id
+                                                 :survey-id survey-id})
+                                           survey-ids))]
+                (clojure.set/intersection surveys-to-permission allowed-surveys)))
+      surveys-allowed-per-instance)))

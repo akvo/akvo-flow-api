@@ -9,9 +9,12 @@
 (spec/def ::page-size (spec/nilable ::positive-integer-string))
 (spec/def ::cursor (spec/nilable ::base64-string))
 (spec/def ::survey-id ::positive-integer-string)
+(spec/def ::instance-id string?)
 (spec/def ::form-id ::positive-integer-string)
 (spec/def ::parent-id ::positive-integer-string)
 (spec/def ::folder-id ::positive-integer-string)
+
+(spec/def ::full-survey-id (spec/keys :req-un [::survey-id ::instance-id]))
 
 (defn validate-params [spec params]
   (if (spec/valid? spec params)

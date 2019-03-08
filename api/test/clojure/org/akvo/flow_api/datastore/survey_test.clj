@@ -3,8 +3,7 @@
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.survey :as survey]
             [org.akvo.flow-api.datastore.user :as user]
-            [org.akvo.flow-api.fixtures :as fixtures])
-  (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
+            [org.akvo.flow-api.fixtures :as fixtures]))
 
 (def system {:components
              {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}
@@ -14,20 +13,15 @@
 
 (use-fixtures :once (fixtures/system system))
 
+(defn surveys-for-user [user]
+  (count (survey/list-by-folder (user/id user) "153142013")))
+
 (deftest survey-test
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
-    (let [ds (DatastoreServiceFactory/getDatastoreService)
-          user-1 (user/id "akvo.flow.user.test@gmail.com")
-          user-2 (user/id "akvo.flow.user.test2@gmail.com")
-          user-3 (user/id "akvo.flow.user.test3@gmail.com")
-          folder-id "153142013"
-          surveys-1 (survey/list user-1 folder-id)
-          surveys-2 (survey/list user-2 folder-id)
-          surveys-3 (survey/list user-3 folder-id)]
-      (testing "Filtered surveys"
-        (is (= 2 (count surveys-1)))
-        (is (= 2 (count surveys-2)))
-        (is (= 0 (count surveys-3)))))))
+    (testing "Filtered surveys"
+      (is (= 2 (surveys-for-user "akvo.flow.user.test@gmail.com")))
+      (is (= 2 (surveys-for-user "akvo.flow.user.test2@gmail.com")))
+      (is (= 0 (surveys-for-user "akvo.flow.user.test3@gmail.com"))))))
 
 (deftest survey-definition-test
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
@@ -46,3 +40,27 @@
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
         question #{:id :name :type :order}))))
+
+(deftest survey-permissions
+  (testing "Has permissions"
+    (is (= [{:instance-id "a" :survey-id "1"}] (survey/keep-allowed-to-see
+                                                 [{:instance-id "a" :survey-id "1"}]
+                                                 [{:instance-id "a"
+                                                   :survey-ids ["1"]}])))
+    (is (= #{{:instance-id "a" :survey-id "1"} {:instance-id "b" :survey-id "2"}}
+          (set (survey/keep-allowed-to-see
+                 [{:instance-id "a" :survey-id "1"}
+                  {:instance-id "b" :survey-id "2"}]
+                 [{:instance-id "a" :survey-ids ["1"]}
+                  {:instance-id "b" :survey-ids ["2"]}])))))
+
+  (testing "Not perms for the survey"
+    (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] {:instance-id "a"
+                                                                               :survey-ids ["2"]}))))
+  (testing "Zero permissions"
+    (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [])))
+    (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [{:instance-id "a"
+                                                                                :survey-ids []}]))))
+  (testing "Same survey id, but different instance"
+    (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [{:instance-id "b"
+                                                                                :survey-ids ["1"]}])))))
