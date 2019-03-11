@@ -29,7 +29,7 @@
 
 (defn endpoint* [{:keys [remote-api akvo-flow-server-config]}]
   (routes
-    (POST "/flumenfly" {:keys [email body]}
+    (POST "/check_permissions" {:keys [email body]}
       (surveys remote-api email body))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
@@ -38,13 +38,14 @@
 
 (comment
   (->
-    (clj-http.client/post "http://localhost:3000/flumenfly" {:as :json
-                                                             :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
-                                                             :form-params [{:instance_id "akvoflowsandbox"
-                                                                            :survey_id "152342023"}
-                                                                           {:instance_id "akvoflowsandbox"
-                                                                            :survey_id "148412329"}]
-                                                             :content-type :json})
+    (clj-http.client/post "http://localhost:3000/check_permissions"
+      {:as :json
+       :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+       :form-params [{:instance_id "akvoflowsandbox"
+                      :survey_id "152342023"}
+                     {:instance_id "akvoflowsandbox"
+                      :survey_id "148412329"}]
+       :content-type :json})
     ;(try (catch Exception e (ex-data e)))
     ;:body
     ;(cheshire.core/parse-string true)
