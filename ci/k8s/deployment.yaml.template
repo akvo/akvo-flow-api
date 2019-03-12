@@ -58,11 +58,11 @@ spec:
           value: "/secrets"
         - name: FLOW_API_BACKEND_URL
           value: "http://localhost:3000"
-        - name: TOKEN_INTROSPECTION_URL
+        - name: OIDC_DISCOVERY_URL
           valueFrom:
             configMapKeyRef:
               name: flow-api
-              key: token.introspection.url
+              key: oidc.discovery.url
       - name: flow-api-monitor
         image: google/cloud-sdk:206.0.0-alpine
         command: ["/bin/sh", "-c"]
