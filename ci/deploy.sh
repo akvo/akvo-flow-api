@@ -12,8 +12,9 @@ fi
 
 # Pushing images
 docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
-docker push "${PROXY_IMAGE_NAME:=akvo/flow-api-proxy}"
-docker push "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}"
+docker push "akvo/flow-api-proxy"
+docker push "akvo/flow-api-auth0-proxy"
+docker push "akvo/flow-api-backend"
 
 # Making sure gcloud and kubectl are installed and up to date
 gcloud components install kubectl
