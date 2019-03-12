@@ -29,5 +29,5 @@
                       (component/start))]
     (add-shutdown-hook ::stop-system #(component/stop system))
     (println "Started HTTP server on port" (-> system :http :port))
-    (let [repl-server (repl/start-server :port (:nrepl-port env 0))]
+    (let [repl-server (repl/start-server :port (Integer/parseInt (:repl-port env "0")))]
       (println "REPL started on port" (:port repl-server)))))
