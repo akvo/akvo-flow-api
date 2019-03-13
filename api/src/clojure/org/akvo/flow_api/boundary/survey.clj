@@ -4,50 +4,44 @@
             org.akvo.flow-api.component.cache
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
-            [org.akvo.flow-api.datastore.survey :as survey])
-  (:import [org.akvo.flow_api.component.cache TTLMemoryCache]
-           [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
+            [org.akvo.flow-api.datastore.survey :as survey]
+            [org.akvo.flow-api.boundary.user :as user]))
 
-(defprotocol ISurvey
-  (list [this instance-id user-id parent-id] "List surveys in a parent folder filtered for a particular user")
-  (by-id [this instance-id user-id survey-id] "Get the survey definition"))
+(defn get-survey-definition [{:keys [cache]} instance-id user-id survey-id]
+  (cache/lookup @cache [:survey-definitions instance-id user-id survey-id]))
 
-(defprotocol ISurveyCache
-  (get-survey-definition [cache instance-id user-id survey-id])
-  (put-survey-definition [cache instance-id user-id survey-id survey-definition]))
+(defn put-survey-definition [{:keys [cache]} instance-id user-id survey-id survey-definition]
+  (swap! cache cache/miss [:survey-definitions instance-id user-id survey-id] survey-definition))
 
-(extend-protocol ISurveyCache
-  TTLMemoryCache
-  (get-survey-definition [{:keys [cache]} instance-id user-id survey-id]
-    (cache/lookup @cache [:survey-definitions instance-id user-id survey-id]))
+(defn list-by-folder [remote-api instance-id user-id folder-id]
+  (ds/with-remote-api remote-api instance-id
+    (doall (survey/list-by-folder user-id folder-id))))
 
-  (put-survey-definition [{:keys [cache]} instance-id user-id survey-id survey-definition]
-    (swap! cache cache/miss [:survey-definitions instance-id user-id survey-id] survey-definition)))
-
-(extend-protocol ISurvey
-  RemoteApi
-  (list [this instance-id user-id folder-id]
+(defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
+  (if-let [survey-definition (get-survey-definition survey-cache
+                               instance-id
+                               user-id
+                               survey-id)]
+    survey-definition
     (ds/with-remote-api this instance-id
-      (doall (survey/list user-id folder-id))))
-  (by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
-    (if-let [survey-definition (get-survey-definition survey-cache
-                                                      instance-id
-                                                      user-id
-                                                      survey-id)]
-      survey-definition
-      (ds/with-remote-api this instance-id
-        (let [survey-definition (survey/by-id user-id survey-id)]
-          (put-survey-definition survey-cache
-                                 instance-id
-                                 user-id
-                                 survey-id
-                                 survey-definition)
-          survey-definition))))
+      (let [survey-definition (survey/by-id user-id survey-id)]
+        (put-survey-definition survey-cache
+          instance-id
+          user-id
+          survey-id
+          survey-definition)
+        survey-definition))))
 
-  LocalApi
-  (list [this instance-id user-id folder-id]
-    (ds/with-remote-api this instance-id
-      (doall (survey/list user-id folder-id))))
-  (by-id [this instance-id user-id survey-id]
-    (ds/with-remote-api this instance-id
-      (survey/by-id user-id survey-id))))
+(defn filter-surveys
+  "Given a list of surveys, returns the ones that the user has access to"
+  [user-email surveys remote-api]
+  (let [instances (into #{} (map :instance-id surveys))
+        mapping-fn (if (> (count instances) 2) pmap map)]
+    (survey/keep-allowed-to-see
+      surveys
+      (mapping-fn (fn [instance]
+                    (let [user-id (user/id-by-email remote-api instance user-email)]
+                      (ds/with-remote-api remote-api instance
+                        {:instance-id instance
+                         :survey-ids (doall (survey/list-ids user-id))})))
+        instances))))

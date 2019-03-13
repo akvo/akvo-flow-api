@@ -16,9 +16,7 @@
           host (afsc/host afsc instance-id)
           iam-account (afsc/iam-account afsc instance-id)
           p12-path (afsc/p12-path afsc instance-id)
-          remote-path (if-let [trace-path (afsc/trace-path afsc instance-id)]
-                        (str "/traced_remote_api/" trace-path)
-                        "/remote_api")
+          remote-path "/remote_api"
           options (-> (RemoteApiOptions.)
                       (.server host port)
                       (.remoteApiPath remote-path))]

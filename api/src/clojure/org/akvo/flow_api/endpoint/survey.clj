@@ -58,7 +58,7 @@
                                                      (rename-keys params
                                                                   {:folder_id :folder-id}))]
        (-> remote-api
-           (survey/list instance-id
+           (survey/list-by-folder instance-id
                         (user/id-by-email remote-api instance-id email)
                         folder-id)
            (add-survey-links api-root alias)
