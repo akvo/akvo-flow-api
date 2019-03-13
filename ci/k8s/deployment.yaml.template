@@ -63,6 +63,11 @@ spec:
             configMapKeyRef:
               name: flow-api
               key: oidc.discovery.url
+        - name: OIDC_EXPECTED_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: flow-api
+              key: oidc.expected.issuer
       - name: flow-api-monitor
         image: google/cloud-sdk:206.0.0-alpine
         command: ["/bin/sh", "-c"]
