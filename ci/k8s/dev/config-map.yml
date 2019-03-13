@@ -6,3 +6,5 @@ metadata:
 data:
   token.introspection.url: https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token/introspect
   api.root: https://api.akvotest.org/flow
+  oidc.discovery.url: https://akvotest.eu.auth0.com/.well-known/openid-configuration
+  oidc.expected.issuer: https://akvotest.eu.auth0.com/

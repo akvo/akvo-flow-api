@@ -30,15 +30,28 @@ docker run \
        openresty/openresty:1.11.2.3-alpine-fat -t -c /conf/nginx.conf
 (
     cd nginx
-    docker build -t "${PROXY_IMAGE_NAME:=akvo/flow-api-proxy}" .
+    docker build -t "akvo/flow-api-proxy" .
     docker tag akvo/flow-api-proxy akvo/flow-api-proxy:$TRAVIS_COMMIT
 )
 
+
+# Check nginx auth0 configuration
+
+(
+    cd nginx-auth0
+    docker build -t "akvo/flow-api-auth0-proxy" .
+    docker tag akvo/flow-api-auth0-proxy akvo/flow-api-auth0-proxy:$TRAVIS_COMMIT
+)
+
+docker run \
+       --rm \
+       --entrypoint /usr/local/openresty/bin/openresty \
+       akvo/flow-api-auth0-proxy -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein with-profile +assemble  do jar, assemble
 
 (
     cd api
-    docker build -t "${BACKEND_IMAGE_NAME:=akvo/flow-api-backend}" .
+    docker build -t "akvo/flow-api-backend" .
     docker tag akvo/flow-api-backend akvo/flow-api-backend:$TRAVIS_COMMIT
 )

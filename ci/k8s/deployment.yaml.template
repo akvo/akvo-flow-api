@@ -37,6 +37,37 @@ spec:
             configMapKeyRef:
               name: flow-api
               key: token.introspection.url
+      - name: flow-api-auth0-proxy
+        image: akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8082
+        volumeMounts:
+        - name: secrets
+          mountPath: /secrets
+          readOnly: true
+        resources:
+          requests:
+            cpu: ${PROXY_POD_CPU_REQUESTS}
+            memory: ${PROXY_POD_MEM_REQUESTS}
+          limits:
+            cpu: ${PROXY_POD_CPU_LIMITS}
+            memory: ${PROXY_POD_MEM_LIMITS}
+        env:
+        - name: SECRETS_MOUNT_PATH
+          value: "/secrets"
+        - name: FLOW_API_BACKEND_URL
+          value: "http://localhost:3000"
+        - name: OIDC_DISCOVERY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: flow-api
+              key: oidc.discovery.url
+        - name: OIDC_EXPECTED_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: flow-api
+              key: oidc.expected.issuer
       - name: flow-api-monitor
         image: google/cloud-sdk:206.0.0-alpine
         command: ["/bin/sh", "-c"]
