@@ -22,6 +22,12 @@ before_install:
 script:
   - "./ci/build.sh && ./ci/deploy.sh"
 
+before_cache:
+  - find $HOME/.m2 -name resolver-status.properties -exec rm -f {} \;
+
+after_failure:
+  - docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml logs
+
 env:
   global:
     - PATH=${HOME}/google-cloud-sdk/bin:$PATH
