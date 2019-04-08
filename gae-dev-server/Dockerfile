@@ -13,6 +13,7 @@ RUN set -ex ; \
     openjdk8~=8 \
     openssh-client~=7 \
     python2~=2 \
+    nss~=3 \
     py-crcmod~=1 \
     py-openssl~=17 \
     maven~=3 \
