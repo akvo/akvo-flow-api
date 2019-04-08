@@ -5,6 +5,7 @@
             [compojure.core :refer :all]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.middleware.resolve-alias]
+            [org.akvo.flow-api.boundary.resolve-alias :as resolve-alias]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
             [ring.util.response :refer [response]]
             [org.akvo.flow-api.endpoint.spec :as spec]))
@@ -19,18 +20,21 @@
   (fn [m]
     (rename-keys m rename-map)))
 
-(defn surveys [remote-api email body]
-  (let [surveys (spec/validate-params survey-list-spec
-                  (map (rename renames) body))]
+(defn surveys [akvo-flow-server-config remote-api email body]
+  (let [surveys (spec/validate-params survey-list-spec (map (rename renames) body))]
     (->> remote-api
-      (survey/filter-surveys email surveys)
-      (map (rename renames-revert))
-      response)))
+         (map #(update %
+                       :instance-id
+                       (fn [instance-id]
+                         (resolve-alias/resolve akvo-flow-server-config instance-id))))
+         (survey/filter-surveys email surveys)
+         (map (rename renames-revert))
+         response)))
 
 (defn endpoint* [{:keys [remote-api akvo-flow-server-config]}]
   (routes
     (POST "/check_permissions" {:keys [email body]}
-      (surveys remote-api email body))))
+      (surveys akvo-flow-server-config remote-api email body))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
