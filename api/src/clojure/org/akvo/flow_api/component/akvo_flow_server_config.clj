@@ -35,7 +35,9 @@
 
 (defrecord DummyAkvoFlowServerConfig []
   component/Lifecycle
-  (start [this] this)
+  (start [this]
+    (assoc this
+      :flow-config (atom {"akvoflowsandbox" "something"})))
   (stop [this] this))
 
 (defn dummy-akvo-flow-server-config [_]
