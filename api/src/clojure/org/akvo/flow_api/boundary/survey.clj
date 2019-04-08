@@ -34,7 +34,7 @@
 
 (defn filter-surveys
   "Given a list of surveys, returns the ones that the user has access to"
-  [user-email surveys remote-api]
+  [remote-api user-email surveys]
   (let [instances (into #{} (map :instance-id surveys))
         mapping-fn (if (> (count instances) 2) pmap map)]
     (survey/keep-allowed-to-see

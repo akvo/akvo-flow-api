@@ -22,12 +22,13 @@
 
 (defn surveys [akvo-flow-server-config remote-api email body]
   (let [surveys (spec/validate-params survey-list-spec (map (rename renames) body))]
-    (->> remote-api
-         (map #(update %
-                       :instance-id
-                       (fn [instance-id]
-                         (resolve-alias/resolve akvo-flow-server-config instance-id))))
-         (survey/filter-surveys email surveys)
+    (->> surveys
+         (map (fn [{alias :instance-id :as m}]
+                (assoc m
+                  :alias alias
+                  :instance-id (resolve-alias/resolve akvo-flow-server-config alias))))
+         (survey/filter-surveys remote-api email)
+         (map (rename {:alias :instance-id}))
          (map (rename renames-revert))
          response)))
 
@@ -36,7 +37,7 @@
     (POST "/check_permissions" {:keys [email body]}
       (surveys akvo-flow-server-config remote-api email body))))
 
-(defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
+(defn endpoint [deps]
   (-> (endpoint* deps)
     (jdo-pm/wrap-close-persistent-manager)))
 
@@ -46,11 +47,13 @@
       {:as :json
        :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
        :form-params [{:instance_id "akvoflowsandbox"
-                      :survey_id "152342023"}
+                      :survey_id "152342023"
+                      :additional-properties "props"}
                      {:instance_id "akvoflowsandbox"
                       :survey_id "148412329"}]
        :content-type :json})
-    ;(try (catch Exception e (ex-data e)))
-    ;:body
+    (try (catch Exception e (ex-data e)))
+    :body
     ;(cheshire.core/parse-string true)
-    ))
+    )
+  )
