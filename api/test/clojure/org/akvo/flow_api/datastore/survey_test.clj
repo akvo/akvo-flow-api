@@ -52,7 +52,13 @@
                  [{:instance-id "a" :survey-id "1"}
                   {:instance-id "b" :survey-id "2"}]
                  [{:instance-id "a" :survey-ids ["1"]}
-                  {:instance-id "b" :survey-ids ["2"]}])))))
+                  {:instance-id "b" :survey-ids ["2"]}]))))
+    (testing "compares just the instance id and the survey-id"
+      (is (= [{:instance-id "a" :survey-id "1" :foo "bar"}]
+            (survey/keep-allowed-to-see
+              [{:instance-id "a" :survey-id "1" :foo "bar"}]
+              [{:instance-id "a"
+                :survey-ids ["1"]}])))))
 
   (testing "Not perms for the survey"
     (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] {:instance-id "a"

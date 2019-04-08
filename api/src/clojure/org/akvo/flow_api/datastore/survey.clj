@@ -91,11 +91,11 @@
        :modified-at (ds/modified-at survey)})))
 
 (defn keep-allowed-to-see [surveys-to-permission surveys-allowed-per-instance]
-  (let [surveys-to-permission (set surveys-to-permission)]
-    (mapcat (fn [{:keys [instance-id survey-ids]}]
-              (let [allowed-surveys (set (map (fn [survey-id]
-                                                {:instance-id instance-id
-                                                 :survey-id survey-id})
-                                           survey-ids))]
-                (clojure.set/intersection surveys-to-permission allowed-surveys)))
-      surveys-allowed-per-instance)))
+  (let [instance->survey-set (into {}
+                               (map (fn [{:keys [instance-id survey-ids]}]
+                                      [instance-id (set survey-ids)])
+                                 surveys-allowed-per-instance))]
+    (filter
+      (fn [{:keys [instance-id survey-id]}]
+        (contains? (get instance->survey-set instance-id) survey-id))
+      surveys-to-permission)))
