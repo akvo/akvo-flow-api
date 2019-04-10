@@ -15,8 +15,7 @@
 (deftest user-tests
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsanbox"
     (testing "Non existing user"
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (user/id "no-such@user.com"))))
+      (is (nil? (user/id "no-such@user.com"))))
 
     (testing "Existing users"
       (are [email] (number? (user/id email))
