@@ -28,7 +28,7 @@
                                                                  {:parent_id :parent-id}))]
       (-> remote-api
           (folder/list instance-id
-                       (user/id-by-email-or-throw-error remote-api instance-id email)
+                       (user/id-by-email remote-api instance-id email :throw-error)
                        (or parent-id "0"))
           (add-links api-root alias)
           (folders-response)))))

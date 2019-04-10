@@ -12,15 +12,15 @@
 (defn put-id [{:keys [cache]} instance-id email id]
   (swap! cache cache/miss [instance-id email] id))
 
-(defn id-by-email [{:keys [user-cache] :as this} instance-id email]
-  (if-let [id (get-id user-cache instance-id email)]
-    id
-    (ds/with-remote-api this instance-id
-      (let [id (user/id email)]
-        (put-id user-cache instance-id email id)
-        id))))
-
-(defn id-by-email-or-throw-error [remote-api instance-id email]
-  (or
-    (id-by-email remote-api instance-id email)
-    (anomaly/unauthorized "User does not exist" {:email email})))
+(defn id-by-email
+  ([{:keys [user-cache] :as this} instance-id email]
+   (if-let [id (get-id user-cache instance-id email)]
+     id
+     (ds/with-remote-api this instance-id
+       (let [id (user/id email)]
+         (put-id user-cache instance-id email id)
+         id))))
+  ([remote-api instance-id email opt]
+   (or (id-by-email remote-api instance-id email)
+       (condp = opt
+         :throw-error (anomaly/unauthorized "User does not exist" {:email email})))))

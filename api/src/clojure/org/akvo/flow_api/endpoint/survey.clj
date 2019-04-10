@@ -48,7 +48,7 @@
                                                      params)]
        (-> remote-api
            (survey/by-id instance-id
-                         (user/id-by-email-or-throw-error remote-api instance-id email)
+                         (user/id-by-email remote-api instance-id email :throw-error)
                          survey-id)
            (add-form-instances-links api-root alias)
            (add-data-points-link api-root alias)
@@ -59,7 +59,7 @@
                                                                   {:folder_id :folder-id}))]
        (-> remote-api
            (survey/list-by-folder instance-id
-                        (user/id-by-email-or-throw-error remote-api instance-id email)
+                        (user/id-by-email remote-api instance-id email :throw-error)
                         folder-id)
            (add-survey-links api-root alias)
            (surveys-response))))))
