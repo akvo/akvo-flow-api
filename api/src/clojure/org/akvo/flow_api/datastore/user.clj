@@ -1,13 +1,10 @@
 (ns org.akvo.flow-api.datastore.user
-  (:require [org.akvo.flow-api.anomaly :as anomaly]
-            [org.akvo.flow-api.datastore :as ds])
+  (:require [org.akvo.flow-api.datastore :as ds])
   (:import [com.gallatinsystems.user.dao UserDao]))
 
 (defn by-email [email]
-  (if-let [user (.findUserByEmail (UserDao.) email)]
-    user
-    (anomaly/unauthorized "User does not exist"
-                          {:email email})))
+  (.findUserByEmail (UserDao.) email))
 
 (defn id [email]
-  (ds/id (by-email email)))
+  (when-let [user (by-email email)]
+    (ds/id user)))

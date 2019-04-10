@@ -41,7 +41,7 @@
                                                                :page_size :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
-          user-id (user/id-by-email remote-api instance-id email)
+          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
           survey (survey/by-id remote-api instance-id user-id survey-id)]
       (-> remote-api
           (data-point/list instance-id user-id survey {:page-size page-size
