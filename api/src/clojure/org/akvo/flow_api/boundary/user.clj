@@ -12,13 +12,17 @@
 (defn put-id [{:keys [cache]} instance-id email id]
   (swap! cache cache/miss [instance-id email] id))
 
-(defn id-by-email [{:keys [user-cache] :as this} instance-id email]
+(defn id-by-email [{:keys [user-cache unknown-user-cache] :as this} instance-id email]
   (if-let [id (get-id user-cache instance-id email)]
     id
-    (ds/with-remote-api this instance-id
-      (let [id (user/id email)]
-        (put-id user-cache instance-id email id)
-        id))))
+    (if (cache/has? @(:cache unknown-user-cache) [instance-id email])
+      nil
+      (ds/with-remote-api this instance-id
+        (let [id (user/id email)]
+          (if id
+            (put-id user-cache instance-id email id)
+            (put-id unknown-user-cache instance-id email id))
+          id)))))
 
 (defn id-by-email-or-throw-error [remote-api instance-id email]
   (or
