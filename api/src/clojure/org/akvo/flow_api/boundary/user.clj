@@ -16,8 +16,8 @@
   (cache/has? @cache [instance-id email]))
 
 (defn id-by-email [{:keys [user-cache unknown-user-cache] :as this} instance-id email]
-  (if-let [id (get-id user-cache instance-id email)]
-    id
+  (or
+    (get-id user-cache instance-id email)
     (when-not (has? unknown-user-cache instance-id email)
       (ds/with-remote-api this instance-id
         (let [id (user/id email)
