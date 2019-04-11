@@ -2,7 +2,6 @@
   (:require [clojure.set :refer [rename-keys]]
             [clojure.spec]
             [compojure.core :refer :all]
-            [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
@@ -55,7 +54,7 @@
                                                                :page_size :page-size}))
           page-size (when page-size
                       (Long/parseLong page-size))
-          user-id (user/id-by-email remote-api instance-id email)
+          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
           survey (survey/by-id remote-api instance-id user-id survey-id)
           form (find-form (:forms survey) form-id)]
       (if (some? form)

@@ -3,7 +3,8 @@
             org.akvo.flow-api.component.cache
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
-            [org.akvo.flow-api.datastore.user :as user]))
+            [org.akvo.flow-api.datastore.user :as user]
+            [org.akvo.flow-api.anomaly :as anomaly]))
 
 (defn get-id [{:keys [cache]} instance-id email]
   (cache/lookup @cache [instance-id email]))
@@ -18,3 +19,8 @@
       (let [id (user/id email)]
         (put-id user-cache instance-id email id)
         id))))
+
+(defn id-by-email-or-throw-error [remote-api instance-id email]
+  (or
+    (id-by-email remote-api instance-id email)
+    (anomaly/unauthorized "User does not exist" {:email email})))

@@ -65,6 +65,7 @@
                                                                                :survey-ids ["2"]}))))
   (testing "Zero permissions"
     (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [])))
+    (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [nil])))
     (is (= [] (survey/keep-allowed-to-see [{:instance-id "a" :survey-id "1"}] [{:instance-id "a"
                                                                                 :survey-ids []}]))))
   (testing "Same survey id, but different instance"

@@ -40,7 +40,7 @@
     (survey/keep-allowed-to-see
       surveys
       (mapping-fn (fn [instance]
-                    (let [user-id (user/id-by-email remote-api instance user-email)]
+                    (when-let [user-id (user/id-by-email remote-api instance user-email)]
                       (ds/with-remote-api remote-api instance
                         {:instance-id instance
                          :survey-ids (doall (survey/list-ids user-id))})))
