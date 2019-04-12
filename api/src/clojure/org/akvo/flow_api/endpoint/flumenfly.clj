@@ -27,6 +27,7 @@
                 (assoc m
                   :alias alias
                   :instance-id (resolve-alias/resolve akvo-flow-server-config alias))))
+         (filter :instance-id)
          (survey/filter-surveys remote-api email)
          (map (rename {:alias :instance-id}))
          (map (rename renames-revert))
