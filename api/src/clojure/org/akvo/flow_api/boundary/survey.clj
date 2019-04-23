@@ -41,7 +41,6 @@
       surveys
       (mapping-fn (fn [instance]
                     (when-let [user-id (user/id-by-email remote-api instance user-email)]
-                      (ds/with-remote-api remote-api instance
-                        {:instance-id instance
-                         :survey-ids (doall (survey/list-ids user-id))})))
+                      {:instance-id instance
+                       :survey-ids (survey/cached-list-ids remote-api instance user-id)}))
         instances))))
