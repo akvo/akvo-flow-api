@@ -5,6 +5,7 @@
   :akvo-flow-server-config #var org.akvo.flow-api.component.akvo-flow-server-config/akvo-flow-server-config
   :user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :unknown-user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
+  :survey-list-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :survey-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache}
  :endpoints
  {:root #var org.akvo.flow-api.endpoint.root/endpoint
@@ -17,11 +18,12 @@
  :dependencies
  {:http [:app]
   :app  [:root :folder :survey :data-point :form-instance :config-refresh :flumenfly]
-  :remote-api [:akvo-flow-server-config :user-cache :survey-cache :unknown-user-cache]
+  :remote-api [:akvo-flow-server-config :user-cache :survey-cache :unknown-user-cache :survey-list-cache]
   :akvo-flow-server-config []
   :root []
   :user-cache []
   :unknown-user-cache []
+  :survey-list-cache []
   :survey-cache []
   :folder [:remote-api :akvo-flow-server-config :api-root]
   :flumenfly [:remote-api :akvo-flow-server-config]
@@ -61,5 +63,6 @@
                             :tmp-dir tmp-dir}
   :user-cache {:ttl 86400000} ;; 1 day
   :unknown-user-cache {:ttl 600000} ;; 10 mins
+  :survey-list-cache {:ttl 300000} ;; 5 mins
   :survey-cache {:ttl 3600000} ;; 1 hr
   :api-root api-root}}
