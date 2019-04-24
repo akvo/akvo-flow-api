@@ -26,7 +26,8 @@
     (= 200 (:status (clj-http.client/get url)))))
 
 (defn check-servers-up []
-  (wait-for-server "http://localhost:8888/_ah/admin"))
+  (wait-for-server "http://localhost:8888/_ah/admin")
+  (wait-for-server "http://mainnetwork:3000/"))
 
 (defn system [system]
   (fn [f]

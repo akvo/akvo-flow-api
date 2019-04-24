@@ -37,7 +37,7 @@
   component/Lifecycle
   (start [this]
     (assoc this
-      :flow-config (atom {"akvoflowsandbox" "something"})))
+      :flow-config (atom {:instances {"akvoflowsandbox" "something"}})))
   (stop [this] this))
 
 (defn dummy-akvo-flow-server-config [_]
