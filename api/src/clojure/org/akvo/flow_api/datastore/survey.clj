@@ -20,11 +20,11 @@
            (str (ds/id survey))))))
 
 (defn cached-list-ids [{:keys [survey-list-cache] :as remote-api} instance user-id]
-  (if-let [survey-list (cache/lookup @survey-list-cache [instance user-id])]
+  (if-let [survey-list (cache/lookup @(:cache survey-list-cache) [instance user-id])]
     survey-list
     (ds/with-remote-api remote-api instance
       (let [survey-list (doall (list-ids user-id))]
-        (swap! @survey-list-cache cache/miss [instance user-id] survey-list)
+        (swap! (:cache survey-list-cache) cache/miss [instance user-id] survey-list)
         survey-list))))
 
 (defn list-by-folder [user-id folder-id]

@@ -14,3 +14,4 @@
 **/.nrepl-port
 **/.cache/
 /bin/
+.idea
