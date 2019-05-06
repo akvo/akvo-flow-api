@@ -42,3 +42,11 @@
             #{}
             (check-perms "unknown@user.com"
               valid-surveys))))))
+
+(deftest huge-headers
+  (testing "Keycloak Bearer token header is bigger than 8k"
+    (is (= 200
+          (:status (clj-http.client/get "http://mainnetwork:3000/"
+                     {:as :json
+                      :headers {"huge" (apply str (repeat 30000 "x"))}
+                      :content-type :json}))))))
