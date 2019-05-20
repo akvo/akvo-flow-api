@@ -5,6 +5,7 @@
             org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.survey :as survey]
+            [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-persistent-manager]
             [org.akvo.flow-api.boundary.user :as user]))
 
 (defn get-survey-definition [{:keys [cache]} instance-id user-id survey-id]
@@ -39,8 +40,9 @@
         mapping-fn (if (> (count instances) 1) pmap map)]
     (survey/keep-allowed-to-see
       surveys
-      (mapping-fn (fn [instance]
-                    (when-let [user-id (user/id-by-email remote-api instance user-email)]
-                      {:instance-id instance
-                       :survey-ids (survey/cached-list-ids remote-api instance user-id)}))
+      (mapping-fn (jdo-persistent-manager/wrap-close-persistent-manager
+                    (fn [instance]
+                      (when-let [user-id (user/id-by-email remote-api instance user-email)]
+                        {:instance-id instance
+                         :survey-ids (survey/cached-list-ids remote-api instance user-id)})))
         instances))))
