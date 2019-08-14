@@ -25,3 +25,17 @@ spec:
       name: http
   selector:
     run: flow-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flow-api-internal
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    run: flow-api
