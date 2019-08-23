@@ -12,6 +12,11 @@
                  (url-encode v)))
        (s/join "&")))
 
+(defn get-api-root [request]
+  (let [scheme (name (:scheme request))
+        hostname (get (:headers request) "host")]
+    (str scheme "://" hostname "/")))
+
 (defn url-builder
   ([api-root instance path]
    (url-builder api-root instance path nil))

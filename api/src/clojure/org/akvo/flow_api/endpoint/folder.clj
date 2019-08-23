@@ -21,8 +21,8 @@
 
 (def params-spec (clojure.spec/keys :opt-un [::spec/parent-id]))
 
-(defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/folders" {:keys [email instance-id alias params]}
+(defn endpoint* [{:keys [remote-api]}]
+  (GET "/folders" {:keys [email instance-id alias params] :as req}
     (let [{:keys [parent-id]} (spec/validate-params params-spec
                                                     (rename-keys params
                                                                  {:parent_id :parent-id}))]
@@ -30,7 +30,7 @@
           (folder/list instance-id
                        (user/id-by-email-or-throw-error remote-api instance-id email)
                        (or parent-id "0"))
-          (add-links api-root alias)
+          (add-links (utils/get-api-root req) alias)
           (folders-response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]

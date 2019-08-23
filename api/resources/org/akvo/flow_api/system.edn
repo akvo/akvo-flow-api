@@ -25,11 +25,11 @@
   :unknown-user-cache []
   :survey-list-cache []
   :survey-cache []
-  :folder [:remote-api :akvo-flow-server-config :api-root]
+  :folder [:remote-api :akvo-flow-server-config]
   :flumenfly [:remote-api :akvo-flow-server-config]
-  :survey [:remote-api :akvo-flow-server-config :api-root]
-  :data-point [:remote-api :akvo-flow-server-config :api-root]
-  :form-instance [:remote-api :akvo-flow-server-config :api-root]
+  :survey [:remote-api :akvo-flow-server-config]
+  :data-point [:remote-api :akvo-flow-server-config]
+  :form-instance [:remote-api :akvo-flow-server-config]
   :config-refresh [:akvo-flow-server-config]}
  :config
  {:app
@@ -66,4 +66,4 @@
   :unknown-user-cache {:ttl 600000} ;; 10 mins
   :survey-list-cache {:ttl 300000} ;; 5 mins
   :survey-cache {:ttl 3600000} ;; 1 hr
-  :api-root api-root}}
+  }}
