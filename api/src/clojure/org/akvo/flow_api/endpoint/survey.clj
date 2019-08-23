@@ -43,17 +43,17 @@
 
 (defn endpoint* [{:keys [remote-api api-root]}]
   (routes
-   (GET "/surveys/:survey-id" {:keys [email alias instance-id params]}
+   (GET "/surveys/:survey-id" {:keys [email alias instance-id params] :as req}
      (let [{:keys [survey-id]} (spec/validate-params survey-definition-params-spec
                                                      params)]
        (-> remote-api
            (survey/by-id instance-id
                          (user/id-by-email-or-throw-error remote-api instance-id email)
                          survey-id)
-           (add-form-instances-links api-root alias)
+           (add-form-instances-links (utils/get-api-root req) alias)
            (add-data-points-link api-root alias)
            (response))))
-   (GET "/surveys" {:keys [email alias instance-id params]}
+   (GET "/surveys" {:keys [email alias instance-id params] :as req}
      (let [{:keys [folder-id]} (spec/validate-params survey-list-params-spec
                                                      (rename-keys params
                                                                   {:folder_id :folder-id}))]
@@ -61,7 +61,7 @@
            (survey/list-by-folder instance-id
                         (user/id-by-email-or-throw-error remote-api instance-id email)
                         folder-id)
-           (add-survey-links api-root alias)
+           (add-survey-links (utils/get-api-root req) alias)
            (surveys-response))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
