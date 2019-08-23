@@ -32,7 +32,7 @@
                                     :opt-un [::spec/page-size ::spec/cursor]))
 
 (defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/data_points" {:keys [email instance-id alias params]}
+  (GET "/data_points" {:keys [email instance-id alias params] :as req}
     (let [{:keys [survey-id
                   page-size
                   cursor]} (spec/validate-params params-spec
@@ -46,7 +46,7 @@
       (-> remote-api
           (data-point/list instance-id user-id survey {:page-size page-size
                                                        :cursor cursor})
-          (add-next-page-url api-root alias survey-id page-size)
+          (add-next-page-url (utils/get-api-root req) alias survey-id page-size)
           (response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
