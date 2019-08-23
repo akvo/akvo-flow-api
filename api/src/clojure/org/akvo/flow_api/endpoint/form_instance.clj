@@ -42,7 +42,7 @@
 (def params-spec (clojure.spec/keys :req-un [::spec/survey-id ::spec/form-id]
                                     :opt-un [::spec/cursor ::spec/page-size]))
 
-(defn endpoint* [{:keys [remote-api api-root]}]
+(defn endpoint* [{:keys [remote-api]}]
   (GET "/form_instances" {:keys [email instance-id alias params] :as req}
     (let [{:keys [survey-id
                   form-id

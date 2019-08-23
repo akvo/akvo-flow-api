@@ -41,7 +41,7 @@
 
 (def survey-list-params-spec (clojure.spec/keys :req-un [::spec/folder-id]))
 
-(defn endpoint* [{:keys [remote-api api-root]}]
+(defn endpoint* [{:keys [remote-api]}]
   (routes
    (GET "/surveys/:survey-id" {:keys [email alias instance-id params] :as req}
      (let [{:keys [survey-id]} (spec/validate-params survey-definition-params-spec
@@ -51,7 +51,7 @@
                          (user/id-by-email-or-throw-error remote-api instance-id email)
                          survey-id)
            (add-form-instances-links (utils/get-api-root req) alias)
-           (add-data-points-link api-root alias)
+           (add-data-points-link (utils/get-api-root req) alias)
            (response))))
    (GET "/surveys" {:keys [email alias instance-id params] :as req}
      (let [{:keys [folder-id]} (spec/validate-params survey-list-params-spec

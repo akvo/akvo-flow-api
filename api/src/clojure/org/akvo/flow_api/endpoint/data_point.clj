@@ -31,7 +31,7 @@
 (def params-spec (clojure.spec/keys :req-un [::spec/survey-id]
                                     :opt-un [::spec/page-size ::spec/cursor]))
 
-(defn endpoint* [{:keys [remote-api api-root]}]
+(defn endpoint* [{:keys [remote-api]}]
   (GET "/data_points" {:keys [email instance-id alias params] :as req}
     (let [{:keys [survey-id
                   page-size

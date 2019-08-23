@@ -21,7 +21,7 @@
 
 (def params-spec (clojure.spec/keys :opt-un [::spec/parent-id]))
 
-(defn endpoint* [{:keys [remote-api api-root]}]
+(defn endpoint* [{:keys [remote-api]}]
   (GET "/folders" {:keys [email instance-id alias params] :as req}
     (let [{:keys [parent-id]} (spec/validate-params params-spec
                                                     (rename-keys params
