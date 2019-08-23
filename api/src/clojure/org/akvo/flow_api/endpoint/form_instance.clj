@@ -43,7 +43,7 @@
                                     :opt-un [::spec/cursor ::spec/page-size]))
 
 (defn endpoint* [{:keys [remote-api api-root]}]
-  (GET "/form_instances" {:keys [email instance-id alias params]}
+  (GET "/form_instances" {:keys [email instance-id alias params] :as req}
     (let [{:keys [survey-id
                   form-id
                   page-size
@@ -61,7 +61,7 @@
         (-> remote-api
             (form-instance/list instance-id user-id form {:page-size page-size
                                                           :cursor cursor})
-            (add-next-page-url api-root alias survey-id form-id page-size)
+            (add-next-page-url (utils/get-api-root req) alias survey-id form-id page-size)
             (response))
         {:status 404
          :body {"formId" form-id
