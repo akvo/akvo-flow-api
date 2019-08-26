@@ -13,9 +13,9 @@
        (s/join "&")))
 
 (defn get-api-root [request]
-  (let [scheme (name (:scheme request))
-        hostname (get (:headers request) "host")]
-    (str scheme "://" hostname "/")))
+  (let [hostname (get (:headers request) "host")
+        [scheme suffix] (if (s/includes? hostname "flow-api-internal") ["http" ""] ["https" "flow/"])]
+    (str scheme "://" hostname "/" suffix)))
 
 (defn url-builder
   ([api-root instance path]
