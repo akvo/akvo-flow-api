@@ -7,7 +7,7 @@ if [ -z "$TRAVIS_COMMIT" ]; then
 fi
 
 if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
-    log "Skipping build as it is a prod promotion"
+    echo "Skipping build as it is a prod promotion"
     exit 0
 fi
 
