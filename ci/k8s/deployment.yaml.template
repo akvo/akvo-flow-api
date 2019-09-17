@@ -4,10 +4,14 @@ metadata:
   name: flow-api
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+        run: flow-api
   template:
     metadata:
       labels:
         run: flow-api
+        akvo-flow-api-version: ${TRAVIS_COMMIT}
         environment: ${ENVIRONMENT}
     spec:
       containers:
