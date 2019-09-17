@@ -10,12 +10,6 @@ if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
-# Pushing images
-docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
-docker push "akvo/flow-api-proxy"
-docker push "akvo/flow-api-auth0-proxy"
-docker push "akvo/flow-api-backend"
-
 # Making sure gcloud and kubectl are installed and up to date
 gcloud components install kubectl
 gcloud components update
@@ -29,8 +23,7 @@ gcloud config set container/cluster europe-west1-d
 gcloud config set compute/zone europe-west1-d
 
 ENVIRONMENT="test"
-
-if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     gcloud container clusters get-credentials production
     CONFIG_MAP=prod
     ENVIRONMENT=production
@@ -53,6 +46,11 @@ else
     PROXY_POD_CPU_LIMITS="100m"
     PROXY_POD_MEM_REQUESTS="16Mi"
     PROXY_POD_MEM_LIMITS="32Mi"
+
+    docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
+    docker push "akvo/flow-api-proxy"
+    docker push "akvo/flow-api-auth0-proxy"
+    docker push "akvo/flow-api-backend"
 fi
 
 # Deploying
