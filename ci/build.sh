@@ -6,6 +6,11 @@ if [ -z "$TRAVIS_COMMIT" ]; then
     export TRAVIS_COMMIT=local
 fi
 
+if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+    log "Skipping build as it is a prod promotion"
+    exit 0
+fi
+
 LOCAL_TEST_DATA_PATH="gae-dev-server/target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
 mkdir -p "$HOME/.m2/repository"
