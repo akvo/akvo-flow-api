@@ -41,11 +41,6 @@ spec:
             configMapKeyRef:
               name: flow-api
               key: token.introspection.url
-        - name: NGINX_AUTH0_LOG_LEVEL
-          valueFrom:
-            configMapKeyRef:
-              name: flow-api
-              key: nginx.auth0.log.level
       - name: flow-api-auth0-proxy
         image: akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}
         imagePullPolicy: Always

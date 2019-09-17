@@ -4,7 +4,6 @@ metadata:
   name: flow-api
   namespace: default
 data:
-  nginx.auth0.log.level: INFO
   token.introspection.url: https://login.akvo.org/auth/realms/akvo/protocol/openid-connect/token/introspect
   api.root: https://api.akvo.org/flow
   oidc.discovery.url: https://akvofoundation.eu.auth0.com/.well-known/openid-configuration
