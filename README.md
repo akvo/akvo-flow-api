@@ -7,34 +7,19 @@
 
 ## Dependencies
 
-* `make` (via Xcode on macOS)
-* [Docker](https://docs.docker.com/engine/installation/)
-* [curl](https://curl.haxx.se/)
-* [jq](https://stedolan.github.io/jq/)
+* [Docker compose](https://docs.docker.com/engine/installation/)
 
-### Build
+### Start dev env
 
-    $ ./ci/build.sh
+	docker-compose up
+	
+REPL available in port 47480.
+Backend available in port 3000. 
 
-### Start
+### Deployment to production
 
-	$ make start # assumes lumen-keycloak container is running
-	$ # or #
-	$ make start-full # wait few seconds to Keycloak starts and imports the Akvo realm
+Run:
 
-#### Starting API backend (WIP)
+    ./ci/promote-test-to-prod.sh
 
-Assuming a `secrets` folder is in the current directory
-
-    $ docker run --rm -p 3000:3000 --interactive --tty --volume "$PWD/secrets":/secrets akvo/flow-api-backend
-
-
-### Test
-
-    $ ./util/test-proxy.sh
-
-## Other info
-
-* Available users username/password:
-  * demo1/akvo123
-  * demo2/akvo123
+And follow the instructions
