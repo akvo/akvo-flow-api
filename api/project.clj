@@ -14,7 +14,7 @@
                  [ring-jetty-component "0.3.1"]
                  [commons-fileupload "1.3.1"]
                  [org.akvo.flow/akvo-flow "v1.9.43-5-gff7e9ea" :classifier "classes"]
-                 [org.akvo/commons "0.4.5"]
+                 [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
                  [com.google.appengine/appengine-tools-sdk "1.9.50"]
@@ -26,7 +26,7 @@
                  [org.apache.geronimo.specs/geronimo-jpa_3.0_spec "1.1.1"]
                  [clj-http "2.3.0"]
                  [cheshire "5.7.0"]
-                 [org.clojure/tools.nrepl "0.2.12"]]
+                 [nrepl/nrepl "0.6.0"]]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
   :test-paths ["test/clojure"]
@@ -47,7 +47,8 @@
                                   [org.clojure/tools.namespace "0.2.11"]
                                   [eftest "0.1.1"]
                                   [com.gearswithingears/shrubbery "0.4.1"]
-                                  [kerodon "0.8.0"]]
+                                  [kerodon "0.8.0"]
+                                  [com.clojure-goes-fast/clj-memory-meter "0.1.2"]]
                    :repl-options   {:init-ns dev
                                     :init (do
                                             (println "Starting BackEnd ...")

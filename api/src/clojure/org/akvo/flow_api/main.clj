@@ -6,7 +6,7 @@
             [duct.util.runtime :refer [add-shutdown-hook]]
             [duct.util.system :refer [load-system]]
             [environ.core :refer [env]]
-            [clojure.tools.nrepl.server :as repl]
+            [nrepl.server :as repl]
             [org.akvo.flow-api.utils :as utils]))
 
 (defn secret-value
