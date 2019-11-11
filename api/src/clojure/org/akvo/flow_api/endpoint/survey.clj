@@ -52,6 +52,7 @@
                          survey-id)
            (add-form-instances-links (utils/get-api-root req) alias)
            (add-data-points-link (utils/get-api-root req) alias)
+           (assoc :instance-id instance-id)
            (response))))
    (GET "/surveys" {:keys [email alias instance-id params] :as req}
      (let [{:keys [folder-id]} (spec/validate-params survey-list-params-spec
