@@ -77,7 +77,11 @@
            {:lat 1.0
             :long 2.0
             :elev nil
-            :code nil}))))
+            :code nil})))
+  (testing "caddisfly question type"
+    (let [data "{\"type\":\"caddisfly\",\"name\":\"Water - E.coli\",\"uuid\":\"e40d4764-e73f-46dd-a598-ed4db0fd3386\",\"result\":[],\"image\":\"a3bf6305-add0-49df-9cd7-75dab425e45e.jpg\",\"testDate\":\"2019-10-29 17:17\",\"app\":{\"appVersion\":\"1.0.13 (Build 275)\"}}"]
+      (is (= (form-instance/parse-response "CADDISFLY" data {:asset-url-root "https://example.org/images"})
+             {"type" "caddisfly", "name" "Water - E.coli", "uuid" "e40d4764-e73f-46dd-a598-ed4db0fd3386", "result" [], "image" "https://example.org/images/a3bf6305-add0-49df-9cd7-75dab425e45e.jpg", "testDate" "2019-10-29 17:17", "app" {"appVersion" "1.0.13 (Build 275)"}})))))
 
 (deftest response-for-missing-question-test
   (testing "Response for missing question (regression #82)"
