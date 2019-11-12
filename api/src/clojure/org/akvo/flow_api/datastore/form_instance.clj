@@ -155,8 +155,11 @@
        (catch JsonParseException _)))
 
 (defmethod parse-response "CADDISFLY"
-  [_ response-str opts]
-  (json/parse-string response-str))
+  [_ response-str {:keys [asset-url-root]}]
+  (let [json-data (json/parse-string response-str)]
+    (if-let [image (get json-data "image")]
+      (update json-data "image" replace-path asset-url-root)
+      json-data)))
 
 (defn map-vals
   "Apply f to every value in the map, producing a new map with the same keys"
