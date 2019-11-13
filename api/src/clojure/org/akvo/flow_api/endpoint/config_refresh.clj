@@ -1,6 +1,6 @@
 (ns org.akvo.flow-api.endpoint.config-refresh
   (:require
-    [compojure.core :refer :all]
+    [compojure.core :refer [POST]]
     [org.akvo.flow-api.component.akvo-flow-server-config :as server-config-component]
     [ring.util.response :refer [response]]))
 

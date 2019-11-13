@@ -4,9 +4,7 @@
             [org.akvo.flow-api.datastore :as ds]
             clojure.set
             [clojure.core.cache :as cache])
-  (:import [com.gallatinsystems.survey.dao.SurveyDAO]
-           [com.gallatinsystems.survey.dao.SurveyGroupDAO]
-           [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
+  (:import [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
 
 (defn list* [user-id]
   (let [survey-dao (SurveyDAO.)

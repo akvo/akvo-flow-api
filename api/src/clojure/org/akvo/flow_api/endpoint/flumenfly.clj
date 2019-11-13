@@ -1,8 +1,8 @@
 (ns org.akvo.flow-api.endpoint.flumenfly
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.spec]
+            [clojure.spec.alpha :as s]
             [clojure.walk]
-            [compojure.core :refer :all]
+            [compojure.core :refer [routes POST]]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.middleware.resolve-alias]
             [org.akvo.flow-api.boundary.resolve-alias :as resolve-alias]
@@ -10,10 +10,11 @@
             [ring.util.response :refer [response]]
             [org.akvo.flow-api.endpoint.spec :as spec]))
 
-(def survey-list-spec (clojure.spec/coll-of ::spec/full-survey-id))
+(def survey-list-spec (s/coll-of ::spec/full-survey-id))
 
 (def renames {"instance_id" :instance-id
               "survey_id" :survey-id})
+
 (def renames-revert (clojure.set/map-invert renames))
 
 (defn rename [rename-map]

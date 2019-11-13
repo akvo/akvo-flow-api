@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.endpoint.survey
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.spec]
-            [compojure.core :refer :all]
+            [clojure.spec.alpha :as s]
+            [compojure.core :refer [routes GET]]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
@@ -37,9 +37,9 @@
 (defn surveys-response [surveys]
   (response {:surveys surveys}))
 
-(def survey-definition-params-spec (clojure.spec/keys :req-un [::spec/survey-id]))
+(def survey-definition-params-spec (s/keys :req-un [::spec/survey-id]))
 
-(def survey-list-params-spec (clojure.spec/keys :req-un [::spec/folder-id]))
+(def survey-list-params-spec (s/keys :req-un [::spec/folder-id]))
 
 (defn endpoint* [{:keys [remote-api]}]
   (routes

@@ -1,23 +1,23 @@
 (ns org.akvo.flow-api.endpoint.spec
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as s]
             [org.akvo.flow-api.anomaly :as anomaly])
   (:import [org.apache.commons.codec.binary Base64]))
 
-(spec/def ::positive-integer-string (spec/and string? #(re-matches #"[0-9]+" %)))
-(spec/def ::base64-string (spec/and string? #(Base64/isBase64 %)))
+(s/def ::positive-integer-string (s/and string? #(re-matches #"[0-9]+" %)))
+(s/def ::base64-string (s/and string? #(Base64/isBase64 %)))
 
-(spec/def ::page-size (spec/nilable ::positive-integer-string))
-(spec/def ::cursor (spec/nilable ::base64-string))
-(spec/def ::survey-id ::positive-integer-string)
-(spec/def ::instance-id string?)
-(spec/def ::form-id ::positive-integer-string)
-(spec/def ::parent-id ::positive-integer-string)
-(spec/def ::folder-id ::positive-integer-string)
+(s/def ::page-size (s/nilable ::positive-integer-string))
+(s/def ::cursor (s/nilable ::base64-string))
+(s/def ::survey-id ::positive-integer-string)
+(s/def ::instance-id string?)
+(s/def ::form-id ::positive-integer-string)
+(s/def ::parent-id ::positive-integer-string)
+(s/def ::folder-id ::positive-integer-string)
 
-(spec/def ::full-survey-id (spec/keys :req-un [::survey-id ::instance-id]))
+(s/def ::full-survey-id (s/keys :req-un [::survey-id ::instance-id]))
 
 (defn validate-params [spec params]
-  (if (spec/valid? spec params)
+  (if (s/valid? spec params)
     params
     (anomaly/bad-request "Invalid params"
                          {:problems (mapv (fn [problem]
@@ -25,4 +25,4 @@
                                              :val (:val problem)
                                              :in (:in problem)})
                                           (:clojure.spec/problems
-                                           (spec/explain-data spec params)))})))
+                                           (s/explain-data spec params)))})))
