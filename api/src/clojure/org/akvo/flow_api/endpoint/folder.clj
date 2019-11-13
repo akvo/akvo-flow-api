@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.endpoint.folder
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.spec]
-            [compojure.core :refer :all]
+            [clojure.spec.alpha :as s]
+            [compojure.core :refer [GET]]
             [org.akvo.flow-api.boundary.folder :as folder]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
@@ -19,7 +19,7 @@
 (defn folders-response [folders]
   (response {:folders folders}))
 
-(def params-spec (clojure.spec/keys :opt-un [::spec/parent-id]))
+(def params-spec (s/keys :opt-un [::spec/parent-id]))
 
 (defn endpoint* [{:keys [remote-api]}]
   (GET "/folders" {:keys [email instance-id alias params] :as req}

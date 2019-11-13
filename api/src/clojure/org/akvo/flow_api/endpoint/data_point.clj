@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.endpoint.data-point
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.spec]
-            [compojure.core :refer :all]
+            [clojure.spec.alpha :as s]
+            [compojure.core :refer [GET]]
             [org.akvo.flow-api.boundary.data-point :as data-point]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]
@@ -28,8 +28,8 @@
                               (:cursor data-points)))
         (dissoc :cursor))))
 
-(def params-spec (clojure.spec/keys :req-un [::spec/survey-id]
-                                    :opt-un [::spec/page-size ::spec/cursor]))
+(def params-spec (s/keys :req-un [::spec/survey-id]
+                         :opt-un [::spec/page-size ::spec/cursor]))
 
 (defn endpoint* [{:keys [remote-api]}]
   (GET "/data_points" {:keys [email instance-id alias params] :as req}

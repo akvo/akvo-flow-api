@@ -2,7 +2,7 @@
   :description "Akvo Flow API"
   :url "https://github.com/akvo/akvo-flow-api"
   :min-lein-version "2.0.0"
-  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/core.cache "0.6.5"]
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.1"]
@@ -13,14 +13,14 @@
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
                  [commons-fileupload "1.3.1"]
-                 [org.akvo.flow/akvo-flow "v1.9.43-5-gff7e9ea" :classifier "classes"]
+                 [org.akvo.flow/akvo-flow "v1.10-58-g867c78e9" :classifier "classes"]
                  [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
-                 [com.google.appengine/appengine-tools-sdk "1.9.50"]
-                 [com.google.appengine/appengine-remote-api "1.9.50"]
-                 [com.google.appengine/appengine-api-1.0-sdk "1.9.50"]
-                 [com.google.appengine/appengine-jsr107cache "1.9.50"]
+                 [com.google.appengine/appengine-tools-sdk "1.9.63"]
+                 [com.google.appengine/appengine-remote-api "1.9.63"]
+                 [com.google.appengine/appengine-api-1.0-sdk "1.9.63"]
+                 [com.google.appengine/appengine-jsr107cache "1.9.63"]
                  [net.sf.jsr107cache/jsr107cache "1.1"]
                  [javax.servlet/servlet-api "2.5"]
                  [org.apache.geronimo.specs/geronimo-jpa_3.0_spec "1.1.1"]
@@ -44,7 +44,7 @@
    :profiles/test {}
    :project/dev   {:dependencies [[duct/generate "0.8.2"]
                                   [reloaded.repl "0.2.3"]
-                                  [org.clojure/tools.namespace "0.2.11"]
+                                  [org.clojure/tools.namespace "0.3.1"]
                                   [eftest "0.1.1"]
                                   [com.gearswithingears/shrubbery "0.4.1"]
                                   [kerodon "0.8.0"]

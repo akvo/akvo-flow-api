@@ -1,5 +1,5 @@
 (ns org.akvo.flow-api.endpoint.root
-  (:require [compojure.core :refer :all]
+  (:require [compojure.core :refer [GET]]
             [ring.util.response :refer [response]]))
 
 (defn endpoint [_]

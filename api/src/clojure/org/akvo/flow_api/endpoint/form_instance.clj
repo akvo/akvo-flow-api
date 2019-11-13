@@ -1,6 +1,6 @@
 (ns org.akvo.flow-api.endpoint.form-instance
   (:require [clojure.set :refer [rename-keys]]
-            [clojure.spec]
+            [clojure.spec.alpha :as s]
             [compojure.core :refer :all]
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
@@ -39,8 +39,8 @@
                               (:cursor form-instances)))
         (dissoc :cursor))))
 
-(def params-spec (clojure.spec/keys :req-un [::spec/survey-id ::spec/form-id]
-                                    :opt-un [::spec/cursor ::spec/page-size]))
+(def params-spec (s/keys :req-un [::spec/survey-id ::spec/form-id]
+                         :opt-un [::spec/cursor ::spec/page-size]))
 
 (defn endpoint* [{:keys [remote-api]}]
   (GET "/form_instances" {:keys [email instance-id alias params] :as req}
