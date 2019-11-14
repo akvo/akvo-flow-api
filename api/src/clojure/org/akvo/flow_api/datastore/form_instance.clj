@@ -7,9 +7,11 @@
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.utils :as utils])
   (:refer-clojure :exclude [list])
-  (:import [com.fasterxml.jackson.core JsonParseException]
+  (:import com.fasterxml.jackson.core.JsonParseException
            [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
-           [java.text SimpleDateFormat]))
+           java.text.SimpleDateFormat
+           java.util.Date
+           java.time.Instant))
 
 (set! *warn-on-reflection* true)
 
@@ -22,13 +24,23 @@
       page-size
       MAX_PAGE_SIZE)))
 
+(defn get-filter
+  [form-id submission-date operator]
+  (let [filter-by-id (q/= "surveyId" (Long/parseLong form-id))]
+    (if (and submission-date operator)
+      (let [op (resolve (symbol "akvo.commons.gae.query" operator))
+            date-filter (op "collectionDate" (Date/from ^Instant submission-date))]
+        (q/and filter-by-id date-filter))
+      filter-by-id)))
+
 (defn form-instances-query
   ^com.google.appengine.api.datastore.QueryResultIterator
-  [ds form-definition {:keys [cursor page-size]}]
-  (let [page-size (normalize-page-size page-size)]
+  [ds form-definition {:keys [cursor page-size submission-date operator]}]
+  (let [page-size (normalize-page-size page-size)
+        filter (get-filter (:id form-definition) submission-date operator)]
     (.iterator ^QueryResultIterable (q/result ds
                                               {:kind "SurveyInstance"
-                                               :filter (q/= "surveyId" (Long/parseLong (:id form-definition)))}
+                                               :filter filter}
                                               {:start-cursor cursor
                                                :chunk-size page-size
                                                :limit page-size}))))
@@ -219,7 +231,8 @@
                                   :filter (q/in "surveyInstanceId"
                                                 (map (comp #(Long/parseLong %) :id)
                                                      form-instance-batch))}
-                                 {:chunk-size 300})))
+                                 {:prefetch-size MAX_PAGE_SIZE
+                                  :chunk-size MAX_PAGE_SIZE})))
              {}
              (partition-all 30 form-instances)))))
 
