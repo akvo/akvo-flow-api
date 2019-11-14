@@ -61,7 +61,7 @@
   (let [parsed (parse-filter s)]
     (boolean (and (:operator parsed) (:timestamp parsed)))))
 
-(s/def ::submission-date valid-filter?)
+(s/def ::submission-date (s/nilable valid-filter?))
 
 (def params-spec (s/keys :req-un [::spec/survey-id ::spec/form-id]
                          :opt-un [::spec/cursor ::spec/page-size
@@ -84,7 +84,8 @@
           user-id (user/id-by-email-or-throw-error remote-api instance-id email)
           survey (survey/by-id remote-api instance-id user-id survey-id)
           form (find-form (:forms survey) form-id)
-          parsed-date (parse-filter submission-date)]
+          parsed-date (when submission-date
+                        (parse-filter submission-date))]
       (if (some? form)
         (-> remote-api
             (form-instance/list instance-id user-id form {:page-size page-size
