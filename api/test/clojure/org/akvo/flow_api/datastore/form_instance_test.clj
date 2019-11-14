@@ -5,7 +5,9 @@
             [org.akvo.flow-api.datastore.survey :as survey]
             [org.akvo.flow-api.datastore.user :as user]
             [org.akvo.flow-api.fixtures :as fixtures])
-  (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
+  (:import com.google.appengine.api.datastore.DatastoreServiceFactory
+           java.time.Instant
+           java.util.Date))
 
 (def system {:components
              {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}
@@ -42,6 +44,22 @@
           (is (= 150 (count (:form-instances page-1))))
           (is (= 17 (count (:form-instances page-2))))
           (is (empty? (:form-instances page-3))))))))
+
+(deftest form-instance-filter-test
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
+    (let [ds (DatastoreServiceFactory/getDatastoreService)
+          filter-date (Instant/parse "2017-03-30T08:05:00Z")
+          form-id "153312013"
+          data (form-instance/list ds {:id form-id} {:page-size 100
+                                                     :prefetch-size 100
+                                                     :submission-date filter-date
+                                                     :op ">="})
+          ok? (fn [instance]
+                (and (= (:form-id instance)
+                        form-id)
+                     (= (.isAfter filter-date (.toInstant ^Date (:submission-date instance))))))]
+      (is (not-empty (:form-instances data)))
+      (is (every? ok? (:form-instances data))))))
 
 (deftest response-parsing
   (testing "date question type"
