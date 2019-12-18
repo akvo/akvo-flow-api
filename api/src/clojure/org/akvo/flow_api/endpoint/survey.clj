@@ -62,7 +62,13 @@
                         (user/id-by-email-or-throw-error remote-api instance-id email)
                         folder-id)
            (add-survey-links (utils/get-api-root req) alias)
-           (surveys-response))))))
+           (surveys-response))))
+   (GET "/surveys-list" {:keys [email alias instance-id params] :as req}
+     (-> remote-api
+         (survey/list-by-user instance-id
+                              (user/id-by-email-or-throw-error remote-api instance-id email))
+         (add-survey-links (utils/get-api-root req) alias)
+         (surveys-response)))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

@@ -36,6 +36,16 @@
             :modified-at (ds/modified-at survey)}))
     (filter #(= (:folder-id %) folder-id))))
 
+(defn list-by-user [user-id]
+  (->>
+    (list* user-id)
+    (map (fn [survey]
+           {:id (str (ds/id survey))
+            :name (.getName survey)
+            :folder-id (str (.getParentId survey))
+            :created-at (ds/created-at survey)
+            :modified-at (ds/modified-at survey)}))))
+
 (defn ->question [question]
   (let [type* (str (.getType question))]
     (merge

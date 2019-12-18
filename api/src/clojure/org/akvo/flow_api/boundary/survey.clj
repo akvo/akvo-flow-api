@@ -18,6 +18,10 @@
   (ds/with-remote-api remote-api instance-id
     (doall (survey/list-by-folder user-id folder-id))))
 
+(defn list-by-user [remote-api instance-id user-id]
+  (ds/with-remote-api remote-api instance-id
+    (doall (survey/list-by-user user-id))))
+
 (defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
   (if-let [survey-definition (get-survey-definition survey-cache
                                instance-id
