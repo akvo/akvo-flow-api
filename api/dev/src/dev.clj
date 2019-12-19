@@ -25,3 +25,42 @@
 (gen/set-ns-prefix 'org.akvo.flow-api)
 
 (reloaded.repl/set-init! new-system)
+
+(comment
+  (->
+   (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/surveys"
+                        {:as :json
+                         :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                         :content-type :json})
+   :body
+   )
+
+
+  (-> (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/folders"
+                        {:as :json
+                         :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                         
+                         :content-type :json}
+                        )
+      :body)
+
+    
+
+
+
+{:surveys
+ [{:id "152342023",
+   :name "BAR-handpump",
+   :folderId "153142013",
+   :createdAt "2017-03-27T08:47:23.830Z",
+   :modifiedAt "2017-03-27T08:53:53.184Z",
+   :surveyUrl
+   "https://localhost:3000/flow/orgs/akvoflowsandbox/surveys/152342023"}
+  {:id "148412306",
+   :name "NR-handpump",
+   :folderId "153142013",
+   :createdAt "2017-03-27T09:05:51.743Z",
+   :modifiedAt "2017-03-27T09:07:27.506Z",
+   :surveyUrl
+   "https://localhost:3000/flow/orgs/akvoflowsandbox/surveys/148412306"}]}  
+  )

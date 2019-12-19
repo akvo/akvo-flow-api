@@ -39,7 +39,7 @@
 
 (def survey-definition-params-spec (s/keys :req-un [::spec/survey-id]))
 
-(def survey-list-params-spec (s/keys :req-un [::spec/folder-id]))
+(def survey-list-params-spec (s/keys :opt-un [::spec/folder-id]))
 
 (defn endpoint* [{:keys [remote-api]}]
   (routes
@@ -62,13 +62,7 @@
                         (user/id-by-email-or-throw-error remote-api instance-id email)
                         folder-id)
            (add-survey-links (utils/get-api-root req) alias)
-           (surveys-response))))
-   (GET "/surveys-list" {:keys [email alias instance-id params] :as req}
-     (-> remote-api
-         (survey/list-by-user instance-id
-                              (user/id-by-email-or-throw-error remote-api instance-id email))
-         (add-survey-links (utils/get-api-root req) alias)
-         (surveys-response)))))
+           (surveys-response))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

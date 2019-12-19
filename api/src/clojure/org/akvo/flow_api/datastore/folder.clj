@@ -7,15 +7,16 @@
 (defn list [user-id parent-id]
   (let [folder-dao (FolderDAO.)
         all-folders (.listAll folder-dao)
-        user-folders (.filterByUserAuthorizationObjectId folder-dao
-                                                         all-folders
-                                                         user-id)]
+        user-folders (->> (.filterByUserAuthorizationObjectId folder-dao
+                                                              all-folders
+                                                              user-id)
+                          (map (fn [folder]
+                                 {:id (str (ds/id folder))
+                                  :name (.getName folder)
+                                  :parent-id (str (.getParentId folder))
+                                  :created-at (ds/created-at folder)
+                                  :modified-at (ds/modified-at folder)})))]
+    (cond->> user-folders
+      parent-id (filter #(= (:parent-id %) parent-id)))))
 
-    (->> user-folders
-         (map (fn [folder]
-                {:id (str (ds/id folder))
-                 :name (.getName folder)
-                 :parent-id (str (.getParentId folder))
-                 :created-at (ds/created-at folder)
-                 :modified-at (ds/modified-at folder)}))
-         (filter #(= (:parent-id %) parent-id)))))
+

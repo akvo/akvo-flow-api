@@ -29,7 +29,7 @@
       (-> remote-api
           (folder/list instance-id
                        (user/id-by-email-or-throw-error remote-api instance-id email)
-                       (or parent-id "0"))
+                       parent-id)
           (add-links (utils/get-api-root req) alias)
           (folders-response)))))
 
