@@ -14,5 +14,15 @@ services:
    network_mode: service:mainnetwork
    volumes:
      - ~/.m2:/home/akvo/.m2
+     - pg-data:/pg-certs:ro
  wiremock-proxy:
    image: rodolpheche/wiremock:2.16.0-alpine
+ unilog:
+   image: akvo/akvo-postgres-11:20190222.b31bfb0
+   environment:
+     - POSTGRES_PASSWORD=akvo
+   volumes:
+     - ./unilog/initdb:/docker-entrypoint-initdb.d:ro
+     - pg-data:/var/lib/postgresql/data
+volumes:
+   pg-data:
