@@ -1,9 +1,9 @@
 (ns org.akvo.flow-api.endpoint.utils
   (:require [clojure.string :as s])
-  (:import [java.net URLEncoder]))
+  (:import java.net.URLEncoder))
 
 (defn url-encode [s]
-  (java.net.URLEncoder/encode (str s) "UTF-8"))
+  (URLEncoder/encode (str s) "UTF-8"))
 
 (defn query-params-str [m]
   (->> (for [[k v] m
@@ -14,7 +14,10 @@
 
 (defn get-api-root [request]
   (let [hostname (get (:headers request) "host")
-        [scheme suffix] (if (s/includes? hostname "flow-api-internal") ["http" ""] ["https" "flow/"])]
+        [scheme suffix] (if (or (s/includes? hostname "flow-api-internal")
+                                (s/includes? hostname "localhost"))
+                          ["http" ""]
+                          ["https" "flow/"])]
     (str scheme "://" hostname "/" suffix)))
 
 (defn url-builder

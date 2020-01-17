@@ -14,10 +14,11 @@
   :survey #var org.akvo.flow-api.endpoint.survey/endpoint
   :data-point #var org.akvo.flow-api.endpoint.data-point/endpoint
   :form-instance #var org.akvo.flow-api.endpoint.form-instance/endpoint
-  :config-refresh #var org.akvo.flow-api.endpoint.config-refresh/endpoint}
+  :config-refresh #var org.akvo.flow-api.endpoint.config-refresh/endpoint
+  :sync #var org.akvo.flow-api.endpoint.sync/endpoint}
  :dependencies
  {:http [:app]
-  :app  [:root :folder :survey :data-point :form-instance :config-refresh :flumenfly]
+  :app  [:root :folder :survey :data-point :form-instance :config-refresh :flumenfly :sync]
   :remote-api [:akvo-flow-server-config :user-cache :survey-cache :unknown-user-cache :survey-list-cache]
   :akvo-flow-server-config []
   :root []
@@ -30,7 +31,8 @@
   :survey [:remote-api :akvo-flow-server-config]
   :data-point [:remote-api :akvo-flow-server-config]
   :form-instance [:remote-api :akvo-flow-server-config]
-  :config-refresh [:akvo-flow-server-config]}
+  :config-refresh [:akvo-flow-server-config]
+  :sync [:remote-api :akvo-flow-server-config]}
  :config
  {:app
   {:middleware
