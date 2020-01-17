@@ -2,12 +2,13 @@
   (:require [akvo.commons.gae :as gae]
             [akvo.commons.gae.query :as q]
             [cheshire.core :as json]
+            [medley.core :as medley]
             [clojure.string :as s]
             [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
   (:refer-clojure :exclude [list])
   (:import [com.fasterxml.jackson.core JsonParseException]
-           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]))
+           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable Key KeyFactory DatastoreService]))
 
 (set! *warn-on-reflection* true)
 
@@ -40,3 +41,13 @@
          cursor (ds/cursor data-points-iterator)]
      {:data-points data-points
       :cursor cursor})))
+
+(defn data-points-by-id
+  ^com.google.appengine.api.datastore.QueryResultIterator
+  [^DatastoreService ds ids]
+  (.get ds ^Iterable (mapv (fn [^long x]
+                             (KeyFactory/createKey "SurveyedLocale" x)) ids)))
+
+(defn by-ids [ds ids]
+  (let [data-points (mapv data-point-entity->map (vals (data-points-by-id ds ids)))]
+    {:data-points data-points}))

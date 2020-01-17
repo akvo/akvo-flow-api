@@ -8,7 +8,7 @@
             [org.akvo.flow-api.utils :as utils])
   (:refer-clojure :exclude [list])
   (:import com.fasterxml.jackson.core.JsonParseException
-           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
+           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable DatastoreService KeyFactory]
            java.text.SimpleDateFormat
            java.util.Date
            java.time.Instant))
@@ -266,3 +266,19 @@
                                      (get responses (:id form-instance))))
                             form-instances)
       :cursor cursor})))
+
+(defn form-instances-by-id
+  [^DatastoreService ds ids]
+  (.get ds ^Iterable (mapv (fn [^long x]
+                             (KeyFactory/createKey "SurveyInstance" x)) ids)))
+
+(defn by-ids
+  ([ds form-definition ids]
+   {:pre [(some? (:id form-definition))]}
+   (let [form-instances (mapv form-instance-entity->map (vals (form-instances-by-id ds ids)))
+         responses (fetch-responses ds form-definition form-instances {})]
+     {:form-instances (mapv (fn [form-instance]
+                              (assoc form-instance
+                                :responses
+                                (get responses (:id form-instance))))
+                        form-instances)})))

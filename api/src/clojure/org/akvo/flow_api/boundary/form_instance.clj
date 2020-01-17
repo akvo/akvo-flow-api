@@ -13,3 +13,6 @@
                                                :asset-url-root
                                                (asset-url-root akvo-flow-server-config
                                                  instance-id))))))
+
+(defn by-ids [ds form-definition form-instance-ids]
+  (form-instance/by-ids ds form-definition form-instance-ids))

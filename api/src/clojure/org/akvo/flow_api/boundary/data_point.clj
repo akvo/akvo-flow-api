@@ -9,3 +9,8 @@
   (ds/with-remote-api remote-api instance-id
     (let [ds (DatastoreServiceFactory/getDatastoreService)]
       (data-point/list ds survey-definition opts))))
+
+(defn by-ids [remote-api instance-id data-point-ids]
+  (ds/with-remote-api remote-api instance-id
+    (let [ds (DatastoreServiceFactory/getDatastoreService)]
+      (data-point/by-ids ds data-point-ids))))
