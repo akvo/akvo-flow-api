@@ -43,8 +43,6 @@
      (unilog/after-forms-loaded r (apply can-see (:forms-to-load r)))))
   ([events perms]
    (let [r (unilog/process-new-events-pure events)]
-     (println r)
-     (println (unilog/after-forms-loaded r perms))
      (unilog/after-forms-loaded r perms))))
 
 (def form-instance-changes (comp :form-instances-to-load changes-with-permissions))
