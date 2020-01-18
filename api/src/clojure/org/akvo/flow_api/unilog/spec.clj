@@ -32,6 +32,7 @@
    "formInstanceCreated" ::formInstance
    "formUpdated" ::form
    "formCreated" ::form
+   "formDeleted" ::delete
    "answerCreated" ::answer
    "answerUpdated" ::answer})
 

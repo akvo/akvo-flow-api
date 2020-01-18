@@ -12,6 +12,11 @@
    :payload (json/generate-string {:eventType (rand-nth ["formUpdated" "formCreated"])
                                    :entity {:id form-id}})})
 
+(defn form-deleted [form-id]
+  {:id (swap! unilog-id-seq inc)
+   :payload (json/generate-string {:eventType "formDeleted"
+                                   :entity {:id form-id}})})
+
 (defn form-instance [form-id form-instance-id]
   {:id (swap! unilog-id-seq inc)
    :payload (json/generate-string {:eventType (rand-nth ["formInstanceUpdated" "formInstanceCreated"])
@@ -46,6 +51,7 @@
 (def form-instance-deletes (comp :form-instance-deleted changes-with-permissions))
 (def unilog-id (comp :unilog-id changes-with-permissions))
 (def form-changes (comp :form-changes changes-with-permissions))
+(def form-deletes (comp :form-deleted changes-with-permissions))
 
 (deftest unilog-batch
   (testing "basic case"
@@ -110,6 +116,20 @@
                            (form-instance 1 (any))
                            (form-instance 2 (any))
                            (form 10)])))))
+
+  (testing "form deletes"
+    (is (= #{}
+          (form-changes [(form 34)
+                         (form-deleted 34)])))
+    (testing "Delete and update in same unilog batch"
+      (is (= #{34}
+            (form-deletes [(form 34)
+                           (form-deleted 34)]))))
+
+    (testing "Delete of form and update of answer in the same unilog batch"
+      (is (= #{}
+            (form-instance-changes [(answer 44 (any))
+                                    (form-deleted 44)])))))
 
   (testing "Not interesting event"
     (is (= 1010

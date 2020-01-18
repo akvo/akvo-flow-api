@@ -63,7 +63,9 @@
                                 (if ((comp #{"formInstanceDeleted"} :eventType :payload) x)
                                   (assoc x ::form-instance-deleted (-> x :payload :entity :id))
                                   (if ((comp #{"formUpdated" "formCreated"} :eventType :payload) x)
-                                    (assoc x ::form-changed (-> x :payload :entity :id))))))
+                                    (assoc x ::form-changed (-> x :payload :entity :id))
+                                    (if ((comp #{"formDeleted"} :eventType :payload) x)
+                                      (assoc x ::form-deleted (-> x :payload :entity :id)))))))
                             (assoc x ::x ::invalid))))
                    ;(take 100000)
                    )]
@@ -71,15 +73,19 @@
       pipeline
       (fn
         ([final]
-         (let [form-updated (set (keep ::form-changed final))
+         (let [form-deleted (set (keep ::form-deleted final))
+               form-updated (apply disj (set (keep ::form-changed final)) form-deleted)
                form-instance-deleted (set (keep ::form-instance-deleted final))
                form-instances-grouped-by-form (group-by :form-id
                                                 (remove
-                                                  (comp form-instance-deleted :id)
-                                                  (distinct (keep ::form-instance-changed final))))]
+                                                  (comp form-deleted :form-id)
+                                                  (remove
+                                                    (comp form-instance-deleted :id)
+                                                    (distinct (keep ::form-instance-changed final)))))]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
             ::form-updated form-updated
+            ::form-deleted form-deleted
             :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
             ::forms-instances-grouped-by-form form-instances-grouped-by-form}))
         ([sofar batch]
@@ -90,12 +96,14 @@
 (defn after-forms-loaded [{::keys [forms-instances-grouped-by-form
                                    unilog-id
                                    form-updated
+                                   form-deleted
                                    form-instance-deleted]}
                           form-id->form]
   {:unilog-id unilog-id
    :form-changes (->> form-updated
                    (keep form-id->form)
                    set)
+   :form-deleted form-deleted
    :form-instance-deleted form-instance-deleted
    :form-instances-to-load (->> forms-instances-grouped-by-form
                              (keep (fn [[form-id form-instance]]
