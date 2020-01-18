@@ -71,16 +71,32 @@
       pipeline
       (fn
         ([final]
-         (let [form-instance-deleted (set (keep ::form-instance-deleted final))]
-           {:unilog-id (:id (last final))
-            :form-instance-deleted form-instance-deleted
-            :form-instances (remove
-                              (comp form-instance-deleted :id)
-                              (distinct (keep ::form-instance-changed final)))}))
+         (let [form-instance-deleted (set (keep ::form-instance-deleted final))
+               form-instances-grouped-by-form (group-by :form-id
+                                                (remove
+                                                  (comp form-instance-deleted :id)
+                                                  (distinct (keep ::form-instance-changed final))))]
+           {::unilog-id (:id (last final))
+            ::form-instance-deleted form-instance-deleted
+            :forms-to-load (keys form-instances-grouped-by-form)
+            ::forms-instances-grouped-by-form form-instances-grouped-by-form}))
         ([sofar batch]
          (conj sofar batch)))
       []
       reducible)))
+
+(defn after-forms-loaded [{::keys [forms-instances-grouped-by-form
+                                   unilog-id
+                                   form-instance-deleted]}
+                          form-id->form]
+  {:unilog-id unilog-id
+   :form-instance-deleted form-instance-deleted
+   :form-instances-to-load (->> forms-instances-grouped-by-form
+                             (keep (fn [[form-id form-instance]]
+                                     (when-let [form (get form-id->form form-id)]
+                                       {:form form
+                                        :form-instance-ids (set (map :id form-instance))})))
+                             set)})
 
 (defn process-new-events [reducible]
   (let [last-unilog-id (atom nil)
