@@ -22,15 +22,26 @@
                                    :entity {:formInstanceId form-instance-id
                                             :formId form-id}})})
 
-(def unilog-id (comp :unilog-id unilog/process-new-events-pure))
-(def form-instance-deletes (comp :form-instance-deleted unilog/process-new-events-pure))
-(def form-instance-changes (comp set :form-instances unilog/process-new-events-pure))
+(defn can-see [& form-ids]
+  (zipmap form-ids form-ids))
+
+(defn changes-with-permissions
+  ([events]
+   (let [r (unilog/process-new-events-pure events)]
+     (unilog/after-forms-loaded r (apply can-see (:forms-to-load r)))))
+  ([events perms]
+   (let [r (unilog/process-new-events-pure events)]
+     (unilog/after-forms-loaded r perms))))
+
+(def form-instance-changes (comp :form-instances-to-load changes-with-permissions))
+(def form-instance-deletes (comp :form-instance-deleted changes-with-permissions))
+(def unilog-id (comp :unilog-id changes-with-permissions))
 
 (deftest unilog-batch
   (testing "basic case"
-    (is (= #{{:form-id 24 :id 2} {:form-id 24 :id 10}}
+    (is (= #{{:form 24 :form-instance-ids #{2 10}}}
           (form-instance-changes [(form-instance 24 2)
-                                  (form-instance 24 10)])))
+                                   (form-instance 24 10)])))
 
     (let [last-form-instance (form-instance 100 99)]
       (is (= (:id last-form-instance)
@@ -39,18 +50,24 @@
                         last-form-instance])))))
 
   (testing "Multiple updates for the same form instance are grouped together"
-    (is (= #{{:form-id 23 :id 2}}
+    (is (= #{{:form 23 :form-instance-ids #{2}}}
           (form-instance-changes [(form-instance 23 2)
                                   (form-instance 23 2)]))))
 
   (testing "Answers"
-    (is (= #{{:form-id 8 :id 111}}
+    (is (= #{{:form 8 :form-instance-ids #{111}}}
           (form-instance-changes [(answer 8 111)]))))
 
   (testing "Answers and form instance updates are grouped together"
-    (is (= #{{:form-id 8 :id 111}}
+    (is (= #{{:form 8 :form-instance-ids #{111}}}
           (form-instance-changes [(answer 8 111)
                                   (form-instance 8 111)]))))
+
+  (testing "Not permission for some forms"
+    (is (= #{{:form {:any-form :definition} :form-instance-ids #{0}}}
+          (form-instance-changes [(answer 1 0)
+                                  (form-instance 2 0)]
+            {1 {:any-form :definition}}))))
 
   (testing "Delete form instance"
     (is (= #{10 11 112}
