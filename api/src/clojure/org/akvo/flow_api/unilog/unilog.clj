@@ -61,24 +61,26 @@
                               (if ((comp #{"answerUpdated" "answerCreated"} :eventType :payload) x)
                                 (assoc x ::form-instance-changed (-> x :payload :entity echo2))
                                 (if ((comp #{"formInstanceDeleted"} :eventType :payload) x)
-                                  (assoc x ::form-instance-deleted (-> x :payload :entity :id)))))
+                                  (assoc x ::form-instance-deleted (-> x :payload :entity :id))
+                                  (if ((comp #{"formUpdated" "formCreated"} :eventType :payload) x)
+                                    (assoc x ::form-changed (-> x :payload :entity :id))))))
                             (assoc x ::x ::invalid))))
-                   ;(filter (comp #(s/valid? ::unilog-spec/eventType %) :eventType :payload))
-                   ;(filter akvo-authorization.unilog.spec/valid?)
                    ;(take 100000)
                    )]
     (transduce
       pipeline
       (fn
         ([final]
-         (let [form-instance-deleted (set (keep ::form-instance-deleted final))
+         (let [form-updated (set (keep ::form-changed final))
+               form-instance-deleted (set (keep ::form-instance-deleted final))
                form-instances-grouped-by-form (group-by :form-id
                                                 (remove
                                                   (comp form-instance-deleted :id)
                                                   (distinct (keep ::form-instance-changed final))))]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
-            :forms-to-load (keys form-instances-grouped-by-form)
+            ::form-updated form-updated
+            :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
             ::forms-instances-grouped-by-form form-instances-grouped-by-form}))
         ([sofar batch]
          (conj sofar batch)))
@@ -87,9 +89,13 @@
 
 (defn after-forms-loaded [{::keys [forms-instances-grouped-by-form
                                    unilog-id
+                                   form-updated
                                    form-instance-deleted]}
                           form-id->form]
   {:unilog-id unilog-id
+   :form-changes (->> form-updated
+                   (keep form-id->form)
+                   set)
    :form-instance-deleted form-instance-deleted
    :form-instances-to-load (->> forms-instances-grouped-by-form
                              (keep (fn [[form-id form-instance]]

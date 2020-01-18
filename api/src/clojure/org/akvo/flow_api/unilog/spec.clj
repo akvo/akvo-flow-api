@@ -11,6 +11,9 @@
 (s/def ::formInstance
   (s/keys :req-un [::id ::formId]))
 
+(s/def ::form
+  (s/keys :req-un [::id]))
+
 (s/def ::answer
   (s/keys :req-un [::formInstanceId ::formId]))
 
@@ -27,6 +30,8 @@
   {"formInstanceDeleted" ::delete
    "formInstanceUpdated" ::formInstance
    "formInstanceCreated" ::formInstance
+   "formUpdated" ::form
+   "formCreated" ::form
    "answerCreated" ::answer
    "answerUpdated" ::answer})
 
