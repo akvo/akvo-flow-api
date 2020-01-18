@@ -4,6 +4,8 @@
   :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/core.cache "0.6.5"]
+                 [org.clojure/test.check "0.10.0-alpha3"]
+                 [org.clojure/spec.alpha "0.2.176"]
                  [com.stuartsierra/component "0.3.1"]
                  [compojure "1.5.1"]
                  [duct "0.8.2"]

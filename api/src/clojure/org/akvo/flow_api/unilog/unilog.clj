@@ -2,6 +2,7 @@
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory])
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
+            org.akvo.flow-api.boundary.form-instance
             [org.akvo.flow-api.unilog.spec :as unilog-spec]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.datastore :as ds]
@@ -38,6 +39,49 @@
 
 (def parse-json #(json/parse-string % true))
 
+(defn echo [{:keys [formId id]}]
+  {:form-id formId
+   :id id})
+
+(defn echo2 [{:keys [formId formInstanceId]}]
+  {:form-id formId
+   :id formInstanceId})
+
+(defn process-new-events-pure [reducible]
+  (let [pipeline (comp
+                   (map (fn [x]
+                          (try
+                            (update x :payload parse-json)
+                            (catch Exception e
+                              x))))
+                   (map (fn [x]
+                          (if (unilog-spec/valid? x)
+                            (if ((comp #{"formInstanceUpdated" "formInstanceCreated"} :eventType :payload) x)
+                              (assoc x ::form-instance-changed (-> x :payload :entity echo))
+                              (if ((comp #{"answerUpdated" "answerCreated"} :eventType :payload) x)
+                                (assoc x ::form-instance-changed (-> x :payload :entity echo2))
+                                (if ((comp #{"formInstanceDeleted"} :eventType :payload) x)
+                                  (assoc x ::form-instance-deleted (-> x :payload :entity :id)))))
+                            (assoc x ::x ::invalid))))
+                   ;(filter (comp #(s/valid? ::unilog-spec/eventType %) :eventType :payload))
+                   ;(filter akvo-authorization.unilog.spec/valid?)
+                   ;(take 100000)
+                   )]
+    (transduce
+      pipeline
+      (fn
+        ([final]
+         (let [form-instance-deleted (set (keep ::form-instance-deleted final))]
+           {:unilog-id (:id (last final))
+            :form-instance-deleted form-instance-deleted
+            :form-instances (remove
+                              (comp form-instance-deleted :id)
+                              (distinct (keep ::form-instance-changed final)))}))
+        ([sofar batch]
+         (conj sofar batch)))
+      []
+      reducible)))
+
 (defn process-new-events [reducible]
   (let [last-unilog-id (atom nil)
         pipeline (comp
@@ -45,10 +89,10 @@
                    (map (fn [x]
                           (reset! last-unilog-id {:unilog-id (:id x)})
                           x))
-                   (remove (comp #(s/valid? ::unilog-spec/eventType %) :eventType :payload))
+                   (filter unilog-spec/valid?)
                    ;(filter (comp #(s/valid? ::unilog-spec/eventType %) :eventType :payload))
                    ;(filter akvo-authorization.unilog.spec/valid?)
-                   (take 300000)
+                   (take 100000)
                    )]
     (transduce
       pipeline
@@ -57,11 +101,6 @@
          (println "starting" (count final))
          final)
         ([sofar batch]
-         ;(println (first batch))
-         ;(println (second batch))
-         ;(println @last-unilog-id)
-         ;(println "batch!" (count batch))
-         ;(println "sofar" sofar)
          (conj sofar batch)))
       []
       reducible)))
