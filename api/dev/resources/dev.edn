@@ -9,6 +9,12 @@
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
     :applied   ^:replace [:not-found :wrap-anomaly :json-response :ring-defaults :wrap-email :json-body :stacktrace]}}
-  :http
-  {:port 3000}
-  :api-root "http://localhost:3000/"}}
+  :http  {:port 3000}
+  :api-root "http://localhost:3000/"
+  :unilog-db ^:replace {:event-log-password "unilog"
+                        :event-log-user "unilog"
+                        :table-name "event_log"
+                        :extra-jdbc-opts {:ssl false
+                                          :read-only? true}
+                        :event-log-port 5432
+                        :event-log-host "unilog"}}}

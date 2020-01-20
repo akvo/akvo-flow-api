@@ -15,14 +15,25 @@
             [hugsql.core :as hugsql]
     ;       [taoensso.timbre :as timbre]
     ;       [iapetos.core :as prometheus]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [com.stuartsierra.component :as component]))
+
+(defrecord UnilogConfig [spec]
+  component/Lifecycle
+  (start [this]
+    (assoc this :spec spec))
+  (stop [this]
+    (dissoc this :spec)))
+
+(defn config [spec]
+  (->UnilogConfig spec))
 
 (defn event-log-spec [config]
   (assert (not (empty? config)) "Config map is empty")
   (merge
     {:subprotocol "postgresql"
      :subname (format "//%s:%s/%s"
-                (config :event-log-server)
+                (config :event-log-host)
                 (config :event-log-port)
                 (config :db-name))
      :ssl true
@@ -135,6 +146,11 @@
       []
       reducible)))
 
+(defn get-cursor [config]
+  (let [result (first (jdbc/query (event-log-spec config)
+                                  ["SELECT MAX(id) AS cursor FROM event_log"]))]
+    (or (:cursor result) 0)))
+
 #_(defn process-unilog-queue-for-tenant [{:keys [authz-db unilog-db] :as config} db-name]
     (let [offset (last-unilog-id authz-db db-name)]
       (process-new-events
@@ -144,6 +160,7 @@
           (event-log-spec (assoc unilog-db :db-name db-name))
           ["SELECT id, payload::text FROM event_log WHERE id > ? ORDER BY id ASC " offset]
           {:auto-commit? false :fetch-size 1000}))))
+
 
 (comment
 

@@ -6,7 +6,8 @@
   :user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :unknown-user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :survey-list-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
-  :survey-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache}
+  :survey-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
+  :unilog-db #var org.akvo.flow-api.unilog.unilog/config}
  :endpoints
  {:root #var org.akvo.flow-api.endpoint.root/endpoint
   :folder #var org.akvo.flow-api.endpoint.folder/endpoint
@@ -32,7 +33,8 @@
   :data-point [:remote-api :akvo-flow-server-config]
   :form-instance [:remote-api :akvo-flow-server-config]
   :config-refresh [:akvo-flow-server-config]
-  :sync [:remote-api :akvo-flow-server-config]}
+  :sync [:remote-api :akvo-flow-server-config :unilog-db]
+  :unilog-db []}
  :config
  {:app
   {:middleware
@@ -68,4 +70,11 @@
   :unknown-user-cache {:ttl 600000} ;; 10 mins
   :survey-list-cache {:ttl 300000} ;; 5 mins
   :survey-cache {:ttl 3600000} ;; 1 hr
+  :unilog-db {:event-log-password event-log-password
+              :event-log-user event-log-user
+              :table-name event-log-table-name
+              :extra-jdbc-opts {:ssl true
+                                :read-only? true}
+              :event-log-port event-log-port
+              :event-log-host event-log-host}
   }}

@@ -4,6 +4,7 @@
             [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
+            [org.akvo.flow-api.unilog.unilog :as unilog]
             [ring.util.response :refer [response]]))
 
 
@@ -13,12 +14,19 @@
 (defn validate-params
   [params])
 
+(defn get-db-name [instance-id]
+  (str "u_" instance-id))
+
 (defn endpoint* [deps]
   (GET "/sync" {:keys [alias query-params] :as req}
     (if (empty? query-params)
       (anomaly/bad-request "Missing required parameters" {})
       (if (= "true" (get query-params "initial"))
-        (response {:next-sync-url (next-sync-url (utils/get-api-root req) alias 123)})
+        (let [db-name (get-db-name (:instance-id req))
+              db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))]
+          (response {:next-sync-url (next-sync-url (utils/get-api-root req)
+                                                   alias
+                                                   (unilog/get-cursor db-spec))}))
         (response {:changes []
                    :next-sync-url (next-sync-url (utils/get-api-root req) alias 456)})))))
 

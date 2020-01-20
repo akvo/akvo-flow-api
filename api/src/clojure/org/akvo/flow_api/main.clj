@@ -23,7 +23,13 @@
   (let [bindings {'http-port (Integer/parseInt (:http-port env "3000"))
                   'github-auth-token (secret-value "github-auth-token")
                   'sentry-dsn (secret-value "sentry-dsn")
-                  'tmp-dir (utils/ensure-trailing-slash (System/getProperty "java.io.tmpdir"))}
+                  'tmp-dir (utils/ensure-trailing-slash (System/getProperty "java.io.tmpdir"))
+                  'event-log-user (secret-value "event-log-user")
+                  'event-log-password (secret-value "event-log-password")
+                  'event-log-table-name (secret-value "event-log-table-name")
+                  'event-log-server (secret-value "event-log-server")
+                  'event-log-host (secret-value "event-log-host")
+                  'event-log-port (Integer/parseInt (secret-value "event-log-port"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
                       (component/start))]
     (add-shutdown-hook ::stop-system #(component/stop system))
