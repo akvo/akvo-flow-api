@@ -17,4 +17,4 @@
                         :extra-jdbc-opts {:ssl false
                                           :read-only? true}
                         :event-log-port 5432
-                        :event-log-host "unilog"}}}
+                        :event-log-host "localhost"}}}

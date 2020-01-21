@@ -19,6 +19,7 @@ services:
    image: rodolpheche/wiremock:2.16.0-alpine
  unilog:
    image: akvo/akvo-postgres-11:20190222.b31bfb0
+   network_mode: service:mainnetwork
    environment:
      - POSTGRES_PASSWORD=akvo
    volumes:
