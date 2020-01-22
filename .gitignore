@@ -13,5 +13,6 @@
 **/.lein-failures
 **/.nrepl-port
 **/.cache/
+**/.eastwood
 /bin/
 .idea
