@@ -26,27 +26,30 @@
 ;; TODO: Express parameter logic via spec?
 (def params-spec (s/keys :opt-un [::initial ::next ::cursor]))
 
-(defn endpoint* [deps]
-  (GET "/sync" {:keys [alias instance-id params] :as req}
-    (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
-      (if (and initial cursor next)
-        (anomaly/bad-request "Invalid parameters" {})
-        (if (= "true" initial)
+(defn changes [deps {:keys [alias instance-id params] :as req}]
+  (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
+    (if (and initial cursor next)
+      (anomaly/bad-request "Invalid parameters" {})
+      (if (= "true" initial)
+        (let [db-name (get-db-name instance-id)
+              db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))]
+          (response {:next-sync-url (next-sync-url (utils/get-api-root req)
+                                      alias
+                                      (unilog/get-cursor db-spec))}))
+        (if (and next cursor)
           (let [db-name (get-db-name instance-id)
-                db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))]
-            (response {:next-sync-url (next-sync-url (utils/get-api-root req)
-                                                     alias
-                                                     (unilog/get-cursor db-spec))}))
-          (if (and next cursor)
-            (let [db-name (get-db-name instance-id)
-                  db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))
-                  offset (Long/parseLong cursor)]
-              (if (unilog/valid-offset? offset db-spec)
-                (let [changes (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))]
-                  (response {:changes (select-keys changes [:form-instance-changed :form-instance-deleted :form-changed :form-deleted])
-                             :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))}))
-                (anomaly/bad-request "Invalid cursor" {})))
-            (anomaly/bad-request "Invalid parameters" {})))))))
+                db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))
+                offset (Long/parseLong cursor)]
+            (if (unilog/valid-offset? offset db-spec)
+              (let [changes (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))]
+                (response {:changes (select-keys changes [:form-instance-changed :form-instance-deleted :form-changed :form-deleted])
+                           :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))}))
+              (anomaly/bad-request "Invalid cursor" {})))
+          (anomaly/bad-request "Invalid parameters" {}))))))
+
+(defn endpoint* [deps]
+  (GET "/sync" req
+    (#'changes deps req)))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
