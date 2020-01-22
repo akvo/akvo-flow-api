@@ -20,7 +20,7 @@
   (stop [this]
     (dissoc this :spec)))
 
-(defn config [spec]
+(defn unilog-config [spec]
   (->UnilogConfig spec))
 
 (defn event-log-spec [config]

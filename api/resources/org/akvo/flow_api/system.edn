@@ -7,7 +7,7 @@
   :unknown-user-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :survey-list-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
   :survey-cache #var org.akvo.flow-api.component.cache/ttl-memory-cache
-  :unilog-db #var org.akvo.flow-api.unilog.unilog/config}
+  :unilog-db #var org.akvo.flow-api.unilog.unilog/unilog-config}
  :endpoints
  {:root #var org.akvo.flow-api.endpoint.root/endpoint
   :folder #var org.akvo.flow-api.endpoint.folder/endpoint
