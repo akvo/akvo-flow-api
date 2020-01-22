@@ -139,5 +139,5 @@
       {:unilog-id (:unilog-id events-2)
        :form-deleted (:form-deleted events-2)
        :form-changed (:form-changes events-2)
-       :form-instace-deleted (:form-instance-deleted events-2)
+       :form-instance-deleted (:form-instance-deleted events-2)
        :form-instance-changed (:form-instances form-instances)})))
