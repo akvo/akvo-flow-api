@@ -135,8 +135,4 @@
                            (fn [to-load]
                              (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
                            (:form-instances-to-load events-2))]
-      {:unilog-id (:unilog-id events-2)
-       :form-deleted (:form-deleted events-2)
-       :form-changed (:form-changes events-2)
-       :form-instance-deleted (:form-instance-deleted events-2)
-       :form-instance-changed (:form-instances form-instances)})))
+      (assoc events-2 :form-instances form-instances))))
