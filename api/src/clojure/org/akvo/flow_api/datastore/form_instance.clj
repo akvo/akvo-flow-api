@@ -148,7 +148,11 @@
                     (let [;; SimpleDateFormat is not thread safe so we create a
                           ;; new one every time.
                           date-format (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z")]
-                      (.parse date-format response-str))))]
+                      (try
+                        (.parse date-format response-str)
+                        (catch java.text.ParseException _
+                          (let [date-format-2 (SimpleDateFormat. "dd-MM-yyyy")]
+                            (.parse date-format-2 response-str)))))))]
     (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
@@ -269,7 +273,7 @@
 
 (defn form-instances-by-id
   [^DatastoreService ds ids]
-  (.get ds ^Iterable (mapv (fn [^long x]
+  (.get ds ^Iterable (mapv (fn [^Long x]
                              (KeyFactory/createKey "SurveyInstance" x)) ids)))
 
 (defn by-ids
