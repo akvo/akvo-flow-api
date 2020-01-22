@@ -48,7 +48,7 @@
 (def form-instance-changes (comp :form-instances-to-load changes-with-permissions))
 (def form-instance-deletes (comp :form-instance-deleted changes-with-permissions))
 (def unilog-id (comp :unilog-id changes-with-permissions))
-(def form-changes (comp :form-changes changes-with-permissions))
+(def form-changes (comp :form-changed changes-with-permissions))
 (def form-deletes (comp :form-deleted changes-with-permissions))
 
 (deftest unilog-batch

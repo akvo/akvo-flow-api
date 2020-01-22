@@ -97,7 +97,7 @@
                                    form-instance-deleted]}
                           form-id->form]
   {:unilog-id unilog-id
-   :form-changes (->> form-updated
+   :form-changed (->> form-updated
                    (keep form-id->form)
                    set)
    :form-deleted form-deleted
