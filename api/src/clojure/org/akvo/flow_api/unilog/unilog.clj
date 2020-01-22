@@ -131,11 +131,10 @@
                         {}
                         (:forms-to-load events))
           events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
-          form-instances (reduce (fn [acc to-load]
-                                   (conj (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load))))
-                                 []
-                                 (:form-instances-to-load events-2))
-          form-changed nil]
+          form-instances (keep
+                           (fn [to-load]
+                             (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
+                           (:form-instances-to-load events-2))]
       {:unilog-id (:unilog-id events-2)
        :form-deleted (:form-deleted events-2)
        :form-changed (:form-changes events-2)
