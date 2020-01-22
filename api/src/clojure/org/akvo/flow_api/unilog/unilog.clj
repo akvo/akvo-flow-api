@@ -131,8 +131,9 @@
                         {}
                         (:forms-to-load events))
           events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
-          form-instances (keep
-                           (fn [to-load]
-                             (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
-                           (:form-instances-to-load events-2))]
-      (assoc events-2 :form-instances form-instances))))
+          form-instances (doall
+                           (mapcat
+                             (fn [to-load]
+                               (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
+                             (:form-instances-to-load events-2)))]
+      (assoc events-2 :form-instance-changed form-instances))))

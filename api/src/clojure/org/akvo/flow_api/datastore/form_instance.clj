@@ -281,8 +281,8 @@
    {:pre [(some? (:id form-definition))]}
    (let [form-instances (mapv form-instance-entity->map (vals (form-instances-by-id ds ids)))
          responses (fetch-responses ds form-definition form-instances {})]
-     {:form-instances (mapv (fn [form-instance]
-                              (assoc form-instance
-                                :responses
-                                (get responses (:id form-instance))))
-                        form-instances)})))
+     (mapv (fn [form-instance]
+             (assoc form-instance
+               :responses
+               (get responses (:id form-instance))))
+       form-instances))))
