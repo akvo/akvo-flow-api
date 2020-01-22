@@ -72,7 +72,6 @@
   :survey-cache {:ttl 3600000} ;; 1 hr
   :unilog-db {:event-log-password event-log-password
               :event-log-user event-log-user
-              :table-name event-log-table-name
               :extra-jdbc-opts {:ssl true
                                 :read-only? true}
               :event-log-port event-log-port
