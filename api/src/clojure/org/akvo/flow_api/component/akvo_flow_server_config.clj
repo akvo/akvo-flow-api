@@ -2,7 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [org.akvo.flow-api.akvo-flow-server-config :as afsc]
             [clojure.java.io :as io])
-  (:import (org.apache.commons.io FileUtils)))
+  (:import [org.apache.commons.io FileUtils]))
 
 (defn delete-old-tmp-dir [tmp-subdir]
   (when tmp-subdir
@@ -37,10 +37,25 @@
   component/Lifecycle
   (start [this]
     (assoc this
-           :flow-config (atom {:instances {"akvoflowsandbox" "akvoflowsandbox"
-                                           "uat1" "akvoflow-uat1"
-                                           "uat2" "akvoflow-uat2"}})))
+           :flow-config (atom {:instances {"akvoflowsandbox" "akvoflowsandbox"}
+                               :aliases {"aquaforall" "akvoflow-70"
+                                         "uat1" "akvoflow-uat1"
+                                         "uat2" "akvoflow-uat2"}})))
   (stop [this] this))
 
 (defn dummy-akvo-flow-server-config [_]
   (->DummyAkvoFlowServerConfig))
+
+
+(defrecord LocalAkvoFlowServerConfig [config-folder instance-id alias]
+  component/Lifecycle
+  (start [this]
+    (let [instance-props (afsc/read-instance-props (str config-folder "/" instance-id)
+                                                   "appengine-web.xml")]
+      (assoc this :flow-config (atom {:instances {instance-id instance-props}
+                                      :aliases {alias instance-id}}))))
+  (stop [this]
+    this))
+
+(defn local-akvo-flow-server-config [{:keys [config-folder instance-id alias]}]
+  (->LocalAkvoFlowServerConfig config-folder instance-id alias))

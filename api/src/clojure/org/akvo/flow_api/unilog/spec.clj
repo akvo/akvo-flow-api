@@ -20,12 +20,6 @@
 (s/def ::delete
   (s/keys :req-un [::id]))
 
-(s/def ::eventType string?)
-(s/def ::entity map?)
-(s/def ::payload (s/keys :req-un [::eventType ::entity]))
-
-(s/def ::event (s/keys :req-un [::id ::payload]))
-
 (def type-to-spec
   {"formInstanceDeleted" ::delete
    "formInstanceUpdated" ::formInstance
@@ -36,7 +30,16 @@
    "answerCreated" ::answer
    "answerUpdated" ::answer})
 
+(s/def ::eventType (set (keys type-to-spec)))
+(s/def ::entity map?)
+(s/def ::payload (s/keys :req-un [::eventType ::entity]))
+
+(s/def ::event (s/keys :req-un [::id ::payload]))
+
+
 (defn valid? [m]
+  #_(when-not (s/valid? ::event m)
+    (prn (s/explain ::event m)))
   (and
     (s/valid? ::event m)
     (when-let [spec (get type-to-spec (-> m :payload :eventType))]

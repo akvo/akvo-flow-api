@@ -2,19 +2,14 @@
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory])
   (:require [clojure.java.jdbc :as jdbc]
             [clojure.string :as str]
-            org.akvo.flow-api.boundary.form-instance
+            [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.unilog.spec :as unilog-spec]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
-    ;[akvo-authorization.unilog.spec :as unilog-spec]
-    ;       [akvo-authorization.unilog.message-processor]
-    ;[jsonista.core :as json]
             [clojure.spec.alpha :as s]
             [hugsql.core :as hugsql]
-    ;       [taoensso.timbre :as timbre]
-    ;       [iapetos.core :as prometheus]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
 
@@ -41,26 +36,19 @@
      :password (config :event-log-password)}
     (:extra-jdbc-opts config)))
 
-#_(defn unilog-dbs [db db-prefix]
-    (->>
-      (get-database-names db)
-      (map :datname)
-      (filter (fn [db-name] (str/starts-with? db-name db-prefix)))
-      set))
-
 (def parse-json #(json/parse-string % true))
 
-(defn echo [{:keys [formId id]}]
+(defn form-data [{:keys [formId id surveyId]}]
   {:form-id formId
    :id id})
 
-(defn echo2 [{:keys [formId formInstanceId]}]
+(defn form-instance-data [{:keys [formId formInstanceId]}]
   {:form-id formId
    :id formInstanceId})
 
-(defn process-new-events-pure [reducible]
+(defn process-new-events [reducible]
   (let [pipeline (comp
-                   (map (fn [x]
+                  (map (fn [x]
                           (try
                             (update x :payload parse-json)
                             (catch Exception e
@@ -68,18 +56,16 @@
                    (map (fn [x]
                           (if (unilog-spec/valid? x)
                             (if ((comp #{"formInstanceUpdated" "formInstanceCreated"} :eventType :payload) x)
-                              (assoc x ::form-instance-changed (-> x :payload :entity echo))
+                              (assoc x ::form-instance-changed (-> x :payload :entity form-data))
                               (if ((comp #{"answerUpdated" "answerCreated"} :eventType :payload) x)
-                                (assoc x ::form-instance-changed (-> x :payload :entity echo2))
+                                (assoc x ::form-instance-changed (-> x :payload :entity form-instance-data))
                                 (if ((comp #{"formInstanceDeleted"} :eventType :payload) x)
                                   (assoc x ::form-instance-deleted (-> x :payload :entity :id))
                                   (if ((comp #{"formUpdated" "formCreated"} :eventType :payload) x)
                                     (assoc x ::form-changed (-> x :payload :entity :id))
                                     (if ((comp #{"formDeleted"} :eventType :payload) x)
                                       (assoc x ::form-deleted (-> x :payload :entity :id)))))))
-                            (assoc x ::x ::invalid))))
-                   ;(take 100000)
-                   )]
+                            (assoc x ::x ::invalid)))))]
     (transduce
       pipeline
       (fn
@@ -123,138 +109,35 @@
                                         :form-instance-ids (set (map :id form-instance))})))
                              set)})
 
-(defn process-new-events [reducible]
-  (let [last-unilog-id (atom nil)
-        pipeline (comp
-                   (map (fn [x] (update x :payload parse-json)))
-                   (map (fn [x]
-                          (reset! last-unilog-id {:unilog-id (:id x)})
-                          x))
-                   (filter unilog-spec/valid?)
-                   ;(filter (comp #(s/valid? ::unilog-spec/eventType %) :eventType :payload))
-                   ;(filter akvo-authorization.unilog.spec/valid?)
-                   (take 100000)
-                   )]
-    (transduce
-      pipeline
-      (fn
-        ([final]
-         (println "starting" (count final))
-         final)
-        ([sofar batch]
-         (conj sofar batch)))
-      []
-      reducible)))
-
 (defn get-cursor [config]
   (let [result (first (jdbc/query (event-log-spec config)
                                   ["SELECT MAX(id) AS cursor FROM event_log"]))]
     (or (:cursor result) 0)))
 
-#_(defn process-unilog-queue-for-tenant [{:keys [authz-db unilog-db] :as config} db-name]
-    (let [offset (last-unilog-id authz-db db-name)]
-      (process-new-events
-        config
-        db-name
-        (jdbc/reducible-query
-          (event-log-spec (assoc unilog-db :db-name db-name))
-          ["SELECT id, payload::text FROM event_log WHERE id > ? ORDER BY id ASC " offset]
-          {:auto-commit? false :fetch-size 1000}))))
+(defn valid-offset? [offset config]
+  (let [result (first (jdbc/query (event-log-spec config)
+                                  ["SELECT id AS offset FROM event_log WHERE id = ?" offset]))]
+    (boolean (:offset result))))
 
-
-(comment
-
-  ;; HERE!!!
-  (def unilog-db {:event-log-password ""
-                  :event-log-user ""
-                  :db-name "unilog"
-                  :extra-jdbc-opts {:ssl false}
-                  :event-log-port 5432
-                  :event-log-server ""})
-
-
-  (def x (let [offset 0]
-           (process-new-events
-             (jdbc/reducible-query
-               (event-log-spec (assoc unilog-db :db-name (str "u_" instance-id)))
-               ["SELECT id, payload::text FROM event_log WHERE id > ? ORDER BY id ASC" offset]
-               {:auto-commit? false :fetch-size 3000}))))
-
-  (count x)
-  ; "dataPointUpdated" "answerCreated" "formInstanceCreated"
-  ; "formUpdated" , "questionGroupUpdated", "questionDeleted"
-
-  (keys (:remote-api reloaded.repl/system))
-
-  (def instance-id "akvoflow-23")
-  (def email "")                                            ;; HERE!!!!
-
-  (def user-id (user/id-by-email-or-throw-error
-                 (:remote-api reloaded.repl/system)
-                 instance-id
-                 email))
-
-
-  (->> x
-    (filter (comp #(clojure.string/includes? % "formInstanceDeleted") :eventType :payload))
-    (map :payload)
-    set
-    (take 3)
-    )
-
-  (ds/with-remote-api (:remote-api reloaded.repl/system) instance-id
-    (let [ds (DatastoreServiceFactory/getDatastoreService)]
-      (->> x
-        (filter (comp (partial = "answerCreated") :eventType :payload))
-        (map :payload)
-        (map (comp #(select-keys % [:formId :formInstanceId]) :entity))
-        set
-        (take 3)
-        (group-by :formId)
-        (mapv (fn [[formId forms-instances]]
-                (println formId)
-                (if-let [form-definition (su/get-form-definition (long formId))]
-                  (org.akvo.flow-api.boundary.form-instance/by-ids
-                    ds
-                    form-definition
-                    (map :formInstanceId forms-instances)
-                    ))))
-        (mapcat :form-instances)
-        )))
-
-
-
-  (ds/with-remote-api (:remote-api reloaded.repl/system) instance-id
-    (let [ds (DatastoreServiceFactory/getDatastoreService)]
-      (->> x
-        (filter (comp (partial = "answerCreated") :eventType :payload))
-        (map :payload)
-        (map (comp #(select-keys % [:formId :formInstanceId]) :entity))
-        set
-        (take 3)
-        (group-by :formId)
-        (mapv (fn [[formId forms-instances]]
-               (println formId)
-               (if-let [form-definition (su/get-form-definition (long formId))]
-                 (org.akvo.flow-api.boundary.form-instance/by-ids
-                   ds
-                   form-definition
-                   (map :formInstanceId forms-instances)
-                   ))))
-        (mapcat :form-instances)
-        )))
-
-
-  (org.akvo.flow-api.boundary.data-point/by-ids
-    (:remote-api reloaded.repl/system)
-    "akvoflowsandbox"
-    (->> x
-      (filter (comp (partial = "dataPointUpdated") :eventType :payload))
-      (map :payload)
-      (map (comp :id :entity))
-      set))
-
-  (->> x
-    (map (comp :eventType :payload))
-    (frequencies))
-  )
+(defn process-unilog-events [offset config instance-id remote-api]
+  (ds/with-remote-api remote-api instance-id
+    (let [ds (DatastoreServiceFactory/getDatastoreService)
+          events (process-new-events
+                   (jdbc/reducible-query (event-log-spec config)
+                                         ["SELECT id, payload::text AS payload FROM event_log WHERE id > ? ORDER BY id ASC LIMIT 300" offset]
+                                         {:auto-commit? false :fetch-size 300}))
+          form-id->form (reduce (fn [acc form-id]
+                          (assoc acc form-id (su/get-form-definition (long form-id))))
+                        {}
+                        (:forms-to-load events))
+          events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
+          form-instances (reduce (fn [acc to-load]
+                                   (conj (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load))))
+                                 []
+                                 (:form-instances-to-load events-2))
+          form-changed nil]
+      {:unilog-id (:unilog-id events-2)
+       :form-deleted (:form-deleted events-2)
+       :form-changed (:form-changes events-2)
+       :form-instace-deleted (:form-instance-deleted events-2)
+       :form-instance-changed (:form-instances form-instances)})))
