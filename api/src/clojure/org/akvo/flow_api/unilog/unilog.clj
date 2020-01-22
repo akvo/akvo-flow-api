@@ -115,9 +115,10 @@
     (or (:cursor result) 0)))
 
 (defn valid-offset? [offset config]
-  (let [result (first (jdbc/query (event-log-spec config)
-                                  ["SELECT id AS offset FROM event_log WHERE id = ?" offset]))]
-    (boolean (:offset result))))
+  (or (= offset 0)
+      (let [result (first (jdbc/query (event-log-spec config)
+                                      ["SELECT id AS offset FROM event_log WHERE id = ?" offset]))]
+        (boolean (:offset result)))))
 
 (defn process-unilog-events [offset config instance-id remote-api]
   (ds/with-remote-api remote-api instance-id
@@ -127,9 +128,9 @@
                                          ["SELECT id, payload::text AS payload FROM event_log WHERE id > ? ORDER BY id ASC LIMIT 300" offset]
                                          {:auto-commit? false :fetch-size 300}))
           form-id->form (reduce (fn [acc form-id]
-                          (assoc acc form-id (su/get-form-definition (long form-id))))
-                        {}
-                        (:forms-to-load events))
+                                  (assoc acc form-id (su/get-form-definition (long form-id))))
+                                {}
+                                (:forms-to-load events))
           events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
           form-instances (doall
                            (mapcat

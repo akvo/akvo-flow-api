@@ -28,7 +28,7 @@
 
 (defn changes [deps {:keys [alias instance-id params] :as req}]
   (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
-    (if (and initial cursor next)
+    (if (and initial (or cursor next))
       (anomaly/bad-request "Invalid parameters" {})
       (if (= "true" initial)
         (let [db-name (get-db-name instance-id)
