@@ -1,14 +1,13 @@
-(ns org.akvo.flow-api.sync-end-to-end
-  (:require [akvo.commons.psql-util :as pg]
-            [cheshire.core :as json]
-            [clj-http.client :as http]
-            [clojure.java.io :as io]
-            [clojure.java.jdbc :as jdbc]
-            [clojure.test :refer :all]
-            [duct.util.system :refer [load-system]]
-            [org.akvo.flow-api.endpoint.sync :as endpoint]
-            [org.akvo.flow-api.fixtures :as fixtures]
-            [org.akvo.flow-api.unilog.unilog :refer [event-log-spec]]))
+(:require [akvo.commons.psql-util :as pg]
+          [cheshire.core :as json]
+          [clj-http.client :as http]
+          [clojure.java.io :as io]
+          [clojure.java.jdbc :as jdbc]
+          [clojure.test :refer :all]
+          [duct.util.system :refer [load-system]]
+          [org.akvo.flow-api.endpoint.sync :as endpoint]
+          [org.akvo.flow-api.fixtures :as fixtures]
+          [org.akvo.flow-api.unilog.unilog :refer [event-log-spec]])
 
 (def sync-url "http://localhost:3000/orgs/akvoflowsandbox/sync")
 
@@ -44,7 +43,11 @@
 
 (def more-changes [{:entity {:id 144622080
                              :formId 146532016}
-                    :eventType "formInstanceUpdated"}])
+                    :eventType "formInstanceUpdated"}
+                   {:entity {:id 144622023
+                             :surveyId 152342023
+                             :identifier "3kfp-75fw-w15n"}
+                    :eventType "dataPointCreated"}])
 
 (defn insert-log [db events]
   (jdbc/insert-multi! db :event_log (mapv (fn [evt]
@@ -107,4 +110,6 @@
                                                                        "accept" "application/vnd.akvo.flow.v2+json"}})
                                                   :body)]
             (is (= #{"144622080"}
-                   (set (map :id (:formInstanceChanged changes)))))))))))
+                   (set (map :id (:formInstanceChanged changes)))))
+            (is (= #{"144622023"}
+                   (set (map :id (:dataPointChanged changes)))))))))))
