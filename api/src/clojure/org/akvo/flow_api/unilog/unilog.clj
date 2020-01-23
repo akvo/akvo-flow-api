@@ -9,7 +9,6 @@
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
             [clojure.spec.alpha :as s]
-            [hugsql.core :as hugsql]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
 
