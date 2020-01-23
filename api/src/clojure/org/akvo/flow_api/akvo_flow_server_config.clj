@@ -54,13 +54,21 @@
 (defn get-appengine-web-xml-file [auth-token tmp-dir instance-id]
   (get-file auth-token tmp-dir instance-id (format "/%s/appengine-web.xml" instance-id)))
 
+
+(defn read-instance-props [path file-name]
+  (try
+    (let [ae-reader (AppEngineWebXmlReader. path file-name)]
+      (.getSystemProperties (.readAppEngineWebXml ae-reader)))
+    (catch Exception e)))
+
 (defn get-instance-props [auth-token tmp-dir instance-id]
   (try
-    (let [tmp-file (get-appengine-web-xml-file auth-token tmp-dir instance-id)
-          ae-reader (AppEngineWebXmlReader. (format "%s%s/" tmp-dir instance-id)
-                                            (.getName tmp-file))]
-      (.getSystemProperties (.readAppEngineWebXml ae-reader)))
+    (let [tmp-file (get-appengine-web-xml-file auth-token tmp-dir instance-id)]
+      (read-instance-props (format "%s%s/" tmp-dir instance-id)
+                           (.getName tmp-file)))
     (catch clojure.lang.ExceptionInfo e)))
+
+
 
 (defn get-instance-map [auth-token tmp-dir]
   (let [instance-ids (fetch-instance-ids auth-token)]

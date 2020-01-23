@@ -1,10 +1,11 @@
+
 (ns org.akvo.flow-api.endpoint.spec
   (:require [clojure.spec.alpha :as s]
             [org.akvo.flow-api.anomaly :as anomaly])
   (:import [org.apache.commons.codec.binary Base64]))
 
 (s/def ::positive-integer-string (s/and string? #(re-matches #"[0-9]+" %)))
-(s/def ::base64-string (s/and string? #(Base64/isBase64 %)))
+(s/def ::base64-string (s/and string? #(Base64/isBase64 ^String %)))
 
 (s/def ::page-size (s/nilable ::positive-integer-string))
 (s/def ::cursor (s/nilable ::base64-string))
@@ -24,5 +25,5 @@
                                             {:pred (str (:pred problem))
                                              :val (:val problem)
                                              :in (:in problem)})
-                                          (:clojure.spec/problems
+                                          (:clojure.spec.alpha/problems
                                            (s/explain-data spec params)))})))

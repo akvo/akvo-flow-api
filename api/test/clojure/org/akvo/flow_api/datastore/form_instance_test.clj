@@ -53,11 +53,11 @@
           data (form-instance/list ds {:id form-id} {:page-size 100
                                                      :prefetch-size 100
                                                      :submission-date filter-date
-                                                     :op ">="})
+                                                     :operator ">="})
           ok? (fn [instance]
                 (and (= (:form-id instance)
                         form-id)
-                     (= (.isAfter filter-date (.toInstant ^Date (:submission-date instance))))))]
+                     (.isAfter (.toInstant ^Date (:submission-date instance)) filter-date)))]
       (is (not-empty (:form-instances data)))
       (is (every? ok? (:form-instances data))))))
 

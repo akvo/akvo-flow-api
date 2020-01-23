@@ -20,4 +20,5 @@ services:
       - ~/.m2:/home/akvo/.m2
    depends_on:
       - flow-api
+      - unilog
    command: "true"

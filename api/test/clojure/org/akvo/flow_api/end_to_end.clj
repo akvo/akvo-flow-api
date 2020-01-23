@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.end-to-end
   (:require [clojure.test :refer :all]
+            [clj-http.client]
             [org.akvo.flow-api.fixtures :as fixtures]))
 
 (use-fixtures :once (fn [f]

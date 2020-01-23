@@ -8,7 +8,7 @@
             [org.akvo.flow-api.utils :as utils])
   (:refer-clojure :exclude [list])
   (:import com.fasterxml.jackson.core.JsonParseException
-           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable]
+           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable DatastoreService KeyFactory]
            java.text.SimpleDateFormat
            java.util.Date
            java.time.Instant))
@@ -148,7 +148,11 @@
                     (let [;; SimpleDateFormat is not thread safe so we create a
                           ;; new one every time.
                           date-format (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z")]
-                      (.parse date-format response-str))))]
+                      (try
+                        (.parse date-format response-str)
+                        (catch java.text.ParseException _
+                          (let [date-format-2 (SimpleDateFormat. "dd-MM-yyyy")]
+                            (.parse date-format-2 response-str)))))))]
     (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
@@ -266,3 +270,19 @@
                                      (get responses (:id form-instance))))
                             form-instances)
       :cursor cursor})))
+
+(defn form-instances-by-id
+  [^DatastoreService ds ids]
+  (.get ds ^Iterable (mapv (fn [^Long x]
+                             (KeyFactory/createKey "SurveyInstance" x)) ids)))
+
+(defn by-ids
+  ([ds form-definition ids]
+   {:pre [(some? (:id form-definition))]}
+   (let [form-instances (mapv form-instance-entity->map (vals (form-instances-by-id ds ids)))
+         responses (fetch-responses ds form-definition form-instances {})]
+     (mapv (fn [form-instance]
+             (assoc form-instance
+               :responses
+               (get responses (:id form-instance))))
+       form-instances))))
