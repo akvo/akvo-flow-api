@@ -1,13 +1,14 @@
-(:require [akvo.commons.psql-util :as pg]
-          [cheshire.core :as json]
-          [clj-http.client :as http]
-          [clojure.java.io :as io]
-          [clojure.java.jdbc :as jdbc]
-          [clojure.test :refer :all]
-          [duct.util.system :refer [load-system]]
-          [org.akvo.flow-api.endpoint.sync :as endpoint]
-          [org.akvo.flow-api.fixtures :as fixtures]
-          [org.akvo.flow-api.unilog.unilog :refer [event-log-spec]])
+(ns org.akvo.flow-api.sync-end-to-end
+  (:require [akvo.commons.psql-util :as pg]
+            [cheshire.core :as json]
+            [clj-http.client :as http]
+            [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.test :refer :all]
+            [duct.util.system :refer [load-system]]
+            [org.akvo.flow-api.endpoint.sync :as endpoint]
+            [org.akvo.flow-api.fixtures :as fixtures]
+            [org.akvo.flow-api.unilog.unilog :refer [event-log-spec]]))
 
 (def sync-url "http://localhost:3000/orgs/akvoflowsandbox/sync")
 
