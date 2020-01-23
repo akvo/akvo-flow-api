@@ -73,6 +73,7 @@
   :unilog-db {:event-log-password event-log-password
               :event-log-user event-log-user
               :extra-jdbc-opts {:ssl true
+                                :sslfactory "org.postgresql.ssl.DefaultJavaSSLFactory"
                                 :read-only? true}
               :event-log-port event-log-port
               :event-log-host event-log-host}
