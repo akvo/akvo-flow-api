@@ -8,6 +8,7 @@
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
+            [org.akvo.flow-api.datastore.data-point :as data-point]
             [clojure.spec.alpha :as s]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
@@ -45,14 +46,6 @@
   {:form-id formId
    :id formInstanceId})
 
-(defn data-point-data [{:keys [id surveyId lat lon name identifier]}]
-  (cond-> {:id (str id)
-           :identifier identifier
-           :survey-id (str surveyId)}
-    lat (assoc :lat lat)
-    lon (assoc :lon lon)
-    name (assoc :name name)))
-
 (defn process-new-events [reducible]
   (let [pipeline (comp
                   (map (fn [x]
@@ -70,7 +63,7 @@
                                     "formInstanceDeleted" [::form-instance-deleted :id]
                                     ("formUpdated" "formCreated") [::form-changed :id]
                                     "formDeleted" [::form-deleted :id]
-                                    ("dataPointUpdated" "dataPointCreated") [::data-point-changed data-point-data]
+                                    ("dataPointUpdated" "dataPointCreated") [::data-point-changed :id]
                                     "dataPointDeleted" [::data-point-deleted :id])]
                               (assoc x k (-> x :payload :entity f)))))))]
     (transduce
@@ -87,9 +80,7 @@
                                                     (comp form-instance-deleted :id)
                                                     (distinct (keep ::form-instance-changed final)))))
                data-point-deleted (set (keep ::data-point-deleted final))
-               data-point-changed (set (remove
-                                         (comp data-point-deleted #(Long/parseLong %) :id)
-                                         (keep ::data-point-changed final)))]
+               data-point-changed (apply disj (set (keep ::data-point-changed final)) data-point-deleted)]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
             ::form-updated form-updated
@@ -153,5 +144,6 @@
                            (mapcat
                              (fn [to-load]
                                (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
-                             (:form-instances-to-load events-2)))]
-      (assoc events-2 :form-instance-changed form-instances))))
+                             (:form-instances-to-load events-2)))
+          data-point-changed (doall (data-point/by-ids ds (:data-point-changed events-2)))]
+      (assoc events-2 :form-instance-changed form-instances :data-point-changed data-point-changed))))

@@ -41,13 +41,19 @@
                 db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))
                 offset (Long/parseLong cursor)]
             (if (unilog/valid-offset? offset db-spec)
-              (let [changes (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))]
-                (response {:changes (select-keys changes [:form-instance-changed
-                                                          :form-instance-deleted
-                                                          :form-changed
-                                                          :form-deleted
-                                                          :data-point-changed
-                                                          :data-point-deleted])
+              (let [changes (->
+                             (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))
+                             (select-keys [:form-instance-changed
+                                           :form-instance-deleted
+                                           :form-changed
+                                           :form-deleted
+                                           :data-point-changed
+                                           :data-point-deleted
+                                           :unilog-id])
+                             (update :form-deleted #(map str %))
+                             (update :form-instance-deleted #(map str %))
+                             (update :data-point-deleted #(map str %)))]
+                (response {:changes (dissoc changes :unilog-id)
                            :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))}))
               (anomaly/bad-request "Invalid cursor" {})))
           (anomaly/bad-request "Invalid parameters" {}))))))

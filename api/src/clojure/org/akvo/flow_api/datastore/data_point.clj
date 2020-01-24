@@ -45,9 +45,8 @@
 (defn data-points-by-id
   ^com.google.appengine.api.datastore.QueryResultIterator
   [^DatastoreService ds ids]
-  (.get ds ^Iterable (mapv (fn [^long x]
+  (.get ds ^Iterable (mapv (fn [^Long x]
                              (KeyFactory/createKey "SurveyedLocale" x)) ids)))
 
 (defn by-ids [ds ids]
-  (let [data-points (mapv data-point-entity->map (vals (data-points-by-id ds ids)))]
-    {:data-points data-points}))
+  (mapv data-point-entity->map (vals (data-points-by-id ds ids))))

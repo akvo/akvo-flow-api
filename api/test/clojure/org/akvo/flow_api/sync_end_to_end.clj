@@ -48,7 +48,9 @@
                    {:entity {:id 144622023
                              :surveyId 152342023
                              :identifier "3kfp-75fw-w15n"}
-                    :eventType "dataPointCreated"}])
+                    :eventType "dataPointCreated"}
+                   {:entity {:id 144602051}
+                    :eventType "dataPointDeleted"}])
 
 (defn insert-log [db events]
   (jdbc/insert-multi! db :event_log (mapv (fn [evt]
@@ -97,8 +99,8 @@
                                                                      "content-type" "application/json"
                                                                      "accept" "application/vnd.akvo.flow.v2+json"}})
                                                 :body)]
-          (is (= (:formDeleted changes) [147552013]))
-          (is (= (:formInstanceDeleted changes) [144602134]))
+          (is (= (:formDeleted changes) ["147552013"]))
+          (is (= (:formInstanceDeleted changes) ["144602134"]))
           (is (= #{"144602050"}
                  (set (map :id (:formInstanceChanged changes)))))
           (is (= #{"149382279" "147502018"}
@@ -113,4 +115,5 @@
             (is (= #{"144622080"}
                    (set (map :id (:formInstanceChanged changes)))))
             (is (= #{"144622023"}
-                   (set (map :id (:dataPointChanged changes)))))))))))
+                   (set (map :id (:dataPointChanged changes)))))
+            (is (= (:dataPointDeleted changes) ["144602051"]))))))))

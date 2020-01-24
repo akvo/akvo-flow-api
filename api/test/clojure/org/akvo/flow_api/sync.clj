@@ -109,8 +109,7 @@
                                              (form-instance-deleted 10)]))))))
 
   (testing "Data points"
-    (is (= #{{:id "10" :survey-id "20" :identifier "aaaa-bbbb-cccc"}
-             {:id "30" :survey-id "40" :identifier "dddd-eeee-ffff"}}
+    (is (= #{10 30}
            (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
                                 (data-point 30 40 "dddd-eeee-ffff")])))
     (is (= #{30}
