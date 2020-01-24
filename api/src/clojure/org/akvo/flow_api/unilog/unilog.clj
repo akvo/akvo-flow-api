@@ -86,8 +86,10 @@
                                                   (remove
                                                     (comp form-instance-deleted :id)
                                                     (distinct (keep ::form-instance-changed final)))))
-               data-point-changed (set (keep ::data-point-changed final))
-               data-point-deleted (set (keep ::data-point-deleted final))]
+               data-point-deleted (set (keep ::data-point-deleted final))
+               data-point-changed (set (remove
+                                         (comp data-point-deleted #(Long/parseLong %) :id)
+                                         (keep ::data-point-changed final)))]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
             ::form-updated form-updated

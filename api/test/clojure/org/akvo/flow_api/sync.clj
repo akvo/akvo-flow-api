@@ -114,7 +114,11 @@
            (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
                                 (data-point 30 40 "dddd-eeee-ffff")])))
     (is (= #{30}
-           (data-point-deleted [(data-point-deleted-event 30)]))))
+           (data-point-deleted [(data-point-deleted-event 30)])))
+
+    (is (empty?
+          (data-point-changes [(data-point-deleted-event 11)
+                               (data-point 11 40 "dddd-eeee-ffff")]))))
 
   (testing "form changes"
     (is (= #{{:some-form :definition}}
