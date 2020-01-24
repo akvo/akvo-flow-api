@@ -8,6 +8,7 @@
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
+            [org.akvo.flow-api.datastore.data-point :as data-point]
             [clojure.spec.alpha :as s]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
@@ -53,18 +54,18 @@
                             (catch Exception e
                               x))))
                    (map (fn [x]
-                          (if (unilog-spec/valid? x)
-                            (if ((comp #{"formInstanceUpdated" "formInstanceCreated"} :eventType :payload) x)
-                              (assoc x ::form-instance-changed (-> x :payload :entity form-data))
-                              (if ((comp #{"answerUpdated" "answerCreated"} :eventType :payload) x)
-                                (assoc x ::form-instance-changed (-> x :payload :entity form-instance-data))
-                                (if ((comp #{"formInstanceDeleted"} :eventType :payload) x)
-                                  (assoc x ::form-instance-deleted (-> x :payload :entity :id))
-                                  (if ((comp #{"formUpdated" "formCreated"} :eventType :payload) x)
-                                    (assoc x ::form-changed (-> x :payload :entity :id))
-                                    (if ((comp #{"formDeleted"} :eventType :payload) x)
-                                      (assoc x ::form-deleted (-> x :payload :entity :id)))))))
-                            (assoc x ::x ::invalid)))))]
+                          (if-not (unilog-spec/valid? x)
+                            (assoc x ::x ::invalid)
+                            (let [[k f]
+                                  (case (-> x :payload :eventType)
+                                    ("formInstanceUpdated" "formInstanceCreated") [::form-instance-changed form-data]
+                                    ("answerUpdated" "answerCreated") [::form-instance-changed form-instance-data]
+                                    "formInstanceDeleted" [::form-instance-deleted :id]
+                                    ("formUpdated" "formCreated") [::form-changed :id]
+                                    "formDeleted" [::form-deleted :id]
+                                    ("dataPointUpdated" "dataPointCreated") [::data-point-changed :id]
+                                    "dataPointDeleted" [::data-point-deleted :id])]
+                              (assoc x k (-> x :payload :entity f)))))))]
     (transduce
       pipeline
       (fn
@@ -77,13 +78,17 @@
                                                   (comp form-deleted :form-id)
                                                   (remove
                                                     (comp form-instance-deleted :id)
-                                                    (distinct (keep ::form-instance-changed final)))))]
+                                                    (distinct (keep ::form-instance-changed final)))))
+               data-point-deleted (set (keep ::data-point-deleted final))
+               data-point-changed (apply disj (set (keep ::data-point-changed final)) data-point-deleted)]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
             ::form-updated form-updated
             ::form-deleted form-deleted
             :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
-            ::forms-instances-grouped-by-form form-instances-grouped-by-form}))
+            ::forms-instances-grouped-by-form form-instances-grouped-by-form
+            ::data-point-changed data-point-changed
+            ::data-point-deleted data-point-deleted}))
         ([sofar batch]
          (conj sofar batch)))
       []
@@ -93,7 +98,9 @@
                                    unilog-id
                                    form-updated
                                    form-deleted
-                                   form-instance-deleted]}
+                                   form-instance-deleted
+                                   data-point-changed
+                                   data-point-deleted]}
                           form-id->form]
   {:unilog-id unilog-id
    :form-changed (->> form-updated
@@ -106,7 +113,9 @@
                                      (when-let [form (get form-id->form form-id)]
                                        {:form form
                                         :form-instance-ids (set (map :id form-instance))})))
-                             set)})
+                             set)
+   :data-point-changed data-point-changed
+   :data-point-deleted data-point-deleted})
 
 (defn get-cursor [config]
   (let [result (first (jdbc/query (event-log-spec config)
@@ -135,5 +144,6 @@
                            (mapcat
                              (fn [to-load]
                                (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
-                             (:form-instances-to-load events-2)))]
-      (assoc events-2 :form-instance-changed form-instances))))
+                             (:form-instances-to-load events-2)))
+          data-point-changed (doall (data-point/by-ids ds (:data-point-changed events-2)))]
+      (assoc events-2 :form-instance-changed form-instances :data-point-changed data-point-changed))))

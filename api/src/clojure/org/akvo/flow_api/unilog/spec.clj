@@ -7,12 +7,18 @@
 
 (s/def ::formId ::id)
 (s/def ::formInstanceId ::id)
+(s/def ::dataPointId ::id)
+(s/def ::surveyId ::id)
+(s/def ::identifier string?)
 
 (s/def ::formInstance
   (s/keys :req-un [::id ::formId]))
 
 (s/def ::form
   (s/keys :req-un [::id]))
+
+(s/def ::dataPoint
+  (s/keys :req-un [::id ::surveyId ::identifier]))
 
 (s/def ::answer
   (s/keys :req-un [::formInstanceId ::formId]))
@@ -28,18 +34,20 @@
    "formCreated" ::form
    "formDeleted" ::delete
    "answerCreated" ::answer
-   "answerUpdated" ::answer})
+   "answerUpdated" ::answer
+   "dataPointCreated" ::dataPoint
+   "dataPointUpdated" ::dataPoint
+   "dataPointDeleted" ::delete})
 
 (s/def ::eventType (set (keys type-to-spec)))
 (s/def ::entity map?)
 (s/def ::payload (s/keys :req-un [::eventType ::entity]))
-
 (s/def ::event (s/keys :req-un [::id ::payload]))
 
 
 (defn valid? [m]
   #_(when-not (s/valid? ::event m)
-    (prn (s/explain ::event m)))
+    (s/explain ::event m))
   (and
     (s/valid? ::event m)
     (when-let [spec (get type-to-spec (-> m :payload :eventType))]

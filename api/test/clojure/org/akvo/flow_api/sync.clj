@@ -34,6 +34,18 @@
                                    :entity {:formInstanceId form-instance-id
                                             :formId form-id}})})
 
+(defn data-point [data-point-id survey-id identifier]
+  {:id (swap! unilog-id-seq inc)
+   :payload (json/generate-string {:eventType (rand-nth ["dataPointCreated" "dataPointUpdated"])
+                                   :entity {:id data-point-id
+                                            :surveyId survey-id
+                                            :identifier identifier}})})
+
+(defn data-point-deleted-event [data-point-id]
+  {:id (swap! unilog-id-seq inc)
+   :payload (json/generate-string {:eventType "dataPointDeleted"
+                                   :entity {:id data-point-id}})})
+
 (defn can-see [& form-ids]
   (zipmap form-ids form-ids))
 
@@ -50,6 +62,8 @@
 (def unilog-id (comp :unilog-id changes-with-permissions))
 (def form-changes (comp :form-changed changes-with-permissions))
 (def form-deletes (comp :form-deleted changes-with-permissions))
+(def data-point-changes (comp :data-point-changed changes-with-permissions))
+(def data-point-deleted (comp :data-point-deleted changes-with-permissions))
 
 (deftest unilog-batch
   (testing "basic case"
@@ -93,6 +107,17 @@
       (is (empty?
             (form-instance-changes (shuffle [(answer (any) 10)
                                              (form-instance-deleted 10)]))))))
+
+  (testing "Data points"
+    (is (= #{10 30}
+           (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
+                                (data-point 30 40 "dddd-eeee-ffff")])))
+    (is (= #{30}
+           (data-point-deleted [(data-point-deleted-event 30)])))
+
+    (is (empty?
+          (data-point-changes [(data-point-deleted-event 11)
+                               (data-point 11 40 "dddd-eeee-ffff")]))))
 
   (testing "form changes"
     (is (= #{{:some-form :definition}}
