@@ -53,14 +53,6 @@
     lon (assoc :lon lon)
     name (assoc :name name)))
 
-(def form-instance-changed (comp #{"formInstanceUpdated" "formInstanceCreated"} :eventType :payload))
-(def form-instance-deleted (comp #{"formInstanceDeleted"} :eventType :payload))
-(def answer-changed (comp #{"answerUpdated" "answerCreated"} :eventType :payload))
-(def form-changed (comp #{"formUpdated" "formCreated"} :eventType :payload))
-(def form-deleted (comp #{"formDeleted"} :eventType :payload))
-(def data-point-changed (comp #{"dataPointUpdated" "dataPointCreated"} :eventType :payload))
-(def data-point-deleted (comp #{"dataPointDeleted"} :eventType :payload))
-
 (defn process-new-events [reducible]
   (let [pipeline (comp
                   (map (fn [x]
@@ -69,16 +61,18 @@
                             (catch Exception e
                               x))))
                    (map (fn [x]
-                          (if (unilog-spec/valid? x)
-                            (cond
-                              (form-instance-changed x) (assoc x ::form-instance-changed (-> x :payload :entity form-data))
-                              (answer-changed x) (assoc x ::form-instance-changed (-> x :payload :entity form-instance-data))
-                              (form-instance-deleted x) (assoc x ::form-instance-deleted (-> x :payload :entity :id))
-                              (form-changed x) (assoc x ::form-changed (-> x :payload :entity :id))
-                              (form-deleted x) (assoc x ::form-deleted (-> x :payload :entity :id))
-                              (data-point-changed x) (assoc x ::data-point-changed (-> x :payload :entity data-point-data))
-                              (data-point-deleted x) (assoc x ::data-point-deleted (-> x :payload :entity :id)))
-                            (assoc x ::x ::invalid)))))]
+                          (if-not (unilog-spec/valid? x)
+                            (assoc x ::x ::invalid)
+                            (let [[k f]
+                                  (case (-> x :payload :eventType)
+                                    ("formInstanceUpdated" "formInstanceCreated") [::form-instance-changed form-data]
+                                    ("answerUpdated" "answerCreated") [::form-instance-changed form-instance-data]
+                                    "formInstanceDeleted" [::form-instance-deleted :id]
+                                    ("formUpdated" "formCreated") [::form-changed :id]
+                                    "formDeleted" [::form-deleted :id]
+                                    ("dataPointUpdated" "dataPointCreated") [::data-point-changed data-point-data]
+                                    "dataPointDeleted" [::data-point-deleted :id])]
+                              (assoc x k (-> x :payload :entity f)))))))]
     (transduce
       pipeline
       (fn
