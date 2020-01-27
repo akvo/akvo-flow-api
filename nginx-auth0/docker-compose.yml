@@ -14,7 +14,8 @@ services:
       - OIDC_DISCOVERY_URL=https://akvotest.eu.auth0.com/.well-known/openid-configuration
       - OIDC_EXPECTED_ISSUER=https://akvotest.eu.auth0.com/
   upstream:
-    image: jmalloc/echo-server:latest
+    image: openresty/openresty:1.13.6.2-2-alpine-fat
     network_mode: service:mainnetwork
-    environment:
-      - PORT=3000
+    entrypoint: ["/usr/local/openresty/bin/openresty", "-c", "/usr/local/src/nginx-test.conf", "-g", "daemon off;"]
+    volumes:
+      - ./:/usr/local/src:ro

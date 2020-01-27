@@ -7,7 +7,7 @@
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.unilog.unilog :as unilog]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response status header]]))
 
 
 
@@ -41,20 +41,24 @@
                 db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))
                 offset (Long/parseLong cursor)]
             (if (unilog/valid-offset? offset db-spec)
-              (let [changes (->
-                             (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))
-                             (select-keys [:form-instance-changed
-                                           :form-instance-deleted
-                                           :form-changed
-                                           :form-deleted
-                                           :data-point-changed
-                                           :data-point-deleted
-                                           :unilog-id])
-                             (update :form-deleted #(map str %))
-                             (update :form-instance-deleted #(map str %))
-                             (update :data-point-deleted #(map str %)))]
-                (response {:changes (dissoc changes :unilog-id)
-                           :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))}))
+              (if (= offset (unilog/get-cursor db-spec)) ;; end of the log
+                (-> (status {} 204)
+                    (header "Cache-Control" "max-age=3600"))
+                (let [changes (->
+                               (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))
+                               (select-keys [:form-instance-changed
+                                             :form-instance-deleted
+                                             :form-changed
+                                             :form-deleted
+                                             :data-point-changed
+                                             :data-point-deleted
+                                             :unilog-id])
+                               (update :form-deleted #(map str %))
+                               (update :form-instance-deleted #(map str %))
+                               (update :data-point-deleted #(map str %)))]
+                  (-> (response {:changes (dissoc changes :unilog-id)
+                                 :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))})
+                      (header "Cache-Control" "no-cache"))))
               (anomaly/bad-request "Invalid cursor" {})))
           (anomaly/bad-request "Invalid parameters" {}))))))
 
