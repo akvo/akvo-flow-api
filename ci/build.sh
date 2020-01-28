@@ -23,40 +23,40 @@ fi
 
 cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
 
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein do clean, check, eastwood, test :all
-
-# Check nginx configuration
-
-docker run \
-       --rm \
-       --volume "$PWD/nginx/:/conf" \
-       --entrypoint /usr/local/openresty/bin/openresty \
-       openresty/openresty:1.11.2.3-alpine-fat -t -c /conf/nginx.conf
 (
     cd nginx
-    docker build -t "akvo/flow-api-proxy" .
-    docker tag akvo/flow-api-proxy akvo/flow-api-proxy:$TRAVIS_COMMIT
+    docker build \
+	   -t "akvo/flow-api-proxy:latest" \
+	   -t "akvo/flow-api-proxy:${TRAVIS_COMMIT}" .
 )
 
-
-# Check nginx auth0 configuration
+# Check nginx configuration
+docker run \
+       --rm \
+       --entrypoint /usr/local/openresty/bin/openresty \
+       "akvo/flow-api-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
 (
     cd nginx-auth0
-    docker build -t "akvo/flow-api-auth0-proxy" .
-    docker tag akvo/flow-api-auth0-proxy akvo/flow-api-auth0-proxy:$TRAVIS_COMMIT
+    docker build \
+	   -t "akvo/flow-api-auth0-proxy:latest" \
+	   -t "akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}" .
 )
 
+# Check nginx auth0 configuration
 docker run \
        --rm \
        --entrypoint /usr/local/openresty/bin/openresty \
-       akvo/flow-api-auth0-proxy -t -c /usr/local/openresty/nginx/conf/nginx.conf
+       "akvo/flow-api-auth0-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
+# Backend tests
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein do clean, check, eastwood, test :all
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein with-profile +assemble  do jar, assemble
 
 (
     cd api
-    docker build -t "akvo/flow-api-backend" .
-    docker tag akvo/flow-api-backend akvo/flow-api-backend:$TRAVIS_COMMIT
+    docker build \
+	   -t "akvo/flow-api-backend" \
+	   -t "akvo/flow-api-backend:$TRAVIS_COMMIT" .
 )

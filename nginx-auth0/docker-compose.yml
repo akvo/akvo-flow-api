@@ -14,7 +14,7 @@ services:
       - OIDC_DISCOVERY_URL=https://akvotest.eu.auth0.com/.well-known/openid-configuration
       - OIDC_EXPECTED_ISSUER=https://akvotest.eu.auth0.com/
   upstream:
-    image: openresty/openresty:1.13.6.2-2-alpine-fat
+    image: akvo/flow-api-auth0-proxy:latest
     network_mode: service:mainnetwork
     entrypoint: ["/usr/local/openresty/bin/openresty", "-c", "/usr/local/src/nginx-test.conf", "-g", "daemon off;"]
     volumes:
