@@ -58,6 +58,7 @@ docker run \
     ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: MISS'
     ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
     ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+    ./test.sh "http://localhost:8082/flow/" --header "Pragma: no-cache" 2>&1 | grep 'X-Cache-Status: BYPASS'
     docker-compose down -v
 )
 
