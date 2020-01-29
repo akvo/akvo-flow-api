@@ -43,7 +43,7 @@
             (if (unilog/valid-offset? offset db-spec)
               (if (= offset (unilog/get-cursor db-spec)) ;; end of the log
                 (-> (status {} 204)
-                    (header "Cache-Control" "max-age=3600"))
+                    (header "Cache-Control" "max-age=60"))
                 (let [changes (->
                                (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))
                                (select-keys [:form-instance-changed
