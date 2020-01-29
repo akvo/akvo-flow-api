@@ -26,37 +26,51 @@
 ;; TODO: Express parameter logic via spec?
 (def params-spec (s/keys :opt-un [::initial ::next ::cursor]))
 
+(def no-more-changes (-> (status {} 204) (header "Cache-Control" "max-age=60")))
+
+
+(defn initial-response
+  [req]
+  (let [alias (:alias req)
+        api-root (utils/get-api-root req)
+        db {:connection (:unilog-db-connection req)}
+        cursor (unilog/get-cursor db)]
+    (response {:next-sync-url (next-sync-url api-root alias cursor)})))
+
+(defn changes-response
+  [offset db instance-id remote-api req]
+  (let [alias (:alias req)
+        api-root (utils/get-api-root req)
+        changes (->
+                 (unilog/process-unilog-events offset db instance-id remote-api)
+                 (select-keys [:form-instance-changed
+                               :form-instance-deleted
+                               :form-changed
+                               :form-deleted
+                               :data-point-changed
+                               :data-point-deleted
+                               :unilog-id])
+                 (update :form-deleted #(map str %))
+                 (update :form-instance-deleted #(map str %))
+                 (update :data-point-deleted #(map str %)))
+        cursor (:unilog-id changes)]
+    (-> (response {:changes (dissoc changes :unilog-id)
+                   :next-sync-url (next-sync-url api-root alias cursor)})
+        (header "Cache-Control" "no-cache"))))
+
 (defn changes [deps {:keys [alias instance-id params] :as req}]
   (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
     (if (and initial (or cursor next))
       (anomaly/bad-request "Invalid parameters" {})
       (if (= "true" initial)
-        (let [db {:connection (:unilog-db-connection req)}]
-          (response {:next-sync-url (next-sync-url (utils/get-api-root req)
-                                      alias
-                                      (unilog/get-cursor db))}))
+        (initial-response req)
         (if (and next cursor)
           (let [db {:connection (:unilog-db-connection req)}
                 offset (Long/parseLong cursor)]
             (if (unilog/valid-offset? offset db)
               (if (= offset (unilog/get-cursor db)) ;; end of the log
-                (-> (status {} 204)
-                    (header "Cache-Control" "max-age=60"))
-                (let [changes (->
-                               (unilog/process-unilog-events offset db instance-id (:remote-api deps))
-                               (select-keys [:form-instance-changed
-                                             :form-instance-deleted
-                                             :form-changed
-                                             :form-deleted
-                                             :data-point-changed
-                                             :data-point-deleted
-                                             :unilog-id])
-                               (update :form-deleted #(map str %))
-                               (update :form-instance-deleted #(map str %))
-                               (update :data-point-deleted #(map str %)))]
-                  (-> (response {:changes (dissoc changes :unilog-id)
-                                 :next-sync-url (next-sync-url (utils/get-api-root req) alias (:unilog-id changes))})
-                      (header "Cache-Control" "no-cache"))))
+                no-more-changes
+                (changes-response offset db instance-id (:remote-api deps) req))
               (anomaly/bad-request "Invalid cursor" {})))
           (anomaly/bad-request "Invalid parameters" {}))))))
 
