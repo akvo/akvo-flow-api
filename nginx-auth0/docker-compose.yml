@@ -1,21 +1,21 @@
 version: "3"
 
 services:
-  mainnetwork:
+  secondnetwork:
     image: alpine:3.10
     command: tail -f /dev/null
     ports:
       - 8082:8082
   nginx-auth0:
     image: akvo/flow-api-auth0-proxy:latest
-    network_mode: service:mainnetwork
+    network_mode: service:secondnetwork
     environment:
       - FLOW_API_BACKEND_URL=http://localhost:3000
       - OIDC_DISCOVERY_URL=https://akvotest.eu.auth0.com/.well-known/openid-configuration
       - OIDC_EXPECTED_ISSUER=https://akvotest.eu.auth0.com/
   upstream:
     image: akvo/flow-api-auth0-proxy:latest
-    network_mode: service:mainnetwork
+    network_mode: service:secondnetwork
     entrypoint: ["/usr/local/openresty/bin/openresty", "-c", "/usr/local/src/nginx-test.conf", "-g", "daemon off;"]
     volumes:
       - ./:/usr/local/src:ro
