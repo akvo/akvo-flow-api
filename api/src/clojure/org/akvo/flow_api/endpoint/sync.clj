@@ -31,21 +31,19 @@
     (if (and initial (or cursor next))
       (anomaly/bad-request "Invalid parameters" {})
       (if (= "true" initial)
-        (let [db-name (get-db-name instance-id)
-              db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))]
+        (let [db {:connection (:unilog-db-connection req)}]
           (response {:next-sync-url (next-sync-url (utils/get-api-root req)
                                       alias
-                                      (unilog/get-cursor db-spec))}))
+                                      (unilog/get-cursor db))}))
         (if (and next cursor)
-          (let [db-name (get-db-name instance-id)
-                db-spec (-> deps :unilog-db :spec (assoc :db-name db-name))
+          (let [db {:connection (:unilog-db-connection req)}
                 offset (Long/parseLong cursor)]
-            (if (unilog/valid-offset? offset db-spec)
-              (if (= offset (unilog/get-cursor db-spec)) ;; end of the log
+            (if (unilog/valid-offset? offset db)
+              (if (= offset (unilog/get-cursor db)) ;; end of the log
                 (-> (status {} 204)
                     (header "Cache-Control" "max-age=60"))
                 (let [changes (->
-                               (unilog/process-unilog-events offset db-spec instance-id (:remote-api deps))
+                               (unilog/process-unilog-events offset db instance-id (:remote-api deps))
                                (select-keys [:form-instance-changed
                                              :form-instance-deleted
                                              :form-changed
@@ -68,5 +66,6 @@
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)
+      (unilog/wrap-db-connection (:unilog-db deps))
       (wrap-resolve-alias akvo-flow-server-config)
       (jdo-pm/wrap-close-persistent-manager)))

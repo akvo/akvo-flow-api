@@ -123,4 +123,4 @@
                                                                 "content-type" "application/json"
                                                                 "accept" "application/vnd.akvo.flow.v2+json"}})]
               (is (= 204 status))
-              (is (= "max-age=3600" (get headers "Cache-Control"))))))))))
+              (is (= "max-age=60" (get headers "Cache-Control"))))))))))
