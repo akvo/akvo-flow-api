@@ -49,6 +49,18 @@ docker run \
        --entrypoint /usr/local/openresty/bin/openresty \
        "akvo/flow-api-auth0-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
+# Checking nginx caching
+(
+    cd nginx-auth0
+    docker-compose up -d
+    sleep 5
+    ./test.sh "http://localhost:8082/flow/ok" 2>&1 | grep 'X-Cache-Status: MISS'
+    ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: MISS'
+    ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+    ./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+    docker-compose down -v
+)
+
 # Backend tests
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein do clean, check, eastwood, test :all
