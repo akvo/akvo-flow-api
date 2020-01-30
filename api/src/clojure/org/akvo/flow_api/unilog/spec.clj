@@ -10,6 +10,8 @@
 (s/def ::dataPointId ::id)
 (s/def ::surveyId ::id)
 (s/def ::identifier string?)
+(s/def ::name string?)
+(s/def ::suveyGroupType #{"SURVEY"})
 
 (s/def ::formInstance
   (s/keys :req-un [::id ::formId]))
@@ -26,6 +28,9 @@
 (s/def ::delete
   (s/keys :req-un [::id]))
 
+(s/def ::survey
+  (s/keys :req-un [::id ::name ::surveyGroupType]))
+
 (def type-to-spec
   {"formInstanceDeleted" ::delete
    "formInstanceUpdated" ::formInstance
@@ -37,7 +42,10 @@
    "answerUpdated" ::answer
    "dataPointCreated" ::dataPoint
    "dataPointUpdated" ::dataPoint
-   "dataPointDeleted" ::delete})
+   "dataPointDeleted" ::delete
+   "surveyGroupCreated" ::survey
+   "surveyGroupUpdated" ::survey
+   "surveyGroupDeleted" ::delete})
 
 (s/def ::eventType (set (keys type-to-spec)))
 (s/def ::entity map?)
@@ -46,14 +54,12 @@
 
 
 (defn valid? [m]
-  #_(when-not (s/valid? ::event m)
-    (s/explain ::event m))
   (and
-    (s/valid? ::event m)
-    (when-let [spec (get type-to-spec (-> m :payload :eventType))]
-      (s/valid?
-        spec
-        (-> m :payload :entity)))))
+   (s/valid? ::event m)
+   (when-let [spec (get type-to-spec (-> m :payload :eventType))]
+     (s/valid?
+      spec
+      (-> m :payload :entity)))))
 
 (comment
   (gen/sample (s/gen ::event))

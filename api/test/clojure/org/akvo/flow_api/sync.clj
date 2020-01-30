@@ -46,6 +46,18 @@
    :payload (json/generate-string {:eventType "dataPointDeleted"
                                    :entity {:id data-point-id}})})
 
+(defn survey [survey-id name]
+  {:id (swap! unilog-id-seq inc)
+   :payload (json/generate-string {:eventType (rand-nth ["surveyGroupCreated" "surveyGroupUpdated"])
+                                   :entity {:id survey-id
+                                            :name name
+                                            :surveyGroupType "SURVEY"}})})
+
+(defn survey-delete [survey-id]
+  {:id (swap! unilog-id-seq inc)
+   :payload (json/generate-string {:eventType "surveyGroupDeleted"
+                                   :entity {:id survey-id}})})
+
 (defn can-see [& form-ids]
   (zipmap form-ids form-ids))
 
@@ -64,6 +76,8 @@
 (def form-deletes (comp :form-deleted changes-with-permissions))
 (def data-point-changes (comp :data-point-changed changes-with-permissions))
 (def data-point-deleted (comp :data-point-deleted changes-with-permissions))
+(def survey-changes (comp :survey-changed changes-with-permissions))
+(def survey-deleted (comp :survey-deleted changes-with-permissions))
 
 (deftest unilog-batch
   (testing "basic case"
@@ -118,6 +132,19 @@
     (is (empty?
           (data-point-changes [(data-point-deleted-event 11)
                                (data-point 11 40 "dddd-eeee-ffff")]))))
+
+  (testing "Surveys"
+    (is (= #{60 80}
+           (set (map :id
+                     (survey-changes [(survey 60 "Survey 60")
+                                      (survey 80 "Survey 80")])))))
+
+    (is (= #{90}
+           (survey-deleted [(survey-delete 90)])))
+
+    (is (empty?
+         (survey-changes [(survey 100 "Survey 100")
+                          (survey-delete 100)]))))
 
   (testing "form changes"
     (is (= #{{:some-form :definition}}

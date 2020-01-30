@@ -46,6 +46,10 @@
   {:form-id formId
    :id formInstanceId})
 
+(defn survey-data [{:keys [id name]}]
+  {:id id
+   :name name})
+
 (defn process-new-events [reducible]
   (let [pipeline (comp
                   (map (fn [x]
@@ -64,7 +68,9 @@
                                     ("formUpdated" "formCreated") [::form-changed :id]
                                     "formDeleted" [::form-deleted :id]
                                     ("dataPointUpdated" "dataPointCreated") [::data-point-changed :id]
-                                    "dataPointDeleted" [::data-point-deleted :id])]
+                                    "dataPointDeleted" [::data-point-deleted :id]
+                                    ("surveyGroupCreated" "surveyGroupUpdated") [::survey-changed survey-data]
+                                    "surveyGroupDeleted" [::survey-deleted :id])]
                               (assoc x k (-> x :payload :entity f)))))))]
     (transduce
       pipeline
@@ -80,7 +86,9 @@
                                                     (comp form-instance-deleted :id)
                                                     (distinct (keep ::form-instance-changed final)))))
                data-point-deleted (set (keep ::data-point-deleted final))
-               data-point-changed (apply disj (set (keep ::data-point-changed final)) data-point-deleted)]
+               data-point-changed (apply disj (set (keep ::data-point-changed final)) data-point-deleted)
+               survey-deleted (set (keep ::survey-deleted final))
+               survey-changed (remove #(survey-deleted (:id %)) (set (keep ::survey-changed final)))]
            {::unilog-id (:id (last final))
             ::form-instance-deleted form-instance-deleted
             ::form-updated form-updated
@@ -88,7 +96,9 @@
             :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
             ::forms-instances-grouped-by-form form-instances-grouped-by-form
             ::data-point-changed data-point-changed
-            ::data-point-deleted data-point-deleted}))
+            ::data-point-deleted data-point-deleted
+            ::survey-changed survey-changed
+            ::survey-deleted survey-deleted}))
         ([sofar batch]
          (conj sofar batch)))
       []
@@ -100,7 +110,9 @@
                                    form-deleted
                                    form-instance-deleted
                                    data-point-changed
-                                   data-point-deleted]}
+                                   data-point-deleted
+                                   survey-changed
+                                   survey-deleted]}
                           form-id->form]
   {:unilog-id unilog-id
    :form-changed (->> form-updated
@@ -115,7 +127,9 @@
                                         :form-instance-ids (set (map :id form-instance))})))
                              set)
    :data-point-changed data-point-changed
-   :data-point-deleted data-point-deleted})
+   :data-point-deleted data-point-deleted
+   :survey-changed survey-changed
+   :survey-deleted survey-deleted})
 
 (defn get-cursor [db]
   (let [result (first (jdbc/query db
