@@ -57,21 +57,22 @@
                    :next-sync-url (next-sync-url api-root alias cursor)})
         (header "Cache-Control" "no-cache"))))
 
+(defn get-changes
+  [req cursor instance-id remote-api]
+  (let [db (:unilog-db-connection req)
+        offset (Long/parseLong cursor)]
+    (cond
+      (not (unilog/valid-offset? offset db)) (anomaly/bad-request "Invalid cursor" {})
+      (= offset (unilog/get-cursor db)) no-more-changes
+      :else (changes-response offset db instance-id remote-api req))))
+
 (defn changes [deps {:keys [alias instance-id params] :as req}]
   (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
-    (if (and initial (or cursor next))
-      (anomaly/bad-request "Invalid parameters" {})
-      (if (= "true" initial)
-        (initial-response req)
-        (if (and next cursor)
-          (let [db (:unilog-db-connection req)
-                offset (Long/parseLong cursor)]
-            (if (unilog/valid-offset? offset db)
-              (if (= offset (unilog/get-cursor db)) ;; end of the log
-                no-more-changes
-                (changes-response offset db instance-id (:remote-api deps) req))
-              (anomaly/bad-request "Invalid cursor" {})))
-          (anomaly/bad-request "Invalid parameters" {}))))))
+    (cond
+      (and initial (or cursor next)) (anomaly/bad-request "Invalid parameters" {})
+      (= "true" initial) (initial-response req)
+      (and next cursor) (get-changes req cursor instance-id (:remote-api deps))
+      :else (anomaly/bad-request "Invalid parameters" {}))))
 
 (defn endpoint* [deps]
   (GET "/sync" req
