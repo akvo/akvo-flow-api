@@ -155,5 +155,5 @@
   (fn [request]
     (let [db-name (get-db-name (:instance-id request))
           db-spec (-> unilog-db :spec (assoc :db-name db-name) event-log-spec)]
-      (with-open [connection (jdbc/get-connection  db-spec)]
-        (handler (assoc request :unilog-db-connection connection))))))
+      (jdbc/with-db-connection [conn db-spec]
+        (handler (assoc request :unilog-db-connection conn))))))

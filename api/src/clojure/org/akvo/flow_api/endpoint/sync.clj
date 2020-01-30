@@ -32,7 +32,7 @@
   [req]
   (let [alias (:alias req)
         api-root (utils/get-api-root req)
-        db {:connection (:unilog-db-connection req)}
+        db (:unilog-db-connection req)
         cursor (unilog/get-cursor db)]
     (response {:next-sync-url (next-sync-url api-root alias cursor)})))
 
@@ -64,7 +64,7 @@
       (if (= "true" initial)
         (initial-response req)
         (if (and next cursor)
-          (let [db {:connection (:unilog-db-connection req)}
+          (let [db (:unilog-db-connection req)
                 offset (Long/parseLong cursor)]
             (if (unilog/valid-offset? offset db)
               (if (= offset (unilog/get-cursor db)) ;; end of the log
