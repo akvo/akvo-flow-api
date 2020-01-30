@@ -148,7 +148,6 @@
           data-point-changed (doall (data-point/by-ids ds (:data-point-changed events-2)))]
       (assoc events-2 :form-instance-changed form-instances :data-point-changed data-point-changed))))
 
-
 (defn get-db-name [instance-id]
   (str "u_" instance-id))
 

@@ -28,7 +28,6 @@
 
 (def no-more-changes (-> (status {} 204) (header "Cache-Control" "max-age=60")))
 
-
 (defn initial-response
   [req]
   (let [alias (:alias req)
