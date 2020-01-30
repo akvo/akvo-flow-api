@@ -48,10 +48,15 @@
                                :form-deleted
                                :data-point-changed
                                :data-point-deleted
+                               :survey-changed
+                               :survey-deleted
                                :unilog-id])
                  (update :form-deleted #(map str %))
                  (update :form-instance-deleted #(map str %))
-                 (update :data-point-deleted #(map str %)))
+                 (update :data-point-deleted #(map str %))
+                 (update :survey-deleted #(map str %))
+                 (update :survey-changed (fn [changed]
+                                           (map #(update % :id str) changed))))
         cursor (:unilog-id changes)]
     (-> (response {:changes (dissoc changes :unilog-id)
                    :next-sync-url (next-sync-url api-root alias cursor)})
