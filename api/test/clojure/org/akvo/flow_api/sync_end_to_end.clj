@@ -25,7 +25,7 @@
                           "content-type" "application/json"
                           "accept" "application/vnd.akvo.flow.v2+json"}
                 :query-params params})
-     [:status :body])
+     [:status :body :headers])
     (catch clojure.lang.ExceptionInfo e
       (select-keys (ex-data e) [:status :body]))))
 
@@ -116,4 +116,11 @@
                    (set (map :id (:formInstanceChanged changes)))))
             (is (= #{"144622023"}
                    (set (map :id (:dataPointChanged changes)))))
-            (is (= (:dataPointDeleted changes) ["144602051"]))))))))
+            (is (= (:dataPointDeleted changes) ["144602051"]))
+            (let [{:keys [headers status]} (http/get nextSyncUrl
+                                                     {:as :json
+                                                      :headers {"x-akvo-email" user
+                                                                "content-type" "application/json"
+                                                                "accept" "application/vnd.akvo.flow.v2+json"}})]
+              (is (= 204 status))
+              (is (= "max-age=60" (get headers "Cache-Control"))))))))))

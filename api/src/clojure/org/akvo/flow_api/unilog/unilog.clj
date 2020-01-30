@@ -117,22 +117,22 @@
    :data-point-changed data-point-changed
    :data-point-deleted data-point-deleted})
 
-(defn get-cursor [config]
-  (let [result (first (jdbc/query (event-log-spec config)
+(defn get-cursor [db]
+  (let [result (first (jdbc/query db
                                   ["SELECT MAX(id) AS cursor FROM event_log"]))]
     (or (:cursor result) 0)))
 
-(defn valid-offset? [offset config]
+(defn valid-offset? [offset db]
   (or (= offset 0)
-      (let [result (first (jdbc/query (event-log-spec config)
+      (let [result (first (jdbc/query db
                                       ["SELECT id AS offset FROM event_log WHERE id = ?" offset]))]
         (boolean (:offset result)))))
 
-(defn process-unilog-events [offset config instance-id remote-api]
+(defn process-unilog-events [offset db instance-id remote-api]
   (ds/with-remote-api remote-api instance-id
     (let [ds (DatastoreServiceFactory/getDatastoreService)
           events (process-new-events
-                   (jdbc/reducible-query (event-log-spec config)
+                   (jdbc/reducible-query db
                                          ["SELECT id, payload::text AS payload FROM event_log WHERE id > ? ORDER BY id ASC LIMIT 300" offset]
                                          {:auto-commit? false :fetch-size 300}))
           form-id->form (reduce (fn [acc form-id]
@@ -147,3 +147,13 @@
                              (:form-instances-to-load events-2)))
           data-point-changed (doall (data-point/by-ids ds (:data-point-changed events-2)))]
       (assoc events-2 :form-instance-changed form-instances :data-point-changed data-point-changed))))
+
+(defn get-db-name [instance-id]
+  (str "u_" instance-id))
+
+(defn wrap-db-connection [handler unilog-db]
+  (fn [request]
+    (let [db-name (get-db-name (:instance-id request))
+          db-spec (-> unilog-db :spec (assoc :db-name db-name) event-log-spec)]
+      (jdbc/with-db-connection [conn db-spec]
+        (handler (assoc request :unilog-db-connection conn))))))
