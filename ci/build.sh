@@ -36,18 +36,22 @@ docker run \
        --entrypoint /usr/local/openresty/bin/openresty \
        "akvo/flow-api-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
+# Check nginx auth0 configuration
 (
     cd nginx-auth0
     docker build \
 	   -t "akvo/flow-api-auth0-proxy:latest" \
 	   -t "akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}" .
-)
 
-# Check nginx auth0 configuration
-docker run \
-       --rm \
-       --entrypoint /usr/local/openresty/bin/openresty \
-       "akvo/flow-api-auth0-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
+    docker run \
+	   --rm \
+	   --entrypoint /usr/local/openresty/bin/openresty \
+	   "akvo/flow-api-auth0-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
+
+    docker-compose up -d
+    docker-compose exec testnetwork bash -c 'cd /usr/local/src/ && ./test-cache.sh'
+    docker-compose down -v
+)
 
 # Backend tests
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d

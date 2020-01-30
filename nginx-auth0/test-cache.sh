@@ -2,13 +2,9 @@
 
 set -eu
 
-# Checking nginx caching
+wait4ports nginx=tcp://localhost:8082 upstream=tcp://localhost:3000
 
-docker-compose up -d
-
-./test.sh "http://localhost:8082/flow/ok" 2>&1 | grep 'X-Cache-Status: MISS'
-./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: MISS'
-./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
-./test.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
-
-docker-compose down -v
+./api.sh "http://localhost:8082/flow/ok" 2>&1 | grep 'X-Cache-Status: MISS'
+./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: MISS'
+./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
