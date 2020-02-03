@@ -58,21 +58,26 @@
      :created-at (ds/created-at question-group)
      :modified-at (ds/modified-at question-group)}))
 
-(defn get-form-definition [form-id]
-  (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
-        ;; Includes question groups, but contrary to docstring does not contain questions
-        form (.loadFullSurvey form-dao form-id)
-        question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
-        questions (group-by #(.getQuestionGroupId %)
-                            (.listQuestionsBySurvey question-dao form-id))]
-    {:id (str form-id)
-     :name (.getName form)
-     :question-groups (mapv (fn [question-group]
-                              (question-group-definition question-group
-                                                         (get questions (ds/id question-group))))
-                            (.values (.getQuestionGroupMap form)))
-     :created-at (ds/created-at form)
-     :modified-at (ds/modified-at form)}))
+(defn get-form-definition
+  ([form-id]
+   (get-form-definition form-id {}))
+  ([form-id {:keys [include-survey-id?]}]
+   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+         ;; Includes question groups, but contrary to docstring does not contain questions
+         form (.loadFullSurvey form-dao form-id)
+         question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
+         questions (group-by #(.getQuestionGroupId %)
+                             (.listQuestionsBySurvey question-dao form-id))]
+     (cond->
+         {:id (str form-id)
+          :name (.getName form)
+          :question-groups (mapv (fn [question-group]
+                                   (question-group-definition question-group
+                                                              (get questions (ds/id question-group))))
+                                 (.values (.getQuestionGroupMap form)))
+          :created-at (ds/created-at form)
+          :modified-at (ds/modified-at form)}
+       include-survey-id? (assoc :survey-id (str (.getSurveyGroupId form)))))))
 
 (defn by-id [user-id survey-id]
   (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)

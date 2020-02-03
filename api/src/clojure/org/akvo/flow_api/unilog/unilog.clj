@@ -150,7 +150,8 @@
                                          ["SELECT id, payload::text AS payload FROM event_log WHERE id > ? ORDER BY id ASC LIMIT 300" offset]
                                          {:auto-commit? false :fetch-size 300}))
           form-id->form (reduce (fn [acc form-id]
-                                  (assoc acc form-id (su/get-form-definition (long form-id))))
+                                  (assoc acc form-id (su/get-form-definition (long form-id)
+                                                                             {:include-survey-id? true})))
                                 {}
                                 (:forms-to-load events))
           events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
