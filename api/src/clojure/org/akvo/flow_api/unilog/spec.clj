@@ -11,7 +11,7 @@
 (s/def ::surveyId ::id)
 (s/def ::identifier string?)
 (s/def ::name string?)
-(s/def ::suveyGroupType #{"SURVEY"})
+(s/def ::surveyGroupType #{"SURVEY"})
 
 (s/def ::formInstance
   (s/keys :req-un [::id ::formId]))
@@ -60,11 +60,3 @@
      (s/valid?
       spec
       (-> m :payload :entity)))))
-
-(comment
-  (gen/sample (s/gen ::event))
-
-  (valid? {:id 1
-           :payload {:eventType "answerCreated"
-                     :entity {:formId 2
-                              :formInstanceId 2}}}))

@@ -1,6 +1,7 @@
 (ns org.akvo.flow-api.sync
   (:require [clojure.test :refer :all]
             [org.akvo.flow-api.unilog.unilog :as unilog]
+            [org.akvo.flow-api.unilog.spec :as spec]
             [cheshire.core :as json]))
 
 (def unilog-id-seq (atom 0))
@@ -78,6 +79,19 @@
 (def data-point-deleted (comp :data-point-deleted changes-with-permissions))
 (def survey-changes (comp :survey-changed changes-with-permissions))
 (def survey-deleted (comp :survey-deleted changes-with-permissions))
+
+(deftest event-spec
+  (testing "Basic event validation"
+    (is (true? (spec/valid? {:id 2
+                             :payload {:eventType "surveyGroupUpdated"
+                                       :entity {:id 123
+                                                :name "Testing"
+                                                :surveyGroupType "SURVEY"}}})))
+    (is (false? (spec/valid? {:id 3
+                              :payload {:eventType "surveyGroupUpdated"
+                                        :entity {:id 456
+                                                 :name "Testing"
+                                                 :surveyGroupType "FOLDER"}}})))))
 
 (deftest unilog-batch
   (testing "basic case"
