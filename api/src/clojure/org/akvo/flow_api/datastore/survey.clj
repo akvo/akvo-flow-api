@@ -36,6 +36,11 @@
             :modified-at (ds/modified-at survey)}))
     (filter #(= (:folder-id %) folder-id))))
 
+(defn list-forms [user-id]
+  (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        all-forms (.list form-dao "all")]
+    (.filterByUserAuthorizationObjectId form-dao all-forms user-id)))
+
 (defn ->question [question]
   (let [type* (str (.getType question))]
     (merge

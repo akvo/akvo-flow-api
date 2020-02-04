@@ -29,21 +29,21 @@
     (catch clojure.lang.ExceptionInfo e
       (select-keys (ex-data e) [:status :body]))))
 
-(def event-log [{:entity {:id 149382279}
+(def event-log [{:entity {:id 145492013}
                  :eventType "formCreated"}
-                {:entity {:id 147552013}
+                {:entity {:id 146532016}
                  :eventType "formDeleted"}
                 {:entity {:id 147502018}
                  :eventType "formUpdated"}
                 {:entity {:id 144602050
                           :formId 145492013}
                  :eventType "formInstanceUpdated"}
-                {:entity {:id 144602134
+                {:entity {:id 144602102
                           :formId 145492013}
                  :eventType "formInstanceDeleted"}])
 
-(def more-changes [{:entity {:id 144622080
-                             :formId 146532016}
+(def more-changes [{:entity {:id 144602134
+                             :formId 145492013}
                     :eventType "formInstanceUpdated"}
                    {:entity {:id 144622023
                              :surveyId 152342023
@@ -105,11 +105,11 @@
                                                                      "content-type" "application/json"
                                                                      "accept" "application/vnd.akvo.flow.v2+json"}})
                                                 :body)]
-          (is (= (:formDeleted changes) ["147552013"]))
-          (is (= (:formInstanceDeleted changes) ["144602134"]))
+          (is (= (:formDeleted changes) ["146532016"]))
+          (is (= (:formInstanceDeleted changes) ["144602102"]))
           (is (= #{"144602050"}
                  (set (map :id (:formInstanceChanged changes)))))
-          (is (= #{"149382279" "147502018"}
+          (is (= #{"145492013"}
                  (set (map :id (:formChanged changes)))))
           (insert-log db more-changes)
           (let [{:keys [changes nextSyncUrl]} (-> (http/get nextSyncUrl
@@ -118,7 +118,7 @@
                                                                        "content-type" "application/json"
                                                                        "accept" "application/vnd.akvo.flow.v2+json"}})
                                                   :body)]
-            (is (= #{"144622080"}
+            (is (= #{"144602134"}
                    (set (map :id (:formInstanceChanged changes)))))
             (is (= #{"144622023"}
                    (set (map :id (:dataPointChanged changes)))))

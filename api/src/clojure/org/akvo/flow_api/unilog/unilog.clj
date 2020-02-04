@@ -9,6 +9,7 @@
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
             [org.akvo.flow-api.datastore.data-point :as data-point]
+            [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
@@ -142,18 +143,21 @@
                                       ["SELECT id AS offset FROM event_log WHERE id = ?" offset]))]
         (boolean (:offset result)))))
 
-(defn process-unilog-events [offset db instance-id remote-api]
+(defn process-unilog-events [offset db instance-id remote-api email]
   (ds/with-remote-api remote-api instance-id
     (let [ds (DatastoreServiceFactory/getDatastoreService)
           events (process-new-events
                    (jdbc/reducible-query db
                                          ["SELECT id, payload::text AS payload FROM event_log WHERE id > ? ORDER BY id ASC LIMIT 300" offset]
                                          {:auto-commit? false :fetch-size 300}))
+          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
+          authorized-forms (set (map ds/id (su/list-forms user-id)))
+          authorized-to-load (set/intersection authorized-forms (:forms-to-load events))
           form-id->form (reduce (fn [acc form-id]
                                   (assoc acc form-id (su/get-form-definition (long form-id)
                                                                              {:include-survey-id? true})))
                                 {}
-                                (:forms-to-load events))
+                                authorized-to-load)
           events-2 (after-forms-loaded events form-id->form) ;; TODO: get form definition from cache
           form-instances (doall
                            (mapcat
