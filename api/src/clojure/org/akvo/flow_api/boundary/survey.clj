@@ -20,15 +20,14 @@
 
 (defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
   (if-let [survey-definition (get-survey-definition survey-cache
-                               instance-id
-                               user-id
-                               survey-id)]
+                                                    instance-id
+                                                    user-id
+                                                    survey-id)]
     survey-definition
-    (ds/with-remote-api this instance-id
-      (let [survey-definition (survey/by-id user-id survey-id)]
-        (put-survey-definition survey-cache
-          instance-id
-          user-id
-          survey-id
-          survey-definition)
-        survey-definition))))
+    (let [survey-definition (survey/by-id user-id survey-id)]
+      (put-survey-definition survey-cache
+                             instance-id
+                             user-id
+                             survey-id
+                             survey-definition)
+      survey-definition)))
