@@ -52,11 +52,11 @@
                    {:entity {:id 144602051}
                     :eventType "dataPointDeleted"}
                    {:eventType "surveyGroupUpdated"
-                    :entity {:id 152372359
-                             :name "All question types"
+                    :entity {:id 148412306
+                             :name "NR-handpump"
                              :surveyGroupType "SURVEY"}}
                    {:eventType "surveyGroupDeleted"
-                    :entity {:id 153132013}}])
+                    :entity {:id 152342023}}])
 
 (defn insert-log [db events]
   (jdbc/insert-multi! db :event_log (mapv (fn [evt]
@@ -123,9 +123,9 @@
             (is (= #{"144622023"}
                    (set (map :id (:dataPointChanged changes)))))
             (is (= (:dataPointDeleted changes) ["144602051"]))
-            (is (= #{"152372359"}
+            (is (= #{"148412306"}
                    (set (map :id (:surveyChanged changes)))))
-            (is (= (:surveyDeleted changes) ["153132013"]))
+            (is (= (:surveyDeleted changes) ["152342023"]))
             (let [{:keys [headers status]} (http/get nextSyncUrl
                                                      {:as :json
                                                       :headers {"x-akvo-email" user

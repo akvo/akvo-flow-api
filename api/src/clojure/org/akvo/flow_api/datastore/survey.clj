@@ -4,7 +4,8 @@
             [org.akvo.flow-api.datastore :as ds]
             clojure.set
             [clojure.core.cache :as cache])
-  (:import [org.akvo.flow.api.dao FolderDAO SurveyDAO]))
+  (:import [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+           [com.google.appengine.api.datastore DatastoreService Entity Key KeyFactory QueryResultIterator]))
 
 (defn list* [user-id]
   (let [survey-dao (SurveyDAO.)
@@ -116,3 +117,20 @@
       (fn [{:keys [instance-id survey-id]}]
         (contains? (get instance->survey-set instance-id) survey-id))
       surveys-to-permission)))
+
+(defn survey-entity->map [^Entity entity]
+  {:id (str (ds/id entity))
+   :name (.getProperty entity "name")
+   :registration-form-id (str (.getProperty entity "newLocaleSurveyId"))
+   :created-at (ds/created-at entity)
+   :modified-at (ds/modified-at entity)})
+
+(defn surveys-by-id
+  ^QueryResultIterator
+  [^DatastoreService ds ids]
+  (.get ds ^Iterable (mapv (fn [^Long eid]
+                             (KeyFactory/createKey "SurveyGroup" eid)) ids)))
+
+(defn by-ids
+  [ds ids]
+  (mapv survey-entity->map (vals (surveys-by-id ds ids))))

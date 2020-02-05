@@ -64,11 +64,14 @@
 
 (defn changes-with-permissions
   ([events]
+   (let [r (unilog/process-new-events events)
+         form-id->form (apply can-see (:forms-to-load r))
+         forms #{}
+         surveys #{}]
+     (unilog/filter-events-by-authorization r form-id->form forms surveys)))
+  ([events {:keys [form-id->form forms surveys]}]
    (let [r (unilog/process-new-events events)]
-     (unilog/after-forms-loaded r (apply can-see (:forms-to-load r)))))
-  ([events perms]
-   (let [r (unilog/process-new-events events)]
-     (unilog/after-forms-loaded r perms))))
+     (unilog/filter-events-by-authorization r form-id->form forms surveys))))
 
 (def form-instance-changes (comp :form-instances-to-load changes-with-permissions))
 (def form-instance-deletes (comp :form-instance-deleted changes-with-permissions))
@@ -121,9 +124,9 @@
 
   (testing "Not permission for some forms"
     (is (= #{{:form {:any-form :definition} :form-instance-ids #{0}}}
-          (form-instance-changes [(answer 1 0)
+           (form-instance-changes [(answer 1 0)
                                   (form-instance 2 (any))]
-            {1 {:any-form :definition}}))))
+                                  {:form-id->form {1 {:any-form :definition}}}))))
 
   (testing "Delete form instance"
     (is (= #{10 11 112}
@@ -138,8 +141,9 @@
 
   (testing "Data points"
     (is (= #{10 30}
-           (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
-                                (data-point 30 40 "dddd-eeee-ffff")])))
+           (set (map :id (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
+                                              (data-point 30 40 "dddd-eeee-ffff")]
+                                             {:surveys #{20 40}})))))
     (is (= #{30}
            (data-point-deleted [(data-point-deleted-event 30)])))
 
@@ -149,12 +153,13 @@
 
   (testing "Surveys"
     (is (= #{60 80}
-           (set (map :id
-                     (survey-changes [(survey 60 "Survey 60")
-                                      (survey 80 "Survey 80")])))))
+           (survey-changes [(survey 60 "Survey 60")
+                            (survey 80 "Survey 80")]
+                           {:surveys #{60 80}})))
 
     (is (= #{90}
-           (survey-deleted [(survey-delete 90)])))
+           (survey-deleted [(survey-delete 90)]
+                           {:surveys #{90}})))
 
     (is (empty?
          (survey-changes [(survey 100 "Survey 100")
@@ -165,14 +170,16 @@
           (form-changes [(form 34)
                          (form 34)
                          (form 34)]
-            {34 {:some-form :definition}})))
+                        {:form-id->form {34 {:some-form :definition}}
+                         :forms #{34}})))
 
     (testing "permissions"
       (is (= #{34 36}
             (form-changes [(form 34)
                            (form 35)
                            (form 36)]
-              (can-see 34 36)))))
+                          {:form-id->form (can-see 34 36)
+                           :forms #{34 36}}))))
 
     (testing "mix form and form-instances"
       (is (= #{1 10}
@@ -188,7 +195,8 @@
     (testing "Delete and update in same unilog batch"
       (is (= #{34}
             (form-deletes [(form 34)
-                           (form-deleted 34)]))))
+                           (form-deleted 34)]
+                          {:forms #{34}}))))
 
     (testing "Delete of form and update of answer in the same unilog batch"
       (is (= #{}
