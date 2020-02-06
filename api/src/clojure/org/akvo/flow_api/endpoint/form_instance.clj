@@ -7,6 +7,7 @@
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.endpoint.spec :as spec]
             [org.akvo.flow-api.endpoint.utils :as utils]
+            [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
             [ring.util.response :refer [response]])
@@ -69,34 +70,35 @@
 
 (defn endpoint* [{:keys [remote-api]}]
   (GET "/form_instances" {:keys [email instance-id alias params] :as req}
-    (let [{:keys [survey-id
-                  form-id
-                  page-size
-                  cursor
-                  submission-date]} (spec/validate-params params-spec
-                                                          (rename-keys params
-                                                                       {:survey_id :survey-id
-                                                                        :form_id :form-id
-                                                                        :page_size :page-size
-                                                                        :submission_date :submission-date}))
-          page-size (when page-size
-                      (Long/parseLong page-size))
-          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
-          survey (survey/by-id remote-api instance-id user-id survey-id)
-          form (find-form (:forms survey) form-id)
-          parsed-date (when submission-date
-                        (parse-filter submission-date))]
-      (if (some? form)
-        (-> remote-api
-            (form-instance/list instance-id user-id form {:page-size page-size
-                                                          :cursor cursor
-                                                          :submission-date (:timestamp parsed-date)
-                                                          :operator (:operator parsed-date)})
-            (add-next-page-url (utils/get-api-root req) alias survey-id form-id page-size)
-            (response))
-        {:status 404
-         :body {"formId" form-id
-                "message" "Form not found"}}))))
+    (ds/with-remote-api remote-api instance-id
+      (let [{:keys [survey-id
+                    form-id
+                    page-size
+                    cursor
+                    submission-date]} (spec/validate-params params-spec
+                                                            (rename-keys params
+                                                                         {:survey_id :survey-id
+                                                                          :form_id :form-id
+                                                                          :page_size :page-size
+                                                                          :submission_date :submission-date}))
+            page-size (when page-size
+                        (Long/parseLong page-size))
+            user-id (user/id-by-email-or-throw-error remote-api instance-id email)
+            survey (survey/by-id remote-api instance-id user-id survey-id)
+            form (find-form (:forms survey) form-id)
+            parsed-date (when submission-date
+                          (parse-filter submission-date))]
+        (if (some? form)
+          (-> remote-api
+              (form-instance/list instance-id user-id form {:page-size page-size
+                                                            :cursor cursor
+                                                            :submission-date (:timestamp parsed-date)
+                                                            :operator (:operator parsed-date)})
+              (add-next-page-url (utils/get-api-root req) alias survey-id form-id page-size)
+              (response))
+          {:status 404
+           :body {"formId" form-id
+                  "message" "Form not found"}})))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

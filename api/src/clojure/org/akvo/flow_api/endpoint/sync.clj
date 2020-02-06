@@ -39,9 +39,10 @@
 (defn changes-response
   [offset db instance-id remote-api req]
   (let [alias (:alias req)
+        email (:email req)
         api-root (utils/get-api-root req)
         changes (->
-                 (unilog/process-unilog-events offset db instance-id remote-api)
+                 (unilog/process-unilog-events offset db instance-id remote-api email)
                  (select-keys [:form-instance-changed
                                :form-instance-deleted
                                :form-changed

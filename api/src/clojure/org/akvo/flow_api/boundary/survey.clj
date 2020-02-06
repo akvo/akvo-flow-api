@@ -20,29 +20,14 @@
 
 (defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
   (if-let [survey-definition (get-survey-definition survey-cache
-                               instance-id
-                               user-id
-                               survey-id)]
+                                                    instance-id
+                                                    user-id
+                                                    survey-id)]
     survey-definition
-    (ds/with-remote-api this instance-id
-      (let [survey-definition (survey/by-id user-id survey-id)]
-        (put-survey-definition survey-cache
-          instance-id
-          user-id
-          survey-id
-          survey-definition)
-        survey-definition))))
-
-(defn filter-surveys
-  "Given a list of surveys, returns the ones that the user has access to"
-  [remote-api user-email surveys]
-  (let [instances (into #{} (map :instance-id surveys))
-        mapping-fn (if (> (count instances) 1) pmap map)]
-    (survey/keep-allowed-to-see
-      surveys
-      (mapping-fn (jdo-persistent-manager/wrap-close-persistent-manager
-                    (fn [instance]
-                      (when-let [user-id (user/id-by-email remote-api instance user-email)]
-                        {:instance-id instance
-                         :survey-ids (survey/cached-list-ids remote-api instance user-id)})))
-        instances))))
+    (let [survey-definition (survey/by-id user-id survey-id)]
+      (put-survey-definition survey-cache
+                             instance-id
+                             user-id
+                             survey-id
+                             survey-definition)
+      survey-definition)))

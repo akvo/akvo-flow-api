@@ -7,12 +7,11 @@
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
 (defn list [{:keys [akvo-flow-server-config] :as this} instance-id user-id form-definition opts]
-  (ds/with-remote-api this instance-id
-    (let [ds (DatastoreServiceFactory/getDatastoreService)]
-      (form-instance/list ds form-definition (assoc opts
-                                               :asset-url-root
-                                               (asset-url-root akvo-flow-server-config
-                                                 instance-id))))))
+  (let [ds (DatastoreServiceFactory/getDatastoreService)]
+    (form-instance/list ds form-definition (assoc opts
+                                                  :asset-url-root
+                                                  (asset-url-root akvo-flow-server-config
+                                                                  instance-id)))))
 
 (defn by-ids [ds form-definition form-instance-ids]
   (form-instance/by-ids ds form-definition form-instance-ids))
