@@ -66,12 +66,11 @@
   ([events]
    (let [r (unilog/process-new-events events)
          form-id->form (apply can-see (:forms-to-load r))
-         forms #{}
-         surveys #{}]
-     (unilog/filter-events-by-authorization r form-id->form forms surveys)))
-  ([events {:keys [form-id->form forms surveys]}]
+         survey-id->survey (apply can-see (::unilog/survey-changed r))]
+     (unilog/filter-events-by-authorization r form-id->form survey-id->survey)))
+  ([events {:keys [form-id->form survey-id->survey]}]
    (let [r (unilog/process-new-events events)]
-     (unilog/filter-events-by-authorization r form-id->form forms surveys))))
+     (unilog/filter-events-by-authorization r form-id->form survey-id->survey))))
 
 (def form-instance-changes (comp :form-instances-to-load changes-with-permissions))
 (def form-instance-deletes (comp :form-instance-deleted changes-with-permissions))
@@ -141,9 +140,10 @@
 
   (testing "Data points"
     (is (= #{10 30}
-           (set (map :id (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
-                                              (data-point 30 40 "dddd-eeee-ffff")]
-                                             {:surveys #{20 40}})))))
+           (set (data-point-changes [(data-point 10 20 "aaaa-bbbb-cccc")
+                                     (data-point 30 40 "dddd-eeee-ffff")]
+                                    {:survey-id->survey {20 :survey-20
+                                                         40 :survey-40}}))))
     (is (= #{30}
            (data-point-deleted [(data-point-deleted-event 30)])))
 
@@ -154,12 +154,10 @@
   (testing "Surveys"
     (is (= #{60 80}
            (survey-changes [(survey 60 "Survey 60")
-                            (survey 80 "Survey 80")]
-                           {:surveys #{60 80}})))
+                            (survey 80 "Survey 80")])))
 
     (is (= #{90}
-           (survey-deleted [(survey-delete 90)]
-                           {:surveys #{90}})))
+           (survey-deleted [(survey-delete 90)])))
 
     (is (empty?
          (survey-changes [(survey 100 "Survey 100")

@@ -1,16 +1,23 @@
 (ns org.akvo.flow-api.datastore.survey
   (:refer-clojure :exclude [list list*])
-  (:require [org.akvo.flow-api.anomaly :as anomaly]
-            [org.akvo.flow-api.datastore :as ds]
+  (:require [clojure.core.cache :as cache]
             clojure.set
-            [clojure.core.cache :as cache])
-  (:import [org.akvo.flow.api.dao FolderDAO SurveyDAO]
-           [com.google.appengine.api.datastore DatastoreService Entity Key KeyFactory QueryResultIterator]))
+            [org.akvo.flow-api.anomaly :as anomaly]
+            [org.akvo.flow-api.datastore :as ds])
+  (:import [com.gallatinsystems.survey.domain SurveyGroup]
+           [com.google.appengine.api.datastore DatastoreService Entity Key KeyFactory QueryResultIterator]
+           [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+           [org.apache.commons.lang ArrayUtils]))
 
-(defn list* [user-id]
-  (let [survey-dao (SurveyDAO.)
-        all-surveys (.listAll survey-dao)]
-    (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
+(defn list*
+  ([user-id survey-ids]
+   (let [survey-dao (SurveyDAO.)
+         all-surveys (if survey-ids
+                       (.listByKeys survey-dao (ArrayUtils/toObject (long-array survey-ids)))
+                       (.listAll survey-dao))]
+     (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
+  ([user-id]
+   (list* user-id nil)))
 
 (defn list-ids [user-id]
   (->>
@@ -37,10 +44,15 @@
             :modified-at (ds/modified-at survey)}))
     (filter #(= (:folder-id %) folder-id))))
 
-(defn list-forms [user-id]
-  (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
-        all-forms (.list form-dao "all")]
-    (.filterByUserAuthorizationObjectId form-dao all-forms user-id)))
+(defn list-forms
+  ([user-id]
+   (list-forms user-id nil))
+  ([user-id form-ids]
+   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+         all-forms (if form-ids
+                     (.listByKeys form-dao (ArrayUtils/toObject (long-array form-ids)))
+                     (.list form-dao "all"))]
+     (.filterByUserAuthorizationObjectId form-dao all-forms user-id))))
 
 (defn ->question [question]
   (let [type* (str (.getType question))]
@@ -118,19 +130,10 @@
         (contains? (get instance->survey-set instance-id) survey-id))
       surveys-to-permission)))
 
-(defn survey-entity->map [^Entity entity]
-  {:id (str (ds/id entity))
-   :name (.getProperty entity "name")
-   :registration-form-id (str (.getProperty entity "newLocaleSurveyId"))
-   :created-at (ds/created-at entity)
-   :modified-at (ds/modified-at entity)})
-
-(defn surveys-by-id
-  ^QueryResultIterator
-  [^DatastoreService ds ids]
-  (.get ds ^Iterable (mapv (fn [^Long eid]
-                             (KeyFactory/createKey "SurveyGroup" eid)) ids)))
-
-(defn by-ids
-  [ds ids]
-  (mapv survey-entity->map (vals (surveys-by-id ds ids))))
+(defn survey->map
+  [^SurveyGroup survey]
+  {:id (str (ds/id survey))
+   :name (.getName survey)
+   :registration-form-id (str (.getNewLocaleSurveyId survey))
+   :created-at (ds/created-at survey)
+   :modified-at (ds/modified-at survey)})

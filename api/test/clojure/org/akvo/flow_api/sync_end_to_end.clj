@@ -123,7 +123,7 @@
             (is (= #{"144622023"}
                    (set (map :id (:dataPointChanged changes)))))
             (is (= (:dataPointDeleted changes) ["144602051"]))
-            (is (= #{"148412306"}
+            (is (= #{"148412306" "152342023"}
                    (set (map :id (:surveyChanged changes)))))
             (is (= (:surveyDeleted changes) ["152342023"]))
             (let [{:keys [headers status]} (http/get nextSyncUrl
