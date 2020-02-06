@@ -10,14 +10,18 @@
            [org.apache.commons.lang ArrayUtils]))
 
 (defn list*
-  ([user-id survey-ids]
-   (let [survey-dao (SurveyDAO.)
-         all-surveys (if survey-ids
-                       (.listByKeys survey-dao (ArrayUtils/toObject (long-array survey-ids)))
-                       (.listAll survey-dao))]
-     (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
-  ([user-id]
-   (list* user-id nil)))
+  [user-id]
+  (let [survey-dao (SurveyDAO.)
+        all-surveys (.listAll survey-dao)]
+    (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
+
+(defn list-by-ids
+  [user-id survey-ids]
+  (let [survey-dao (SurveyDAO.)
+        all-surveys (if survey-ids
+                      (.listByKeys survey-dao (ArrayUtils/toObject (long-array survey-ids)))
+                      (.listAll survey-dao))]
+    (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
 
 (defn list-ids [user-id]
   (->>
@@ -44,15 +48,11 @@
             :modified-at (ds/modified-at survey)}))
     (filter #(= (:folder-id %) folder-id))))
 
-(defn list-forms
-  ([user-id]
-   (list-forms user-id nil))
-  ([user-id form-ids]
-   (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
-         all-forms (if form-ids
-                     (.listByKeys form-dao (ArrayUtils/toObject (long-array form-ids)))
-                     (.list form-dao "all"))]
-     (.filterByUserAuthorizationObjectId form-dao all-forms user-id))))
+(defn list-forms-by-ids
+  [user-id form-ids]
+  (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
+        all-forms (.listByKeys form-dao (ArrayUtils/toObject (long-array form-ids)))]
+    (.filterByUserAuthorizationObjectId form-dao all-forms user-id)))
 
 (defn ->question [question]
   (let [type* (str (.getType question))]

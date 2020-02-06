@@ -45,7 +45,7 @@
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
     (testing "Filtered forms"
       (let [user-id (user/id "akvo.flow.user.test@gmail.com")
-            forms (survey/list-forms user-id #{145492013 146532016})
+            forms (survey/list-forms-by-ids user-id #{145492013 146532016 153312013})
             forms-ids (set (map ds/id forms))]
         (is (= #{145492013 146532016} forms-ids))))))
 

@@ -95,6 +95,7 @@
             ::form-updated form-updated
             ::form-deleted form-deleted
             :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
+            :surveys-to-load (apply conj survey-changed (map :survey-id data-point-changed))
             ::forms-instances-grouped-by-form form-instances-grouped-by-form
             ::data-point-changed data-point-changed
             ::data-point-deleted data-point-deleted
@@ -127,7 +128,7 @@
                                            :form-instance-ids (set (map :id form-instance))})))
                                 set)
    :data-point-changed (->> data-point-changed
-                            (filter (comp (set (keys survey-id->survey)) :survey-id))
+                            (filter (comp survey-id->survey :survey-id))
                             (map :id)
                             set)
    :data-point-deleted data-point-deleted
@@ -156,29 +157,27 @@
     (let [ds (DatastoreServiceFactory/getDatastoreService)
           events (process-new-events (read-event-log db offset))
           user-id (user/id-by-email-or-throw-error remote-api instance-id email)
-          authorized-forms (set (map ds/id (su/list-forms user-id (:forms-to-load events))))
+          authorized-forms (set (map ds/id (su/list-forms-by-ids user-id (:forms-to-load events))))
           form-id->form (reduce (fn [acc form-id]
                                   (assoc acc form-id (su/get-form-definition (long form-id)
                                                                              {:include-survey-id? true})))
                                 {}
                                 authorized-forms)
-          authorized-surveys (su/list* user-id (:survey-changed events))
+          authorized-surveys (su/list-by-ids user-id (:surveys-to-load events))
           survey-id->survey (reduce (fn [acc survey]
                                       (assoc acc (ds/id survey) (su/survey->map survey)))
                                     {}
                                     authorized-surveys)
           authorized-events (filter-events-by-authorization events form-id->form survey-id->survey)
           form-instances (doall
-                           (mapcat
-                             (fn [to-load]
-                               (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
-                             (:form-instances-to-load authorized-events)))
-          data-point-changed (doall (data-point/by-ids ds (:data-point-changed authorized-events)))
-          survey-changed (vals survey-id->survey)]
+                          (mapcat
+                           (fn [to-load]
+                             (form-instance/by-ids ds (:form to-load) (:form-instance-ids to-load)))
+                           (:form-instances-to-load authorized-events)))
+          data-point-changed (doall (data-point/by-ids ds (:data-point-changed authorized-events)))]
       (assoc authorized-events
              :form-instance-changed form-instances
-             :data-point-changed data-point-changed
-             :survey-changed survey-changed))))
+             :data-point-changed data-point-changed))))
 
 (defn get-db-name [instance-id]
   (str "u_" instance-id))
