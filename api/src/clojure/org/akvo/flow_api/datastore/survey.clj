@@ -18,9 +18,7 @@
 (defn list-by-ids
   [user-id survey-ids]
   (let [survey-dao (SurveyDAO.)
-        all-surveys (if survey-ids
-                      (.listByKeys survey-dao (ArrayUtils/toObject (long-array survey-ids)))
-                      (.listAll survey-dao))]
+        all-surveys (.listByKeys survey-dao (ArrayUtils/toObject (long-array survey-ids)))]
     (.filterByUserAuthorizationObjectId survey-dao all-surveys user-id)))
 
 (defn list-ids [user-id]
