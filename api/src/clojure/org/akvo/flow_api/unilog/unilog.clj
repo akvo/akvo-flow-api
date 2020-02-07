@@ -39,17 +39,17 @@
 
 (def parse-json #(json/parse-string % true))
 
-(defn form-data [{:keys [formId id surveyId]}]
-  {:form-id formId
+(defn form-data [{:keys [formId id]}]
+  {:owner-id formId
    :id id})
 
 (defn form-instance-data [{:keys [formId formInstanceId]}]
-  {:form-id formId
+  {:owner-id formId
    :id formInstanceId})
 
 (defn datapoint-data [{:keys [id surveyId]}]
   {:id id
-   :survey-id surveyId})
+   :owner-id surveyId})
 
 (defn process-new-events [reducible]
   (let [pipeline (comp
@@ -80,23 +80,30 @@
          (let [form-deleted (set (keep ::form-deleted final))
                form-updated (apply disj (set (keep ::form-changed final)) form-deleted)
                form-instance-deleted (set (keep ::form-instance-deleted final))
-               form-instances-grouped-by-form (group-by :form-id
-                                                (remove
-                                                  (comp form-deleted :form-id)
-                                                  (remove
-                                                    (comp form-instance-deleted :id)
-                                                    (distinct (keep ::form-instance-changed final)))))
-               data-point-deleted (set (keep ::data-point-deleted final))
-               data-point-changed (remove #(data-point-deleted (:id %)) (set (keep ::data-point-changed final)))
+               form-instance-changed (remove
+                                        (comp form-deleted :owner-id)
+                                        (remove
+                                          (comp form-instance-deleted :id)
+                                          (distinct (keep ::form-instance-changed final))))
+
                survey-deleted (set (keep ::survey-deleted final))
-               survey-changed (apply disj (set (keep ::survey-changed final)) survey-deleted)]
-           {::unilog-id (:id (last final))
-            ::form-instance-deleted form-instance-deleted
+               survey-changed (apply disj (set (keep ::survey-changed final)) survey-deleted)
+               data-point-deleted (set (keep ::data-point-deleted final))
+               data-point-changed (remove
+                                    (comp survey-deleted :owner-id)
+                                    (remove
+                                      (comp data-point-deleted :id)
+                                      (distinct (keep ::data-point-changed final))))
+               ]
+           {:forms-to-load (apply conj form-updated (map :owner-id form-instance-changed))
+            :surveys-to-load (apply conj survey-changed (map :owner-id data-point-changed))
+
+            ::unilog-id (:id (last final))
             ::form-updated form-updated
             ::form-deleted form-deleted
-            :forms-to-load (apply conj form-updated (keys form-instances-grouped-by-form))
-            :surveys-to-load (apply conj survey-changed (map :survey-id data-point-changed))
-            ::forms-instances-grouped-by-form form-instances-grouped-by-form
+            ::form-instance-deleted form-instance-deleted
+            ;;::form-instance-changed form-instance-changed
+            ::forms-instances-grouped-by-form (group-by :owner-id form-instance-changed)
             ::data-point-changed data-point-changed
             ::data-point-deleted data-point-deleted
             ::survey-changed survey-changed
@@ -128,7 +135,7 @@
                                            :form-instance-ids (set (map :id form-instance))})))
                                 set)
    :data-point-changed (->> data-point-changed
-                            (filter (comp survey-id->survey :survey-id))
+                            (filter (comp survey-id->survey :owner-id))
                             (map :id)
                             set)
    :data-point-deleted data-point-deleted
