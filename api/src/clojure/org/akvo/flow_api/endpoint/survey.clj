@@ -8,7 +8,8 @@
             [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response]]
+            [org.akvo.flow-api.datastore :as ds]))
 
 (defn add-survey-links [surveys api-root instance-id]
   (for [survey surveys]
@@ -46,23 +47,24 @@
    (GET "/surveys/:survey-id" {:keys [email alias instance-id params] :as req}
      (let [{:keys [survey-id]} (spec/validate-params survey-definition-params-spec
                                                      params)]
-       (-> remote-api
+       (ds/with-remote-api remote-api instance-id
+         (-> remote-api
            (survey/by-id instance-id
-                         (user/id-by-email-or-throw-error remote-api instance-id email)
-                         survey-id)
+             (user/id-by-email-or-throw-error remote-api instance-id email)
+             survey-id)
            (add-form-instances-links (utils/get-api-root req) alias)
            (add-data-points-link (utils/get-api-root req) alias)
-           (response))))
+           (response)))))
    (GET "/surveys" {:keys [email alias instance-id params] :as req}
      (let [{:keys [folder-id]} (spec/validate-params survey-list-params-spec
                                                      (rename-keys params
                                                                   {:folder_id :folder-id}))]
-       (-> remote-api
-           (survey/list-by-folder instance-id
-                        (user/id-by-email-or-throw-error remote-api instance-id email)
-                        folder-id)
+       (ds/with-remote-api remote-api instance-id
+         (-> (survey/list-by-folder
+               (user/id-by-email-or-throw-error remote-api instance-id email)
+               folder-id)
            (add-survey-links (utils/get-api-root req) alias)
-           (surveys-response))))))
+           (surveys-response)))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

@@ -9,7 +9,8 @@
             [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response]]
+            [org.akvo.flow-api.datastore :as ds]))
 
 (defn next-page-url [api-root instance-id survey-id page-size cursor]
   (utils/url-builder api-root instance-id "data_points" {"survey_id" survey-id
@@ -33,21 +34,22 @@
 
 (defn endpoint* [{:keys [remote-api]}]
   (GET "/data_points" {:keys [email instance-id alias params] :as req}
-    (let [{:keys [survey-id
-                  page-size
-                  cursor]} (spec/validate-params params-spec
-                                                 (rename-keys params
-                                                              {:survey_id :survey-id
-                                                               :page_size :page-size}))
-          page-size (when page-size
-                      (Long/parseLong page-size))
-          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
-          survey (survey/by-id remote-api instance-id user-id survey-id)]
-      (-> remote-api
-          (data-point/list instance-id user-id survey {:page-size page-size
-                                                       :cursor cursor})
+    (ds/with-remote-api remote-api instance-id
+      (let [{:keys [survey-id
+                    page-size
+                    cursor]} (spec/validate-params params-spec
+                               (rename-keys params
+                                 {:survey_id :survey-id
+                                  :page_size :page-size}))
+            page-size (when page-size
+                        (Long/parseLong page-size))
+            user-id (user/id-by-email-or-throw-error remote-api instance-id email)
+            survey (survey/by-id remote-api instance-id user-id survey-id)]
+        (->
+          (data-point/list survey {:page-size page-size
+                                   :cursor cursor})
           (add-next-page-url (utils/get-api-root req) alias survey-id page-size)
-          (response)))))
+          (response))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

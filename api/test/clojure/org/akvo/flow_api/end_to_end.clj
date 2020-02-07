@@ -26,3 +26,42 @@
                       :content-type :json})]
       (is (= 200 (:status response)))
       (is (= 2 (-> response :body :formInstances count))))))
+
+(deftest data-point
+  (testing "Datapoint"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/data_points"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :query-params {:survey_id "152342023"
+                                     :form_id "146532016"
+                                     :page_size 2}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 2 (-> response :body :dataPoints count))))))
+
+(deftest surveys
+  (testing "All surveys"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/surveys"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :query-params {:folder_id "153142013"}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 2 (-> response :body :surveys count)))))
+
+  (testing "One survey"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/surveys/152342023"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 1 (-> response :body :forms count))))))
+
+(deftest folder
+  (testing "Root folder"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/folders"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 1 (-> response :body :folders count))))))

@@ -8,7 +8,8 @@
             [org.akvo.flow-api.endpoint.utils :as utils]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
-            [ring.util.response :refer [response]]))
+            [ring.util.response :refer [response]]
+            [org.akvo.flow-api.datastore :as ds]))
 
 (defn add-links [folders api-root instance-id]
   (for [{:keys [id] :as folder} folders]
@@ -26,12 +27,13 @@
     (let [{:keys [parent-id]} (spec/validate-params params-spec
                                                     (rename-keys params
                                                                  {:parent_id :parent-id}))]
-      (-> remote-api
-          (folder/list instance-id
-                       (user/id-by-email-or-throw-error remote-api instance-id email)
-                       (or parent-id "0"))
+      (ds/with-remote-api remote-api instance-id
+        (->
+          (folder/list
+            (user/id-by-email-or-throw-error remote-api instance-id email)
+            (or parent-id "0"))
           (add-links (utils/get-api-root req) alias)
-          (folders-response)))))
+          (folders-response))))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
   (-> (endpoint* deps)

@@ -156,7 +156,7 @@
   (ds/with-remote-api remote-api instance-id
     (let [ds (DatastoreServiceFactory/getDatastoreService)
           events (process-new-events (read-event-log db offset))
-          user-id (user/id-by-email-or-throw-error* remote-api instance-id email)
+          user-id (user/id-by-email-or-throw-error remote-api instance-id email)
           authorized-forms (set (map ds/id (su/list-forms-by-ids user-id (:forms-to-load events))))
           form-id->form (reduce (fn [acc form-id]
                                   (assoc acc form-id (su/get-form-definition (long form-id)

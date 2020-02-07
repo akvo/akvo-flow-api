@@ -63,12 +63,12 @@
         (testing "User is cached"
           (let [unique-email (uuid)]
             (create-user ds unique-email)
-            (is (some? (user-cache/id-by-email* remote-api "akvoflowsanbox" unique-email)))
+            (is (some? (user-cache/id-by-email remote-api "akvoflowsanbox" unique-email)))
             (delete-user ds unique-email)
-            (is (some? (user-cache/id-by-email* remote-api "akvoflowsanbox" unique-email)))))
+            (is (some? (user-cache/id-by-email remote-api "akvoflowsanbox" unique-email)))))
 
         (testing "Cache also if the user does not exist"
           (let [unique-email (uuid)]
-            (is (nil? (user-cache/id-by-email* remote-api "akvoflowsanbox" unique-email)))
+            (is (nil? (user-cache/id-by-email remote-api "akvoflowsanbox" unique-email)))
             (create-user ds unique-email)
-            (is (nil? (user-cache/id-by-email* remote-api "akvoflowsanbox" unique-email)))))))))
+            (is (nil? (user-cache/id-by-email remote-api "akvoflowsanbox" unique-email)))))))))

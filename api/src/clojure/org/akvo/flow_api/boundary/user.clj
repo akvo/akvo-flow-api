@@ -15,7 +15,7 @@
 (defn has? [{:keys [cache]} instance-id email]
   (cache/has? @cache [instance-id email]))
 
-(defn id-by-email* [{:keys [user-cache unknown-user-cache] :as this} instance-id email]
+(defn id-by-email [{:keys [user-cache unknown-user-cache] :as this} instance-id email]
   (or
    (get-id user-cache instance-id email)
    (when-not (has? unknown-user-cache instance-id email)
@@ -23,21 +23,6 @@
            which-cache (if id user-cache unknown-user-cache)]
        (put-id which-cache instance-id email id)
        id))))
-
-(defn id-by-email-or-throw-error* [remote-api instance-id email]
-  (or
-    (id-by-email* remote-api instance-id email)
-    (anomaly/unauthorized "User does not exist" {:email email})))
-
-(defn id-by-email [{:keys [user-cache unknown-user-cache] :as this} instance-id email]
-  (or
-    (get-id user-cache instance-id email)
-    (when-not (has? unknown-user-cache instance-id email)
-      (ds/with-remote-api this instance-id
-        (let [id (user/id email)
-              which-cache (if id user-cache unknown-user-cache)]
-          (put-id which-cache instance-id email id)
-          id)))))
 
 (defn id-by-email-or-throw-error [remote-api instance-id email]
   (or
