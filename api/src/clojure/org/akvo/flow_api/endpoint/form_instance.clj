@@ -83,7 +83,7 @@
                                                                           :submission_date :submission-date}))
             page-size (when page-size
                         (Long/parseLong page-size))
-            user-id (user/id-by-email-or-throw-error remote-api instance-id email)
+            user-id (user/id-by-email-or-throw-error* remote-api instance-id email)
             survey (survey/by-id remote-api instance-id user-id survey-id)
             form (find-form (:forms survey) form-id)
             parsed-date (when submission-date
