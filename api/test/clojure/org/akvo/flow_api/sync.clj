@@ -66,7 +66,7 @@
   ([events]
    (let [r (unilog/process-new-events events)
          form-id->form (apply can-see (:forms-to-load r))
-         survey-id->survey (apply can-see (::unilog/survey-changed r))]
+         survey-id->survey (apply can-see (:surveys-to-load r))]
      (unilog/filter-events-by-authorization r form-id->form survey-id->survey)))
   ([events {:keys [form-id->form survey-id->survey]}]
    (let [r (unilog/process-new-events events)]

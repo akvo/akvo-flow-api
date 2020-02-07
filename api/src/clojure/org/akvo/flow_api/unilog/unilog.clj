@@ -51,9 +51,24 @@
   {:id id
    :owner-id surveyId})
 
+(defn collapse [final {:keys [parent-delete-key parent-update-key child-delete-key child-update-key]}]
+  (let [parent-deleted (set (keep parent-delete-key final))
+        parent-updated (apply disj (set (keep parent-update-key final)) parent-deleted)
+        child-deleted (set (keep child-delete-key final))
+        child-changed (remove
+                        (comp parent-deleted :owner-id)
+                        (remove
+                          (comp child-deleted :id)
+                          (distinct (keep child-update-key final))))]
+    {:parent-deleted parent-deleted
+     :parent-updated parent-updated
+     :child-deleted child-deleted
+     :child-changed child-changed
+     :parents-to-load (apply conj parent-updated (map :owner-id child-changed))}))
+
 (defn process-new-events [reducible]
   (let [pipeline (comp
-                  (map (fn [x]
+                   (map (fn [x]
                           (try
                             (update x :payload parse-json)
                             (catch Exception e
@@ -77,70 +92,52 @@
       pipeline
       (fn
         ([final]
-         (let [form-deleted (set (keep ::form-deleted final))
-               form-updated (apply disj (set (keep ::form-changed final)) form-deleted)
-               form-instance-deleted (set (keep ::form-instance-deleted final))
-               form-instance-changed (remove
-                                        (comp form-deleted :owner-id)
-                                        (remove
-                                          (comp form-instance-deleted :id)
-                                          (distinct (keep ::form-instance-changed final))))
+         (let [form-related (collapse final {:parent-delete-key ::form-deleted
+                              :parent-update-key ::form-changed
+                              :child-update-key ::form-instance-changed
+                              :child-delete-key ::form-instance-deleted})
 
-               survey-deleted (set (keep ::survey-deleted final))
-               survey-changed (apply disj (set (keep ::survey-changed final)) survey-deleted)
-               data-point-deleted (set (keep ::data-point-deleted final))
-               data-point-changed (remove
-                                    (comp survey-deleted :owner-id)
-                                    (remove
-                                      (comp data-point-deleted :id)
-                                      (distinct (keep ::data-point-changed final))))
-               ]
-           {:forms-to-load (apply conj form-updated (map :owner-id form-instance-changed))
-            :surveys-to-load (apply conj survey-changed (map :owner-id data-point-changed))
-
+               survey-related (collapse final {:parent-delete-key ::survey-deleted
+                                               :parent-update-key ::survey-changed
+                                               :child-update-key ::data-point-changed
+                                               :child-delete-key ::data-point-deleted})]
+           {:forms-to-load (:parents-to-load form-related)
+            :surveys-to-load (:parents-to-load survey-related)
             ::unilog-id (:id (last final))
-            ::form-updated form-updated
-            ::form-deleted form-deleted
-            ::form-instance-deleted form-instance-deleted
-            ;;::form-instance-changed form-instance-changed
-            ::forms-instances-grouped-by-form (group-by :owner-id form-instance-changed)
-            ::data-point-changed data-point-changed
-            ::data-point-deleted data-point-deleted
-            ::survey-changed survey-changed
-            ::survey-deleted survey-deleted}))
+            ::form-related form-related
+            ::survey-related survey-related}))
         ([sofar batch]
          (conj sofar batch)))
       []
       reducible)))
 
-(defn filter-events-by-authorization [{::keys [forms-instances-grouped-by-form
-                                               unilog-id
-                                               form-updated
-                                               form-deleted
-                                               form-instance-deleted
-                                               data-point-changed
-                                               data-point-deleted
-                                               survey-changed
-                                               survey-deleted]}
+(defn filter-events-by-authorization [{::keys [unilog-id
+                                               form-related
+                                               survey-related]}
                                       form-id->form
                                       survey-id->survey]
   {:unilog-id unilog-id
-   :form-changed (->> form-updated (keep form-id->form) set)
-   :form-deleted form-deleted
-   :form-instance-deleted form-instance-deleted
-   :form-instances-to-load (->> forms-instances-grouped-by-form
-                                (keep (fn [[form-id form-instance]]
-                                        (when-let [form (get form-id->form form-id)]
-                                          {:form form
-                                           :form-instance-ids (set (map :id form-instance))})))
-                                set)
-   :data-point-changed (->> data-point-changed
-                            (filter (comp survey-id->survey :owner-id))
-                            (map :id)
-                            set)
-   :data-point-deleted data-point-deleted
-   :survey-changed (->> survey-changed (keep survey-id->survey) set)
-   :survey-deleted survey-deleted})
+
+   :form-deleted (:parent-deleted form-related)
+   :form-instance-deleted (:child-deleted form-related)
+
+   :survey-deleted (:parent-deleted survey-related)
+   :data-point-deleted (:child-deleted survey-related)
+
+   :form-changed (->> (:parent-updated form-related) (keep form-id->form) set)
+   :survey-changed (->> (:parent-updated survey-related) (keep survey-id->survey) set)
+
+   :form-instances-to-load (->> (:child-changed form-related)
+                             (group-by :owner-id)
+                             (keep (fn [[form-id form-instance]]
+                                     (when-let [form (get form-id->form form-id)]
+                                       {:form form
+                                        :form-instance-ids (set (map :id form-instance))})))
+                             set)
+   :data-point-changed (->> (:child-changed survey-related)
+                         (filter (comp survey-id->survey :owner-id))
+                         (map :id)
+                         set)})
 
 (defn get-cursor [db]
   (let [result (first (jdbc/query db
