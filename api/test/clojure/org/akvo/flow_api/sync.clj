@@ -149,7 +149,12 @@
 
     (is (empty?
           (data-point-changes [(data-point-deleted-event 11)
-                               (data-point 11 40 "dddd-eeee-ffff")]))))
+                               (data-point 11 40 "dddd-eeee-ffff")])))
+    (testing "survey deleted"
+      (let [survey-id 41120]
+        (is (empty?
+              (data-point-changes [(survey-delete survey-id)
+                                   (data-point 11 survey-id "dddd-eeee-ffff")]))))))
 
   (testing "Surveys"
     (is (= #{60 80}

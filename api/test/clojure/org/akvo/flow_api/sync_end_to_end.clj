@@ -56,7 +56,7 @@
                              :name "NR-handpump"
                              :surveyGroupType "SURVEY"}}
                    {:eventType "surveyGroupDeleted"
-                    :entity {:id 152342023}}])
+                    :entity {:id 152342024444}}])
 
 (defn insert-log [db events]
   (jdbc/insert-multi! db :event_log (mapv (fn [evt]
@@ -125,7 +125,7 @@
             (is (= (:dataPointDeleted changes) ["144602051"]))
             (is (= #{"148412306"}
                    (set (map :id (:surveyChanged changes)))))
-            (is (= (:surveyDeleted changes) ["152342023"]))
+            (is (= (:surveyDeleted changes) ["152342024444"]))
             (let [{:keys [headers status]} (http/get nextSyncUrl
                                                      {:as :json
                                                       :headers {"x-akvo-email" user
