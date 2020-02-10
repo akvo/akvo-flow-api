@@ -40,23 +40,23 @@
 (def parse-json #(json/parse-string % true))
 
 (defn form-data [{:keys [formId id]}]
-  {:owner-id formId
+  {:parent-id formId
    :id id})
 
 (defn form-instance-data [{:keys [formId formInstanceId]}]
-  {:owner-id formId
+  {:parent-id formId
    :id formInstanceId})
 
 (defn datapoint-data [{:keys [id surveyId]}]
   {:id id
-   :owner-id surveyId})
+   :parent-id surveyId})
 
 (defn collapse [final {:keys [parent-delete-key parent-update-key child-delete-key child-update-key]}]
   (let [parent-deleted (set (keep parent-delete-key final))
         parent-updated (apply disj (set (keep parent-update-key final)) parent-deleted)
         child-deleted (set (keep child-delete-key final))
         child-changed (remove
-                        (comp parent-deleted :owner-id)
+                        (comp parent-deleted :parent-id)
                         (remove
                           (comp child-deleted :id)
                           (distinct (keep child-update-key final))))]
@@ -64,7 +64,7 @@
      :parent-updated parent-updated
      :child-deleted child-deleted
      :child-changed child-changed
-     :parents-to-load (apply conj parent-updated (map :owner-id child-changed))}))
+     :parents-to-load (apply conj parent-updated (map :parent-id child-changed))}))
 
 (defn process-new-events [reducible]
   (let [pipeline (comp
@@ -128,14 +128,14 @@
    :survey-changed (->> (:parent-updated survey-related) (keep survey-id->survey) set)
 
    :form-instances-to-load (->> (:child-changed form-related)
-                             (group-by :owner-id)
+                             (group-by :parent-id)
                              (keep (fn [[form-id form-instance]]
                                      (when-let [form (get form-id->form form-id)]
                                        {:form form
                                         :form-instance-ids (set (map :id form-instance))})))
                              set)
    :data-point-changed (->> (:child-changed survey-related)
-                         (filter (comp survey-id->survey :owner-id))
+                         (filter (comp survey-id->survey :parent-id))
                          (map :id)
                          set)})
 
