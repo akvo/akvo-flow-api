@@ -66,7 +66,7 @@
   ([events]
    (let [r (unilog/process-new-events events)
          form-id->form (apply can-see (:forms-to-load r))
-         survey-id->survey (apply can-see (::unilog/survey-changed r))]
+         survey-id->survey (apply can-see (:surveys-to-load r))]
      (unilog/filter-events-by-authorization r form-id->form survey-id->survey)))
   ([events {:keys [form-id->form survey-id->survey]}]
    (let [r (unilog/process-new-events events)]
@@ -149,7 +149,12 @@
 
     (is (empty?
           (data-point-changes [(data-point-deleted-event 11)
-                               (data-point 11 40 "dddd-eeee-ffff")]))))
+                               (data-point 11 40 "dddd-eeee-ffff")])))
+    (testing "survey deleted"
+      (let [survey-id 41120]
+        (is (empty?
+              (data-point-changes [(survey-delete survey-id)
+                                   (data-point 11 survey-id "dddd-eeee-ffff")]))))))
 
   (testing "Surveys"
     (is (= #{60 80}
