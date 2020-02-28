@@ -49,7 +49,7 @@ docker run \
 	   "akvo/flow-api-auth0-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
 
     docker-compose up -d
-    docker-compose exec testnetwork bash -c 'cd /usr/local/src/ && ./test-cache.sh'
+    docker-compose exec testnetwork /bin/sh -c 'cd /usr/local/src/ && ./entrypoint.sh ./test-cache.sh'
     docker-compose down -v
 )
 

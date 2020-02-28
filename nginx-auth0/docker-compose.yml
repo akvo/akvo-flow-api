@@ -3,7 +3,6 @@ version: "3"
 services:
   testnetwork:
     image: alpine:3.10
-    entrypoint: "/usr/local/src/entrypoint.sh"
     command: ["tail", "-f", "/dev/null"]
     ports:
       - 8082:8082
