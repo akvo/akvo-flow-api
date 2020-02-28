@@ -14,3 +14,6 @@
 
 (defn bad-request [message m]
   (throw-anomaly ::bad-request message m))
+
+(defn too-many-requests [message m]
+  (throw-anomaly ::too-many-requests message m))

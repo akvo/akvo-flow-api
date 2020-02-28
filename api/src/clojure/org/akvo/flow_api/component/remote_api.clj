@@ -16,3 +16,11 @@
 
 (defn local-api [_]
   (->LocalApi))
+
+(defrecord OverQuotaApi []
+  component/Lifecycle
+  (start [this] this)
+  (stop [this] this))
+
+(defn over-quota-api [_]
+  (->OverQuotaApi))

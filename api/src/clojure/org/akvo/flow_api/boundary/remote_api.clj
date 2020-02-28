@@ -2,7 +2,8 @@
   (:require [org.akvo.flow-api.boundary.akvo-flow-server-config :as afsc]
             [org.akvo.flow-api.component.remote-api])
   (:import [com.google.appengine.tools.remoteapi RemoteApiOptions]
-           [org.akvo.flow_api.component.remote_api RemoteApi LocalApi]))
+           [org.akvo.flow_api.component.remote_api RemoteApi LocalApi OverQuotaApi]
+           java.io.IOException))
 
 (defprotocol IRemoteApi
   (options [this instance-id]))
@@ -30,4 +31,8 @@
     (let [options (-> (RemoteApiOptions.)
                       (.server "localhost" 8888))]
       (.useDevelopmentServerCredential options)
-      options)))
+      options))
+
+  OverQuotaApi
+  (options [this instance-id]
+    (throw (IOException. "<H1>Over Quota</H1>"))))

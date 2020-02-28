@@ -8,7 +8,7 @@
  {:app
   {:middleware
    {:functions {:stacktrace #var ring.middleware.stacktrace/wrap-stacktrace}
-    :applied   ^:replace [:not-found :wrap-anomaly :json-response :ring-defaults :wrap-email :json-body :stacktrace]}}
+    :applied   ^:replace [:not-found :log-errors :wrap-anomaly :json-response :ring-defaults :wrap-email :json-body :stacktrace]}}
   :http  {:port 3000}
   :api-root "http://localhost:3000/"
   :unilog-db ^:replace {:event-log-password "unilog"
