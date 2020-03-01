@@ -27,3 +27,8 @@
   (-> (body e)
       (response)
       (assoc :status 400)))
+
+(defmethod handle :org.akvo.flow-api.anomaly/too-many-requests [e]
+  (-> (body e)
+      (response)
+      (assoc :status 429)))
