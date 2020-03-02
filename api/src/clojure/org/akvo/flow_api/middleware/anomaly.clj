@@ -15,6 +15,7 @@
     (try
       (handler request)
       (catch Throwable e
-        (if (.contains (.getMessage e) "Over Quota")
+        (if (or (.contains (.getMessage e) "Over Quota")
+                (.contains (.getMessage e) "required more quota"))
           (an/too-many-requests "This application is temporarily over its serving quota." {})
           (throw e))))))
