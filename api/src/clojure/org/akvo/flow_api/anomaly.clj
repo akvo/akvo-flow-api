@@ -17,3 +17,6 @@
 
 (defn too-many-requests [message m]
   (throw-anomaly ::too-many-requests message m))
+
+(defn bad-gateway [message m]
+  (throw-anomaly ::bad-gateway message m))

@@ -32,3 +32,8 @@
   (-> (body e)
       (response)
       (assoc :status 429)))
+
+(defmethod handle :org.akvo.flow-api.anomaly/bad-gateway [e]
+  (-> (body e)
+      (response)
+      (assoc :status 502)))

@@ -18,4 +18,6 @@
         (if (or (.contains (.getMessage e) "Over Quota")
                 (.contains (.getMessage e) "required more quota"))
           (an/too-many-requests "This application is temporarily over its serving quota." {})
-          (throw e))))))
+          (if (.contains (.getMessage e) "Please try again in 30 seconds")
+            (an/bad-gateway "The server encountered an error and could not complete your request. Please try again in 30 seconds." {})
+            (throw e)))))))
