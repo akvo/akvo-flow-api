@@ -6,9 +6,9 @@
 (defn ex? [exception-or-message]
   (try
     (anomaly/translate-exception (if (= (type exception-or-message) String)
-                                   (IOException. exception-or-message)
+                                   (IOException. ^String exception-or-message)
                                    exception-or-message))
-    (is false "Should never reach here")
+    "Should never reach here"
     (catch Exception e
       (if (ex-data e)
         (:org.akvo.flow-api/anomaly (ex-data e))
