@@ -12,9 +12,9 @@
 
 (defn translate-exception [e]
   (condp #(.contains %2 %1) (or (.getMessage e) "")
-    "Over Quota" (an/too-many-requests "This application is temporarily over its serving quota." {})
-    "required more quota" (an/too-many-requests "This application is temporarily over its serving quota." {})
-    "Please try again in 30 seconds" (an/bad-gateway "The server encountered an error and could not complete your request. Please try again in 30 seconds." {})
+    "Over Quota" (an/too-many-requests)
+    "required more quota" (an/too-many-requests)
+    "Please try again in 30 seconds" (an/bad-gateway)
     (throw e)))
 
 (defn wrap-log-errors [handler]

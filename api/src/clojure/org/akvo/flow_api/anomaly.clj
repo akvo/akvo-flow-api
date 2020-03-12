@@ -15,8 +15,8 @@
 (defn bad-request [message m]
   (throw-anomaly ::bad-request message m))
 
-(defn too-many-requests [message m]
-  (throw-anomaly ::too-many-requests message m))
+(defn too-many-requests []
+  (throw-anomaly ::too-many-requests "This application is temporarily over its serving quota." {}))
 
-(defn bad-gateway [message m]
-  (throw-anomaly ::bad-gateway message m))
+(defn bad-gateway []
+  (throw-anomaly ::bad-gateway "The server encountered an error and could not complete your request. Please try again in 30 seconds." {}))
