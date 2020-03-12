@@ -81,7 +81,8 @@
 
 (defn parse-double [s]
   (try (Double/parseDouble s)
-       (catch NumberFormatException _)))
+       (catch NumberFormatException _)
+       (catch NullPointerException _)))
 
 (defmethod parse-response "NUMBER"
   [_ response-str opts]
