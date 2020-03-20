@@ -28,13 +28,20 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     docker build \
 	   -t "akvo/flow-api-proxy:latest" \
 	   -t "akvo/flow-api-proxy:${TRAVIS_COMMIT}" .
-)
 
-# Check nginx configuration
-docker run \
+    # Check nginx configuration
+    docker run \
        --rm \
        --entrypoint /usr/local/openresty/bin/openresty \
        "akvo/flow-api-proxy" -t -c /usr/local/openresty/nginx/conf/nginx.conf
+
+    # Test KC based auth
+    docker-compose up -d
+    docker-compose exec testnetwork /bin/sh -c 'cd /usr/local/src/ && ./entrypoint.sh ./test-auth.sh'
+    docker-compose down -v
+)
+
+
 
 # Check nginx auth0 configuration
 (
