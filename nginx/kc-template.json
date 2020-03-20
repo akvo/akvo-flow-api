@@ -1,0 +1,9 @@
+{
+  "realm": "akvo",
+  "auth-server-url": "https://kc.akvotest.org/auth",
+  "ssl-required": "all",
+  "resource": "akvo-api-proxy",
+  "credentials": {
+    "secret": null
+  }
+}

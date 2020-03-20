@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  testnetwork:
+    image: alpine:3.11
+    command: ["tail", "-f", "/dev/null"]
+    ports:
+      - 8081:8081
+    volumes:
+      - ./:/usr/local/src:ro
+      - ./:/secrets
+    environment:
+      - KC_USER
+      - KC_PASSWORD
+      - KC_SECRET
+  api-proxy:
+    image: akvo/flow-api-proxy:latest
+    network_mode: service:testnetwork
+    environment:
+      - FLOW_API_BACKEND_URL=http://localhost:3000
+      - TOKEN_INTROSPECTION_URL=https://kc.akvotest.org/auth/realms/akvo/protocol/openid-connect/token/introspect
+      - SECRETS_MOUNT_PATH=/secrets
+    volumes:
+      - ./:/secrets:ro
+  upstream:
+    image: akvo/flow-api-proxy:latest
+    network_mode: service:testnetwork
+    entrypoint: ["/usr/local/openresty/bin/openresty", "-c", "/usr/local/src/nginx-test.conf", "-g", "daemon off;"]
+    volumes:
+      - ./:/usr/local/src:ro
