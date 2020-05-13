@@ -18,3 +18,5 @@
 .idea
 
 nginx/keycloak.json
+
+notify.team.sh
