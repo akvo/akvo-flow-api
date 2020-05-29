@@ -39,7 +39,7 @@
         survey #{:id :name :forms :registration-form-id}
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
-        question #{:id :name :type :order}))))
+        question #{:id :name :type :order :personal-data}))))
 
 (deftest list-authorized-forms
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
