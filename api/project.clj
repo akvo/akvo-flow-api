@@ -15,7 +15,7 @@
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
                  [commons-fileupload "1.3.1"]
-                 [org.akvo.flow/akvo-flow "v1.10-58-g867c78e9" :classifier "classes"]
+                 [org.akvo.flow/akvo-flow "20200529-111830.5e177216" :classifier "classes"]
                  [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]

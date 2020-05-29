@@ -46,6 +46,7 @@
       :type type*
       :order (.getOrder question)
       :variable-name (.getVariableName question)
+      :personal-data (.getPersonalData question)
       :created-at (ds/created-at question)
       :modified-at (ds/modified-at question)}
      (when (= type* "CADDISFLY")
@@ -66,7 +67,7 @@
   ([form-id {:keys [include-survey-id?]}]
    (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
          ;; Includes question groups, but contrary to docstring does not contain questions
-         form (.loadFullSurvey form-dao form-id)
+         form (.loadFullForm form-dao form-id)
          question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
          questions (group-by #(.getQuestionGroupId %)
                              (.listQuestionsBySurvey question-dao form-id))]
