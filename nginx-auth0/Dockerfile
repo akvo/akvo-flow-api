@@ -11,5 +11,6 @@ RUN apk add --no-cache \
 EXPOSE 8082
 
 COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+COPY authn.lua /usr/local/openresty/nginx/conf/authn.lua
 
 ENTRYPOINT ["/usr/local/openresty/bin/openresty", "-c", "/usr/local/openresty/nginx/conf/nginx.conf", "-g", "daemon off;"]
