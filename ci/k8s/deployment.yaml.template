@@ -113,10 +113,6 @@ spec:
           mountPath: /secrets
         - name: heap-dumps
           mountPath: /dumps
-        - name: secrets
-          mountPath: "/secrets/cloudsql/credentials.json"
-          subPath: "cloud-database-service-account.json"
-          readOnly: true
         resources:
           requests:
             cpu: ${BACKEND_POD_CPU_REQUESTS}
@@ -135,7 +131,7 @@ spec:
               name: flow-api
               key: api.root
         - name: GOOGLE_APPLICATION_CREDENTIALS
-          value: "/secrets/cloudsql/credentials.json"
+          value: "/secrets/cloud-database-service-account.json"
       volumes:
       - name: secrets
         secret:
