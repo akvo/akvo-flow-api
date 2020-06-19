@@ -113,7 +113,7 @@ spec:
           mountPath: /secrets
         - name: heap-dumps
           mountPath: /dumps
-        - name: "secret-config"
+        - name: secrets
           mountPath: "/secrets/cloudsql/credentials.json"
           subPath: "cloud-database-service-account.json"
           readOnly: true
