@@ -70,6 +70,7 @@
   :survey-cache {:ttl 3600000} ;; 1 hr
   :unilog-db {:event-log-password event-log-password
               :event-log-user event-log-user
+              :cloud-sql-instance cloud-sql-instance
               :extra-jdbc-opts {:ssl true
                                 :sslfactory "org.postgresql.ssl.DefaultJavaSSLFactory"
                                 :read-only? true}
