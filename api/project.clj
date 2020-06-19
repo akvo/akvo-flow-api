@@ -29,6 +29,7 @@
                  [org.postgresql/postgresql "42.2.6"]
                  [com.zaxxer/HikariCP "3.3.1"]
                  [org.clojure/java.jdbc "0.7.10"]
+                 [com.google.cloud.sql/postgres-socket-factory "1.0.16"]
                  [clj-http "2.3.0"]
                  [cheshire "5.7.0"]
                  [nrepl/nrepl "0.6.0"]]

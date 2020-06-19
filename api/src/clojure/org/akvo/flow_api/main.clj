@@ -7,7 +7,8 @@
             [duct.util.system :refer [load-system]]
             [environ.core :refer [env]]
             [nrepl.server :as repl]
-            [org.akvo.flow-api.utils :as utils]))
+            [org.akvo.flow-api.utils :as utils])
+  (:import (java.io FileNotFoundException)))
 
 (defn secret-value
   "Reads the value of a secret from a file. It expects an
@@ -19,6 +20,15 @@
         slurp
         str/trim)))
 
+(defn maybe-secret-value
+  "Reads the value of a secret from a file. It expects an
+  environment variable SECRETS_MOUNT_PATH pointing to a folder
+  containing secret files"
+  [secret-key]
+  (try
+    (secret-value secret-key)
+    (catch FileNotFoundException _ nil)))
+
 (defn -main [& args]
   (let [bindings {'http-port (Integer/parseInt (:http-port env "3000"))
                   'github-auth-token (secret-value "github-auth-token")
@@ -26,6 +36,7 @@
                   'tmp-dir (utils/ensure-trailing-slash (System/getProperty "java.io.tmpdir"))
                   'event-log-user (secret-value "event-log-user")
                   'event-log-password (secret-value "event-log-password")
+                  'cloud-sql-instance (maybe-secret-value "cloud-sql-instance")
                   'event-log-host (secret-value "event-log-host")
                   'event-log-port (Integer/parseInt (secret-value "event-log-port"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)

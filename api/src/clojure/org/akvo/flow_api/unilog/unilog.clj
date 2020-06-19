@@ -26,16 +26,25 @@
 
 (defn event-log-spec [config]
   (assert (not (empty? config)) "Config map is empty")
-  (merge
+  (when-let [cloud-sql-instance (config :cloud-sql-instance)]
     {:subprotocol "postgresql"
-     :subname (format "//%s:%s/%s"
-                (config :event-log-host)
-                (config :event-log-port)
-                (config :db-name))
-     :ssl true
+     :subname (format "//any:5432/%s" (config :db-name))
+     :ssl false
      :user (config :event-log-user)
-     :password (config :event-log-password)}
-    (:extra-jdbc-opts config)))
+     :password (config :event-log-password)
+     :read-only? true
+     :socketFactory "com.google.cloud.sql.postgres.SocketFactory"
+     :cloudSqlInstance cloud-sql-instance}
+    (merge
+      {:subprotocol "postgresql"
+       :subname (format "//%s:%s/%s"
+                  (config :event-log-host)
+                  (config :event-log-port)
+                  (config :db-name))
+       :ssl true
+       :user (config :event-log-user)
+       :password (config :event-log-password)}
+      (:extra-jdbc-opts config))))
 
 (def parse-json #(json/parse-string % true))
 
