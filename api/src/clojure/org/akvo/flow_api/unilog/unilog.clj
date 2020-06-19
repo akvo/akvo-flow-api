@@ -26,7 +26,7 @@
 
 (defn event-log-spec [config]
   (assert (not (empty? config)) "Config map is empty")
-  (when-let [cloud-sql-instance (config :cloud-sql-instance)]
+  (if-let [cloud-sql-instance (config :cloud-sql-instance)]
     {:subprotocol "postgresql"
      :subname (format "//any:5432/%s" (config :db-name))
      :ssl false
