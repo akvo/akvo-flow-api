@@ -10,6 +10,8 @@
             [org.akvo.flow-api.utils :as utils])
   (:import (java.io FileNotFoundException)))
 
+(defonce the-system (atom nil))
+
 (defn secret-value
   "Reads the value of a secret from a file. It expects an
   environment variable SECRETS_MOUNT_PATH pointing to a folder
@@ -40,7 +42,8 @@
                   'event-log-host (secret-value "event-log-host")
                   'event-log-port (Integer/parseInt (secret-value "event-log-port"))}
         system   (->> (load-system [(io/resource "org/akvo/flow_api/system.edn")] bindings)
-                      (component/start))]
+                      (component/start)
+                      (reset! the-system))]
     (add-shutdown-hook ::stop-system #(component/stop system))
     (println "Started HTTP server on port" (-> system :http :port))
     (let [repl-server (repl/start-server :port (Integer/parseInt (:repl-port env "0")))]
