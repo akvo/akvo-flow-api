@@ -52,8 +52,9 @@
      (when (= type* "CADDISFLY")
        {:caddisfly-resource-uuid (.getCaddisflyResourceUuid question)}))))
 
-(defn question-group-definition [question-group questions]
-  (let [qs (sort-by :order (map ->question questions))]
+(defn question-group-definition [question-group]
+  (let [questions (.values (.getQuestionMap question-group))
+        qs (sort-by :order (map ->question questions))]
     {:id (str (ds/id question-group))
      :name (.getName question-group)
      :repeatable (boolean (.getRepeatable question-group))
@@ -67,16 +68,12 @@
   ([form-id {:keys [include-survey-id?]}]
    (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
          ;; Includes question groups, but contrary to docstring does not contain questions
-         form (.loadFullForm form-dao form-id)
-         question-dao (com.gallatinsystems.survey.dao.QuestionDao.)
-         questions (group-by #(.getQuestionGroupId %)
-                             (.listQuestionsBySurvey question-dao form-id))]
+         form (.loadFullForm form-dao form-id)]
      (cond->
          {:id (str form-id)
           :name (.getName form)
           :question-groups (mapv (fn [question-group]
-                                   (question-group-definition question-group
-                                                              (get questions (ds/id question-group))))
+                                   (question-group-definition question-group))
                                  (.values (.getQuestionGroupMap form)))
           :created-at (ds/created-at form)
           :modified-at (ds/modified-at form)}
