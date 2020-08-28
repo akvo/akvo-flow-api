@@ -251,6 +251,7 @@
    :data-point-id (str (.getProperty form-instance "surveyedLocaleId"))
    :identifier (.getProperty form-instance "surveyedLocaleIdentifier")
    :display-name (.getProperty form-instance "surveyedLocaleDisplayName")
+   :form-version (.getProperty form-instance "formVersion")
    :created-at (ds/created-at form-instance)
    :modified-at (ds/modified-at form-instance)})
 
