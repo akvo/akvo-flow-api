@@ -75,6 +75,7 @@
           :question-groups (mapv (fn [question-group]
                                    (question-group-definition question-group))
                                  (.values (.getQuestionGroupMap form)))
+          :version (.getVersion form)
           :created-at (ds/created-at form)
           :modified-at (ds/modified-at form)}
        include-survey-id? (assoc :survey-id (str (.getSurveyGroupId form)))))))
