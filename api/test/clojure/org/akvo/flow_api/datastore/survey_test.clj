@@ -34,6 +34,7 @@
       (are [x required-keys] (= (disj (set (keys x))
                                       :variable-name
                                       :modified-at
+                                      :version
                                       :created-at)
                                 required-keys)
         survey #{:id :name :forms :registration-form-id}
