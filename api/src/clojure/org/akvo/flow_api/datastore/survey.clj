@@ -68,7 +68,7 @@
   ([form-id {:keys [include-survey-id?]}]
    (let [form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
          ;; Includes question groups, but contrary to docstring does not contain questions
-         form (.loadFullForm form-dao form-id)]
+         form (.loadFullFormIncludingQuestionOptions form-dao form-id false)]
      (cond->
          {:id (str form-id)
           :name (.getName form)
