@@ -12,7 +12,7 @@ services:
     environment:
       - KC_USER
       - KC_PASSWORD
-      - KC_SECRET
+      - KC_SECRET=any
   api-proxy:
     image: akvo/flow-api-proxy:latest
     network_mode: service:testnetwork
