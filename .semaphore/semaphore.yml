@@ -23,7 +23,6 @@ blocks:
             - export TRAVIS_BRANCH=${SEMAPHORE_GIT_BRANCH}
             - export TRAVIS_TAG=${SEMAPHORE_GIT_TAG_NAME}
             - export TRAVIS_COMMIT=${SEMAPHORE_GIT_SHA}
-            - export TRAVIS_COMMIT=${SEMAPHORE_GIT_SHA}
             - |-
               if [ "$SEMAPHORE_GIT_REF_TYPE" = "pull-request" ]; then
                 export TRAVIS_PULL_REQUEST="true"
