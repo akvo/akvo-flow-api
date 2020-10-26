@@ -42,7 +42,6 @@ else
     PROXY_POD_MEM_REQUESTS="16Mi"
     PROXY_POD_MEM_LIMITS="32Mi"
 
-    docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
     docker push "akvo/flow-api-proxy"
     docker push "akvo/flow-api-auth0-proxy"
     docker push "akvo/flow-api-backend"
