@@ -42,9 +42,9 @@ else
     PROXY_POD_MEM_REQUESTS="16Mi"
     PROXY_POD_MEM_LIMITS="32Mi"
 
-    docker push "akvo/flow-api-proxy"
-    docker push "akvo/flow-api-auth0-proxy"
-    docker push "akvo/flow-api-backend"
+    docker push "akvo/flow-api-proxy:$TRAVIS_COMMIT"
+    docker push "akvo/flow-api-auth0-proxy:$TRAVIS_COMMIT"
+    docker push "akvo/flow-api-backend:$TRAVIS_COMMIT"
 fi
 
 # Deploying
