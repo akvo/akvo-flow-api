@@ -9,14 +9,23 @@ function log {
 log waiting for docker compose to start
 wait4ports nginx=tcp://localhost:8082 upstream=tcp://localhost:3000
 
+function check_status {
+  api_result=$(./api.sh "$1" 2>&1)
+  if echo "$api_result" | grep -q "$2"; then
+    echo "ok"
+  else
+    echo "$2 not found in response from $1:"
+    echo "$api_result"
+    exit 1
+  fi
+}
 
 log check cache miss
-./api.sh "http://localhost:8082/flow/ok"
-./api.sh "http://localhost:8082/flow/ok" 2>&1 | grep 'X-Cache-Status: MISS'
+check_status "http://localhost:8082/flow/ok" 'X-Cache-Status: MISS'
 log check cache miss again
-./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: MISS'
+check_status "http://localhost:8082/flow/" 'X-Cache-Status: MISS'
 log check cache hit
-./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+check_status "http://localhost:8082/flow/" 'X-Cache-Status: HIT'
 log check cache hit again
-./api.sh "http://localhost:8082/flow/" 2>&1 | grep 'X-Cache-Status: HIT'
+check_status "http://localhost:8082/flow/" 'X-Cache-Status: HIT'
 log test passed
