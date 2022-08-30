@@ -1,6 +1,7 @@
 (ns org.akvo.flow-api.middleware.anomaly
   (:require [org.akvo.flow-api.endpoint.anomaly :as anomaly]
-            [org.akvo.flow-api.anomaly :as an])
+            [org.akvo.flow-api.anomaly :as an]
+            [clojure.tools.logging :as log])
   (:import [clojure.lang ExceptionInfo]))
 
 (defn wrap-anomaly [handler]
@@ -22,4 +23,5 @@
     (try
       (handler request)
       (catch Throwable e
+        (log/error e "App Error")
         (translate-exception e)))))
