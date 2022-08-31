@@ -23,5 +23,5 @@
     (try
       (handler request)
       (catch Throwable e
-        (log/error e "App Error")
+        (log/error e (str "Error:" (.getMessage e)))
         (translate-exception e)))))
