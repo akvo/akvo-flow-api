@@ -15,9 +15,6 @@ if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
-log Login to Docker
-echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
-
 LOCAL_TEST_DATA_PATH="gae-dev-server/target/stub-server-1.0-SNAPSHOT/WEB-INF/appengine-generated"
 
 mkdir -p "$HOME/.m2/repository"
