@@ -33,6 +33,7 @@
                  [com.google.cloud.sql/postgres-socket-factory "1.0.16"]
                  [clj-http "2.3.0"]
                  [cheshire "5.7.0"]
+                 [nrepl/nrepl "0.6.0"]
                  [com.taoensso/timbre "4.10.0"]
                  [com.fzakaria/slf4j-timbre "0.3.8" :exclusions [org.slf4j/slf4j-jdk14]]
                  [org.slf4j/slf4j-api "1.7.14"]
