@@ -1,6 +1,6 @@
 (ns org.akvo.flow-api.endpoint.form-instance-test
   (:require [clojure.test :refer [deftest testing are]]
-            [org.akvo.flow-api.endpoint.form-instance :refer :all])
+            [org.akvo.flow-api.endpoint.form-instance :refer [parse-filter]])
   (:import java.time.Instant))
 
 

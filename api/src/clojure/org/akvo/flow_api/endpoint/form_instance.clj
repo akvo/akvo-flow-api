@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.endpoint.form-instance
   (:require [clojure.set :refer [rename-keys]]
             [clojure.spec.alpha :as s]
-            [compojure.core :refer :all]
+            [compojure.core :refer [GET]]
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.boundary.user :as user]

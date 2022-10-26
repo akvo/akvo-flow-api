@@ -3,10 +3,9 @@
             [org.akvo.flow-api.boundary.remote-api :as remote-api])
   (:import [com.gallatinsystems.framework.domain BaseDomain]
            [com.google.appengine.api.datastore Entity QueryResultIterator]
-           [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
+           [com.google.appengine.tools.remoteapi RemoteApiInstaller]
            [java.text Format]
            [java.time.format DateTimeFormatter]
-           [java.util Date]
            [java.util.logging LogManager]))
 
 (set! *warn-on-reflection* true)

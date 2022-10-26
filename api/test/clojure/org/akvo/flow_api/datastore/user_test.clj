@@ -1,11 +1,13 @@
 (ns org.akvo.flow-api.datastore.user-test
-  (:require  [clojure.test :refer :all]
+  (:require  [akvo.commons.gae :as gae]
+             [akvo.commons.gae.query :as query]
+             [clojure.test :refer [use-fixtures deftest testing is are]]
+             [org.akvo.flow-api.boundary.user :as user-cache]
+             [org.akvo.flow-api.component.cache]
+             [org.akvo.flow-api.component.remote-api]
              [org.akvo.flow-api.datastore :as ds]
              [org.akvo.flow-api.datastore.user :as user]
-             [org.akvo.flow-api.fixtures :as fixtures]
-             [org.akvo.flow-api.boundary.user :as user-cache]
-             [akvo.commons.gae :as gae]
-             [akvo.commons.gae.query :as query])
+             [org.akvo.flow-api.fixtures :as fixtures])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
 (defn uuid [] (str (java.util.UUID/randomUUID)))
@@ -37,9 +39,9 @@
 (defn find-user [ds unique-email]
   (first
    (iterator-seq
-    (.iterator (akvo.commons.gae.query/result ds
-                                              {:kind "User"
-                                               :filter (query/= "emailAddress" unique-email)})))))
+    (.iterator (query/result ds
+                             {:kind "User"
+                              :filter (query/= "emailAddress" unique-email)})))))
 
 (defn create-user [ds unique-email]
   (gae/put! ds "User" {"emailAddress" unique-email})

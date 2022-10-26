@@ -59,14 +59,14 @@
   (try
     (let [ae-reader (AppEngineWebXmlReader. path file-name)]
       (.getSystemProperties (.readAppEngineWebXml ae-reader)))
-    (catch Exception e)))
+    (catch Exception _)))
 
 (defn get-instance-props [auth-token tmp-dir instance-id]
   (try
     (let [tmp-file (get-appengine-web-xml-file auth-token tmp-dir instance-id)]
       (read-instance-props (format "%s%s/" tmp-dir instance-id)
                            (.getName tmp-file)))
-    (catch clojure.lang.ExceptionInfo e)))
+    (catch clojure.lang.ExceptionInfo _)))
 
 
 

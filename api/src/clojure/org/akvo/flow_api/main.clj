@@ -31,7 +31,7 @@
     (secret-value secret-key)
     (catch FileNotFoundException _ nil)))
 
-(defn -main [& args]
+(defn -main [& _args]
   (let [bindings {'http-port (Integer/parseInt (:http-port env "3000"))
                   'github-auth-token (secret-value "github-auth-token")
                   'sentry-dsn (secret-value "sentry-dsn")

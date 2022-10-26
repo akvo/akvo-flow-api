@@ -27,12 +27,12 @@
       options))
 
   LocalApi
-  (options [this instance-id]
+  (options [_this _instance-id]
     (let [options (-> (RemoteApiOptions.)
                       (.server "localhost" 8888))]
       (.useDevelopmentServerCredential options)
       options))
 
   OverQuotaApi
-  (options [this instance-id]
+  (options [_this _instance-id]
     (throw (IOException. "<H1>Over Quota</H1>"))))

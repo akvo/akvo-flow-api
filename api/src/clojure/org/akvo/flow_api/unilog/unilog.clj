@@ -1,16 +1,12 @@
 (ns org.akvo.flow-api.unilog.unilog
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory])
   (:require [clojure.java.jdbc :as jdbc]
-            [clojure.string :as str]
             [org.akvo.flow-api.boundary.form-instance :as form-instance]
             [org.akvo.flow-api.unilog.spec :as unilog-spec]
             [org.akvo.flow-api.boundary.user :as user]
             [org.akvo.flow-api.datastore :as ds]
-            [org.akvo.flow-api.boundary.survey :as survey]
             [org.akvo.flow-api.datastore.survey :as su]
             [org.akvo.flow-api.datastore.data-point :as data-point]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
             [cheshire.core :as json]
             [com.stuartsierra.component :as component]))
 
@@ -25,7 +21,7 @@
   (->UnilogConfig spec))
 
 (defn event-log-spec [config]
-  (assert (not (empty? config)) "Config map is empty")
+  (assert (seq config) "Config map is empty")
   (if-let [cloud-sql-instance (config :cloud-sql-instance)]
     {:subprotocol "postgresql"
      :subname (format "//any:5432/%s" (config :db-name))
@@ -80,7 +76,7 @@
                    (map (fn [x]
                           (try
                             (update x :payload parse-json)
-                            (catch Exception e
+                            (catch Exception _
                               x))))
                    (map (fn [x]
                           (if-not (unilog-spec/valid? x)

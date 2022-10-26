@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.middleware.anomaly-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is]]
             [org.akvo.flow-api.middleware.anomaly :as anomaly])
-  (:import (java.io IOException)))
+  (:import [java.io IOException]))
 
 (defn ex? [exception-or-message]
   (try

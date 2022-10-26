@@ -1,12 +1,10 @@
 (ns org.akvo.flow-api.datastore.survey
   (:refer-clojure :exclude [list list*])
-  (:require [clojure.core.cache :as cache]
-            clojure.set
+  (:require clojure.set
             [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
   (:import [com.gallatinsystems.survey.domain SurveyGroup]
-           [com.google.appengine.api.datastore DatastoreService Entity Key KeyFactory QueryResultIterator]
-           [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+           [org.akvo.flow.api.dao SurveyDAO]
            [org.apache.commons.lang ArrayUtils]))
 
 (defn list*
