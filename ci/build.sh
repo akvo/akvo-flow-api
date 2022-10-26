@@ -79,9 +79,9 @@ docker run \
 log Starting Backend tests docker environment
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
 log Starting tests
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein do clean, check, eastwood, test :all
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml exec -T tests dev/run-as-user.sh lein do clean, check, eastwood, test :all
 log Building uberjar
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml run --no-deps tests dev/run-as-user.sh lein with-profile +assemble  do jar, assemble
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml exec -T tests dev/run-as-user.sh lein with-profile +assemble  do jar, assemble
 
 log Building final container
 (

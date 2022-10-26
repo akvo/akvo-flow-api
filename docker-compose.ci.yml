@@ -1,6 +1,5 @@
 version: "3"
 services:
- mainnetwork:
  flow-api:
    build:
      context: .
@@ -21,4 +20,4 @@ services:
    depends_on:
       - flow-api
       - unilog
-   command: "true"
+   command: tail -f /dev/null
