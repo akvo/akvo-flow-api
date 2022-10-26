@@ -67,6 +67,14 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     docker-compose down -v
 )
 
+log Linting backend code with clj-kondo
+docker run \
+	   --rm \
+	   --volume "$(pwd)/api:/app" \
+	   --workdir /app \
+	   cljkondo/clj-kondo:2022.10.14-alpine \
+	   clj-kondo --lint src test
+
 log Starting Backend tests docker environment
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
 log Starting tests
