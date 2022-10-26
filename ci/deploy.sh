@@ -2,11 +2,11 @@
 
 set -eu
 
-if [[ "${TRAVIS_BRANCH}" != "develop" ]] && [[ ! "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_BRANCH}" != "develop" ]] && [[ ! "${CI_TAG:-}" =~ promote-.* ]]; then
     exit 0
 fi
 
-if [[ "${TRAVIS_PULL_REQUEST}" != "false" ]]; then
+if [[ "${CI_PULL_REQUEST}" != "false" ]]; then
     exit 0
 fi
 
@@ -18,7 +18,7 @@ gcloud config set compute/zone europe-west1-d
 gcloud config set container/use_client_certificate False
 
 ENVIRONMENT="test"
-if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     gcloud container clusters get-credentials production
     CONFIG_MAP=prod
     ENVIRONMENT=production
@@ -42,9 +42,9 @@ else
     PROXY_POD_MEM_REQUESTS="16Mi"
     PROXY_POD_MEM_LIMITS="32Mi"
 
-    docker push "akvo/flow-api-proxy:$TRAVIS_COMMIT"
-    docker push "akvo/flow-api-auth0-proxy:$TRAVIS_COMMIT"
-    docker push "akvo/flow-api-backend:$TRAVIS_COMMIT"
+    docker push "akvo/flow-api-proxy:$CI_COMMIT"
+    docker push "akvo/flow-api-auth0-proxy:$CI_COMMIT"
+    docker push "akvo/flow-api-backend:$CI_COMMIT"
 fi
 
 # Deploying
@@ -58,7 +58,7 @@ sed -e "s/\${ENVIRONMENT}/${ENVIRONMENT}/" \
   -e "s/\${PROXY_POD_MEM_REQUESTS}/${PROXY_POD_MEM_REQUESTS}/" \
   -e "s/\${PROXY_POD_CPU_LIMITS}/${PROXY_POD_CPU_LIMITS}/" \
   -e "s/\${PROXY_POD_MEM_LIMITS}/${PROXY_POD_MEM_LIMITS}/" \
-  -e "s/\${TRAVIS_COMMIT}/${TRAVIS_COMMIT}/" \
+  -e "s/\${CI_COMMIT}/${CI_COMMIT}/" \
   ci/k8s/deployment.yaml.template > ci/k8s/deployment.yml
 
 kubectl apply -f ci/k8s/deployment.yml

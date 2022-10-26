@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#shellcheck disable=SC1010
 
 set -eu
 
@@ -6,11 +7,11 @@ function log {
    echo "$(date +"%T") - INFO - $*"
 }
 
-if [ -z "$TRAVIS_COMMIT" ]; then
-    export TRAVIS_COMMIT=local
+if [[ -z "${CI_COMMIT}" ]]; then
+    export CI_COMMIT=local
 fi
 
-if [[ "${TRAVIS_TAG:-}" =~ promote-.* ]]; then
+if [[ "${CI_TAG:-}" =~ promote-.* ]]; then
     echo "Skipping build as it is a prod promotion"
     exit 0
 fi
@@ -32,7 +33,7 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     cd nginx
     docker build \
 	   -t "akvo/flow-api-proxy:latest" \
-	   -t "akvo/flow-api-proxy:${TRAVIS_COMMIT}" .
+	   -t "akvo/flow-api-proxy:${CI_COMMIT}" .
 
     log Check nginx configuration
     docker run \
@@ -53,7 +54,7 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     log Building Auth0 nginx proxy
     docker build \
 	   -t "akvo/flow-api-auth0-proxy:latest" \
-	   -t "akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}" .
+	   -t "akvo/flow-api-auth0-proxy:${CI_COMMIT}" .
 
     log Check Auth0 nginx configuration
     docker run \
@@ -87,7 +88,7 @@ log Building final container
     cd api
     docker build \
 	   -t "akvo/flow-api-backend" \
-	   -t "akvo/flow-api-backend:$TRAVIS_COMMIT" .
+	   -t "akvo/flow-api-backend:${CI_COMMIT}" .
 )
 
 log Done
