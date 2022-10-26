@@ -44,7 +44,7 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     log Test KC based auth
     docker-compose up -d
     docker-compose exec testnetwork /bin/sh -c 'cd /usr/local/src/ && ./entrypoint.sh ./test-auth.sh'
-    docker-compose down -v
+    docker-compose down -v -t 1
 )
 
 
@@ -65,7 +65,7 @@ cp -v "${HOME}/.cache/local_db.bin" "${LOCAL_TEST_DATA_PATH}"
     log Test Auth0 based auth
     docker-compose up -d
     docker-compose exec testnetwork /bin/sh -c 'cd /usr/local/src/ && ./entrypoint.sh ./test-cache.sh'
-    docker-compose down -v
+    docker-compose down -v -t 1
 )
 
 log Linting backend code with clj-kondo
