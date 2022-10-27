@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
 
-set -eu
+set -eux
 
-token_response=$(curl --silent \
+AUTH_FILE=/tmp/auth.json
+
+if [[ ! -f "${AUTH_FILE}" ]]; then
+    curl --silent \
 	     --data "client_id=qsxNP3Nex0wncADQ9Re6Acz6Fa55SuU8" \
 	     --data "username=akvo.flow.test.user8@gmail.com" \
 	     --data "password=7WqCnqCY6kQJV6YQ7dXT" \
 	     --data "grant_type=password" \
 	     --data "scope=openid email" \
-	     --url "https://akvotest.eu.auth0.com/oauth/token")
+	     --url "https://akvotest.eu.auth0.com/oauth/token" \
+         > "${AUTH_FILE}"
+fi
 
-token=$(echo "$token_response" | jq -M -r .id_token)
+token=$(jq -M -r .id_token "${AUTH_FILE}")
 
-if [ "$token" == "null" ]; then
-  echo "No token found. Response was $token_response"
-  exit 0
+if [[ -z "${token}" ||  "${token}" == "null" ]]; then
+  echo "Auth token not found."
+  exit 1
 fi
 
 URL="${1}"
@@ -25,4 +30,4 @@ curl --verbose \
      --header "Accept: application/vnd.akvo.flow.v2+json" \
      --header "Authorization: Bearer ${token}" \
      "$@" \
-     --url "${URL}" 2>&1 | grep -v "Authorization: Bear"
+     --url "${URL}" 2>&1

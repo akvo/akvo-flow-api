@@ -1,5 +1,5 @@
 (ns org.akvo.flow-api.akvo-flow-server-config-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is testing]]
             [clj-http.client :as http]
             [cheshire.core :as json]
             [org.akvo.flow-api.component.akvo-flow-server-config :as server-config-component]

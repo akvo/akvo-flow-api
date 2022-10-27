@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore.form-instance-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [are use-fixtures deftest testing is]]
+            [org.akvo.flow-api.component.remote-api]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.form-instance :as form-instance]
             [org.akvo.flow-api.datastore.survey :as survey]

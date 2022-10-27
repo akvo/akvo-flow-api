@@ -1,6 +1,5 @@
 (ns org.akvo.flow-api.fixtures
-  (:require [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
+  (:require [com.stuartsierra.component :as component]
             clj-http.client
             [duct.util.system :as duct]))
 

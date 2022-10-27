@@ -2,10 +2,10 @@
   (:require [org.akvo.flow-api.akvo-flow-server-config :as afsc]
             [org.akvo.flow-api.component.akvo-flow-server-config]))
 
-(defn host [flow-server-config instance-id]
+(defn host [_flow-server-config instance-id]
   (str instance-id ".appspot.com"))
 
-(defn port [flow-server-config instance-id]
+(defn port [_flow-server-config _instance-id]
   443)
 
 (defn iam-account [{:keys [flow-config]} instance-id]

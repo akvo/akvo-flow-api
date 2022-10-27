@@ -1,12 +1,11 @@
 (ns org.akvo.flow-api.endpoint.over-quota
-  (:require [clojure.test :refer :all]
-            [org.akvo.flow-api.boundary.remote-api :as remote-api]
+  (:require [clojure.test :refer [use-fixtures deftest is]]
+            [org.akvo.flow-api.component.akvo-flow-server-config]
+            [org.akvo.flow-api.component.remote-api]
             [org.akvo.flow-api.endpoint.survey :as survey]
             [org.akvo.flow-api.fixtures :as fixtures]
             [org.akvo.flow-api.middleware.anomaly :as anomaly]
-            [ring.mock.request :as mock])
-  (:import com.google.appengine.api.datastore.DatastoreServiceFactory
-           java.io.IOException))
+            [ring.mock.request :as mock]))
 
 (def system {:components
              {:remote-api #'org.akvo.flow-api.component.remote-api/over-quota-api

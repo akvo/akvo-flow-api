@@ -36,7 +36,8 @@ local opts = {
    accept_none_alg = false,
    accept_unsupported_alg = false,
    ssl_verify = "yes",
-   expiry_claim = "exp"
+   expiry_claim = "exp",
+   timeout = 1000
 }
 
 local validators = require "resty.jwt-validators"
