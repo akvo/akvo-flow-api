@@ -43,7 +43,7 @@
                                                                                                           "UTF-8"))
                                                                    "type"    "file"}}})}))
 
-(defn setup-p12-file [{:keys [name p12-content]}]
+(defn setup-p12-file [{:keys [^String name ^String p12-content]}]
   (http/post wiremock-mappings-url
              {:body (json/generate-string {"request"  {"method"  "GET"
                                                        "urlPath" (str "/repos/akvo/akvo-flow-server-config/contents/" name "/" name ".p12")}

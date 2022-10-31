@@ -1,9 +1,10 @@
 (ns org.akvo.flow-api.akvo-flow-server-config
-  (:import [com.google.apphosting.utils.config AppEngineWebXmlReader]
-           [org.apache.commons.codec.binary Base64])
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str])
+  (:import [com.google.apphosting.utils.config AppEngineWebXmlReader]
+           [java.io File]
+           [org.apache.commons.codec.binary Base64]))
 
 (def ^:dynamic *github-host* "https://api.github.com")
 
@@ -33,7 +34,7 @@
   Returns nil if the file can't be found"
   [auth-token tmp-dir instance-id file-path]
   (let [bytes (-> (github-contents auth-token file-path)
-                  :content
+                  ^String (get :content)
                   Base64/decodeBase64)
         file-name (.getName (io/file file-path))
         file (io/file tmp-dir instance-id file-name)]
@@ -41,17 +42,17 @@
     (io/copy bytes file)
     file))
 
-(defn get-file [auth-token tmp-dir instance-id file-path]
+(defn get-file ^File [auth-token tmp-dir instance-id file-path]
   (let [file-name (.getName (io/file file-path))
         file (io/file tmp-dir instance-id file-name)]
     (if (.exists file)
       file
       (fetch-file auth-token tmp-dir instance-id file-path))))
 
-(defn get-p12-file [auth-token tmp-dir instance-id]
+(defn get-p12-file ^File [auth-token tmp-dir instance-id]
   (get-file auth-token tmp-dir instance-id (format "/%1$s/%1$s.p12" instance-id)))
 
-(defn get-appengine-web-xml-file [auth-token tmp-dir instance-id]
+(defn get-appengine-web-xml-file ^File [auth-token tmp-dir instance-id]
   (get-file auth-token tmp-dir instance-id (format "/%s/appengine-web.xml" instance-id)))
 
 

@@ -12,8 +12,8 @@
       (catch ExceptionInfo e
         (anomaly/handle e)))))
 
-(defn translate-exception [e]
-  (condp #(.contains %2 %1) (or (.getMessage e) "")
+(defn translate-exception [^Throwable e]
+  (condp #(.contains ^String %2 ^String %1) (or (.getMessage e) "")
     "Over Quota" (an/too-many-requests)
     "required more quota" (an/too-many-requests)
     "Please try again in 30 seconds" (an/bad-gateway)

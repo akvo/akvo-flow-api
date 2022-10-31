@@ -8,7 +8,7 @@
 (defmethod handle :default [e]
   (throw e))
 
-(defn body [e]
+(defn body [^Throwable e]
   (-> (ex-data e)
       (assoc :message (.getMessage e))
       (dissoc :org.akvo.flow-api/anomaly)))

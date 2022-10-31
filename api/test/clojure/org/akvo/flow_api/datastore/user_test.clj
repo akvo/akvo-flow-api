@@ -8,7 +8,8 @@
              [org.akvo.flow-api.datastore :as ds]
              [org.akvo.flow-api.datastore.user :as user]
              [org.akvo.flow-api.fixtures :as fixtures])
-  (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
+  (:import [com.google.appengine.api.datastore DatastoreService
+            DatastoreServiceFactory Entity QueryResultIterable]))
 
 (defn uuid [] (str (java.util.UUID/randomUUID)))
 (def local-ds {:hostname "localhost" :port 8888})
@@ -36,12 +37,14 @@
         "akvo.flow.user.test2@gmail.com"
         "akvo.flow.user.test3@gmail.com"))))
 
-(defn find-user [ds unique-email]
+(defn find-user ^Entity [ds unique-email]
   (first
    (iterator-seq
-    (.iterator (query/result ds
-                             {:kind "User"
-                              :filter (query/= "emailAddress" unique-email)})))))
+    (.iterator
+     ^QueryResultIterable
+     (query/result ds
+                   {:kind "User"
+                    :filter (query/= "emailAddress" unique-email)})))))
 
 (defn create-user [ds unique-email]
   (gae/put! ds "User" {"emailAddress" unique-email})
@@ -49,9 +52,9 @@
   (fixtures/try-for "GAE took too long to return results" 10
     (find-user ds unique-email)))
 
-(defn delete-user [ds unique-email]
+(defn delete-user [^DatastoreService ds unique-email]
   (let [user (find-user ds unique-email)]
-    (.delete ds (into-array [(.getKey user)])))
+    (.delete ds ^"[Lcom.google.appengine.api.datastore.Key;" (into-array [(.getKey user)])))
 
   (fixtures/try-for "GAE took too long to return results" 10
     (not (find-user ds unique-email))))

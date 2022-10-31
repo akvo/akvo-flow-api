@@ -22,8 +22,8 @@
                       (.server host port)
                       (.remoteApiPath remote-path))]
       (.useServiceAccountCredential options
-                                    iam-account
-                                    p12-path)
+                                    ^String iam-account
+                                    ^String p12-path)
       options))
 
   LocalApi
