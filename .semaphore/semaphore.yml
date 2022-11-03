@@ -15,6 +15,7 @@ blocks:
         commands:
           - echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
           - checkout
+          - cache restore lein-deps-$(checksum api/project.clj)
       jobs:
         - name: 'Build&Test'
           commands:
@@ -30,7 +31,13 @@ blocks:
               else
                 export CI_PULL_REQUEST="false"
               fi
-            - ./ci/build.sh && ./ci/deploy.sh
+            - if [[ ! -d "$HOME/.m2" ]]; then mkdir "$HOME/.m2"; fi;
+            - ./ci/build.sh
+            - ./ci/deploy.sh
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
+      epilogue:
+        on_pass:
+          commands:
+            - cache store lein-deps-$(checksum api/project.clj) "$HOME/.m2"
