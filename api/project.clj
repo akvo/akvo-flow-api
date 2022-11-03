@@ -44,7 +44,8 @@
   :java-source-paths ["src/java"]
   :test-paths ["test/clojure"]
   :plugins [[lein-environ "1.0.3"]
-            [jonase/eastwood "1.3.0"]]
+            [jonase/eastwood "1.3.0"]
+            [lein-eftest "0.5.9"]]
   :aliases {"setup"  ["run" "-m" "duct.util.repl/setup"]}
   :profiles
   {:dev  [:project/dev  :profiles/dev]
