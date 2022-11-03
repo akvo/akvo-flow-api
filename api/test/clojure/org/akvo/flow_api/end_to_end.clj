@@ -15,6 +15,18 @@
                       :headers {"huge" (apply str (repeat 30000 "x"))}
                       :content-type :json}))))))
 
+(deftest answer-stats
+  (testing "Answer summary of an option type of question"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :query-params {:survey_id "148412306"
+                                     :form_id "145492013"
+                                     :question_id "147432013"}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 2 (-> response :body :Kpalbe))))))
+
 (deftest form-instances
   (testing "Submission date filter is optional"
     (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/form_instances"

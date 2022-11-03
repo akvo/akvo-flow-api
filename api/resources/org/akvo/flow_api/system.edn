@@ -15,10 +15,11 @@
   :data-point #var org.akvo.flow-api.endpoint.data-point/endpoint
   :form-instance #var org.akvo.flow-api.endpoint.form-instance/endpoint
   :config-refresh #var org.akvo.flow-api.endpoint.config-refresh/endpoint
+  :stats #var org.akvo.flow-api.endpoint.stats/endpoint
   :sync #var org.akvo.flow-api.endpoint.sync/endpoint}
  :dependencies
  {:http [:app]
-  :app  [:root :folder :survey :data-point :form-instance :config-refresh :sync]
+  :app  [:root :folder :survey :data-point :form-instance :config-refresh :sync :stats]
   :remote-api [:akvo-flow-server-config :user-cache :survey-cache :unknown-user-cache :survey-list-cache]
   :akvo-flow-server-config []
   :root []
@@ -32,6 +33,7 @@
   :form-instance [:remote-api :akvo-flow-server-config]
   :config-refresh [:akvo-flow-server-config]
   :sync [:remote-api :akvo-flow-server-config :unilog-db]
+  :stats [:remote-api :akvo-flow-server-config]
   :unilog-db []}
  :config
  {:app
@@ -75,5 +77,4 @@
                                 :sslfactory "org.postgresql.ssl.DefaultJavaSSLFactory"
                                 :read-only? true}
               :event-log-port event-log-port
-              :event-log-host event-log-host}
-  }}
+              :event-log-host event-log-host}}}
