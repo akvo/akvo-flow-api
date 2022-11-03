@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore.stats
-  (:require [akvo.commons.gae.query :as q]
+  (:require [akvo.commons.gae :as gae]
+            [akvo.commons.gae.query :as q]
             [cheshire.core :as json]
             [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
@@ -59,3 +60,14 @@
                                (map #(parse-value (.getProperty ^Entity % "value")) answers))))
                      []
                      (get-form-instance-ids ds form-id))))))
+
+
+(comment
+  (def ds-spec {:hostname "akvoflow-xx.appspot.com"
+                :port 443
+                :service-account-id "sa-akvoflow-xx@akvoflow-xx.iam.gserviceaccount.com"
+                :private-key-file "/server-config/akvoflow-xx/akvoflow-xx.p12"})
+  (gae/with-datastore [ds ds-spec]
+    (doto (question-counts ds {:formId "313200912"
+                               :questionId "311160912"}) prn))
+  )
