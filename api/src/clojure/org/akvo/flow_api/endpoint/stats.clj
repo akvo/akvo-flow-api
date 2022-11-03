@@ -20,7 +20,7 @@
                                   ::spec/question-id]))
 
 (defn endpoint* [{:keys [remote-api]}]
-  (GET "/stats" {:keys [email instance-id alias params] :as req}
+  (GET "/stats" {:keys [email instance-id params]}
     (ds/with-remote-api remote-api instance-id
       (let [{:keys [survey-id
                     form-id
