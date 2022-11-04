@@ -16,6 +16,42 @@
                       :content-type :json}))))))
 
 (deftest answer-stats
+  (testing "Random email trying to get a statistic"
+    (is (thrown? Exception
+                 (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                                      {:as :json
+                                       :headers {"x-akvo-email" "random.email@gmail.com"}
+                                       :query-params {:survey_id "148412306"
+                                                      :form_id "145492013"
+                                                      :question_id "147432013"}
+                                       :content-type :json}))))
+  (testing "Survey Not Found"
+    (is (thrown? Exception
+                 (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                                      {:as :json
+                                       :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                                       :query-params {:survey_id "999"
+                                                      :form_id "145492013"
+                                                      :question_id "147432013"}
+                                       :content-type :json}))))
+  (testing "Question Not Found"
+    (is (thrown? Exception
+                 (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                                      {:as :json
+                                       :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                                       :query-params {:survey_id "148412306"
+                                                      :form_id "145492013"
+                                                      :question_id "999"}
+                                       :content-type :json}))))
+  (testing "Question is not an Option Question"
+    (is (thrown? Exception
+                 (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                                      {:as :json
+                                       :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                                       :query-params {:survey_id "148412306"
+                                                      :form_id "145492013"
+                                                      :question_id "148442013"}
+                                       :content-type :json}))))
   (testing "Answer summary of an option type of question"
     (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
                      {:as :json
