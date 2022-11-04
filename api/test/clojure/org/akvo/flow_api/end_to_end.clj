@@ -1,6 +1,7 @@
 (ns org.akvo.flow-api.end-to-end
-  (:require [clojure.test :refer [use-fixtures deftest testing is]]
+  (:require [cheshire.core :as json]
             [clj-http.client]
+            [clojure.test :refer [use-fixtures deftest testing is]]
             [org.akvo.flow-api.fixtures :as fixtures])
   (:import clojure.lang.ExceptionInfo))
 
@@ -16,64 +17,60 @@
                       :headers {"huge" (apply str (repeat 30000 "x"))}
                       :content-type :json}))))))
 
+(defn http-result [^ExceptionInfo e]
+  (-> e
+      ex-data
+      (select-keys [:status :body])
+      (update :body #(json/parse-string % true))))
+
+(defn test-error [expected-status expected-message http-url http-opts]
+  (is (thrown-with-msg?
+       ExceptionInfo (re-pattern (str "status " expected-status))
+       (try
+         (clj-http.client/get http-url
+                              (merge {:as :json
+                                      :content-type :json}
+                                     http-opts))
+         (catch ExceptionInfo e
+           (let [{{message :message} :body
+                  :keys [status]} (http-result e)]
+             (is (= expected-status status))
+             (is (= expected-message message)))
+           (throw e))))))
+
 (deftest answer-stats
   (testing "Random email trying to get a statistic"
-    (is (thrown-with-msg? ExceptionInfo #"status 403"
-        (try
-          (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/stats"
-                               {:as :json
-                                :headers {"x-akvo-email" "random.email@gmail.com"}
-                                :query-params {:survey_id "148412306"
-                                               :form_id "145492013"
-                                               :question_id "147432013"}
-                                :content-type :json})
-          (catch ExceptionInfo e
-            (is (= (-> e ex-data :status) 403))
-            (is (.contains ^String (-> e ex-data :body) "User does not exist"))
-            (throw e))))))
+    (test-error 403
+                "User does not exist"
+                "http://localhost:3000/orgs/akvoflowsandbox/stats"
+                {:headers {"x-akvo-email" "random.email@gmail.com"}
+                 :query-params {:survey_id "148412306"
+                                :form_id "145492013"
+                                :question_id "147432013"}}))
   (testing "Survey Not Found"
-    (is (thrown-with-msg? ExceptionInfo #"status 404"
-                          (try
-                            (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/stats"
-                                                 {:as :json
-                                                  :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
-                                                  :query-params {:survey_id "999"
-                                                                 :form_id "145492013"
-                                                                 :question_id "147432013"}
-                                                  :content-type :json})
-                            (catch ExceptionInfo e
-                              (is (= (-> e ex-data :status) 404))
-                              (is (.contains ^String (-> e ex-data :body) "Survey not found"))
-                              (throw e))))))
+    (test-error 404
+                "Survey not found"
+                "http://localhost:3000/orgs/akvoflowsandbox/stats"
+                {:headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                 :query-params {:survey_id "999"
+                                :form_id "145492013"
+                                :question_id "147432013"}}))
   (testing "Question Not Found"
-    (is (thrown-with-msg? ExceptionInfo #"status 404"
-                          (try
-                            (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/stats"
-                                                 {:as :json
-                                                  :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
-                                                  :query-params {:survey_id "148412306"
-                                                                 :form_id "145492013"
-                                                                 :question_id "999"}
-                                                  :content-type :json})
-                            (catch ExceptionInfo e
-                              (is (= (-> e ex-data :status) 404))
-                              (is (.contains ^String (-> e ex-data :body) "Question not found"))
-                              (throw e))))))
+    (test-error 404
+                "Question not found"
+                "http://localhost:3000/orgs/akvoflowsandbox/stats"
+                {:headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                 :query-params {:survey_id "148412306"
+                                :form_id "145492013"
+                                :question_id "999"}}))
   (testing "Question is not an Option Question"
-    (is (thrown-with-msg? ExceptionInfo #"status 400"
-                          (try
-                            (clj-http.client/get "http://localhost:3000/orgs/akvoflowsandbox/stats"
-                                                 {:as :json
-                                                  :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
-                                                  :query-params {:survey_id "148412306"
-                                                                 :form_id "145492013"
-                                                                 :question_id "148442013"}
-                                                  :content-type :json})
-                            (catch ExceptionInfo e
-                              (is (= (-> e ex-data :status) 400))
-                              (prn (-> e ex-data :body))
-                              (is (.contains ^String (-> e ex-data :body) "Not an OPTION question"))
-                              (throw e))))))
+    (test-error 400
+                "Not an OPTION question"
+                "http://localhost:3000/orgs/akvoflowsandbox/stats"
+                {:headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                 :query-params {:survey_id "148412306"
+                                :form_id "145492013"
+                                :question_id "148442013"}}))
   (testing "Answer summary of an option type of question"
     (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
                      {:as :json
