@@ -73,7 +73,9 @@
     (reduce [_ rf init]
       (let [iter (.iterator
                   ^QueryResultIterable
-                  (q/result ds query fetch-opts))]
+                  (q/result ds query (merge {:chunk-size MAX_PAGE_SIZE
+                                             :prefetch-size MAX_PAGE_SIZE}
+                                            fetch-opts)))]
         (loop [acc init
                has-next? (.hasNext iter)]
           (if has-next?

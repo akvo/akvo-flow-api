@@ -4,16 +4,16 @@
             [cheshire.core :as json]
             [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
-  (:import [com.google.appengine.api.datastore DatastoreService Entity QueryResultIterable]))
+  (:import [com.google.appengine.api.datastore DatastoreService Entity]))
 
-(defn get-form-instance-ids [^DatastoreService ds ^Long formId]
-  (map ds/id
-   (iterator-seq
-    (.iterator
-     ^QueryResultIterable
-     (q/result ds {:kind "SurveyInstance"
-                   :filter (q/= "surveyId" formId)
-                   :keys-only? true})))))
+(defn get-form-instance-ids [^DatastoreService dss ^Long formId]
+  (into []
+        (map ds/id)
+        (ds/reducible-gae-query dss
+                                {:kind "SurveyInstance"
+                                 :filter (q/= "surveyId" formId)
+                                 :keys-only? true}
+                                {})))
 
 (defn parse-value [v]
   (try
@@ -21,17 +21,17 @@
     (catch Exception e
       (.getMessage e))))
 
-(defn get-answers [ds formInstanceId questionId]
-  (iterator-seq
-   (.iterator
-    ^QueryResultIterable
-    (q/result ds {:kind "QuestionAnswerStore"
-                  :filter (q/and
-                           (q/= "questionID" (str questionId))
-                           (q/= "surveyInstanceId" formInstanceId))}))))
-
-(defn get-answer [ds questionId]
-  (q/entity ds "QuestionAnswerStore" questionId))
+(defn get-answers [ds form-instance-id question-id]
+  (flatten
+   (into []
+         (map #(parse-value (.getProperty ^Entity % "value")))
+         (ds/reducible-gae-query ds
+                                 {:kind "QuestionAnswerStore"
+                                  :filter (q/and
+                                           (q/= "questionID" (str question-id))
+                                           (q/= "surveyInstanceId" form-instance-id))
+                                  :projections {"value" String}}
+                                 {}))))
 
 (defn validate-question
   [^Entity question form-id question-id]
@@ -53,14 +53,10 @@
                   (update acc t inc)
                   (assoc acc t 1))))
             {}
-            (flatten
-             (reduce (fn [acc formInstanceId]
-                       (let [answers (get-answers ds formInstanceId question-id)]
-                         (conj acc
-                               (map #(parse-value (.getProperty ^Entity % "value")) answers))))
-                     []
-                     (get-form-instance-ids ds form-id))))))
-
+            (reduce (fn [acc form-instance-id]
+                      (apply conj acc (get-answers ds form-instance-id question-id)))
+                    []
+                    (get-form-instance-ids ds form-id)))))
 
 (comment
   (def ds-spec {:hostname "akvoflow-xx.appspot.com"

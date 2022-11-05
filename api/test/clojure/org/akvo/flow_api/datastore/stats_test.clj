@@ -22,14 +22,14 @@
               {"text" "fbfb" "code" "OTHER" "isOther" :true}]
              [{"text" "two" "code" "2"}]])
 
-(defn- new-question [form-id question-id question-type now]
+(defn- new-question [^Long form-id ^Long question-id question-type now]
   (doto (Entity. "Question" question-id)
     (.setProperty "surveyId" form-id)
     (.setProperty "createdDateTime" now)
     (.setProperty "lastUpdateDateTime" now)
     (.setProperty "type" question-type)))
 
-(defn- new-form-instance [form-id form-instance-id now]
+(defn- new-form-instance [^Long form-id ^Long form-instance-id now]
   (doto (Entity. "SurveyInstance" form-instance-id)
     (.setProperty "createdDateTime" now)
     (.setProperty "lastUpdateDateTime" now)
