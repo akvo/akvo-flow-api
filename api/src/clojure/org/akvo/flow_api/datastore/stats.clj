@@ -31,29 +31,20 @@
   (when (nil? (#{"OPTION" "NUMBER"} (.getProperty question "type")))
     (anomaly/bad-request "Not an [Option|Number] question" {})))
 
-(defn get-answers-by-form-instance-id [ds form-instance-id question-id]
-  (flatten
-   (into []
-         (map #(parse-value (.getProperty ^Entity % "value")))
-         (ds/reducible-gae-query ds
-                                 {:kind "QuestionAnswerStore"
-                                  :filter (q/and
-                                           (q/= "questionID" (str question-id))
-                                           (q/= "surveyInstanceId" form-instance-id))
-                                  :projections {"value" String}}
-                                 {}))))
-
 (defn get-answers
-  "Returns the answers (`QuestionAnswerStore`) filtered
-  by available form instances (`SurveyInstance`).
-  We apply the same approach of raw data report generation"
   [ds form-id question-id]
-  (->> (get-form-instance-ids ds form-id)
-       (reduce (fn [acc form-instance-id]
-                 (into acc (get-answers-by-form-instance-id ds
-                                                            form-instance-id
-                                                            question-id)))
-               [])))
+  (let [form-instance-ids (set (get-form-instance-ids ds form-id))]
+    (flatten
+     (into []
+           (comp
+            (filter #(form-instance-ids (.getProperty ^Entity % "surveyInstanceId")))
+            (map #(parse-value (.getProperty ^Entity % "value"))))
+           (ds/reducible-gae-query ds
+                                   {:kind "QuestionAnswerStore"
+                                    :filter (q/= "questionID" (str question-id))
+                                    :projections {"value" String
+                                                  "surveyInstanceId" Long}}
+                                   {})))))
 
 (defn question-counts [ds {:keys [formId questionId]}]
   (let [question-id (Long/parseLong questionId)
@@ -73,12 +64,13 @@
         form-id (Long/parseLong formId)
         q (q/entity ds "Question" question-id)]
     (validate-question q form-id question-id)
-    (->> (get-answers ds form-id question-id)
-         (transduce identity (fuse {:sd kixi/standard-deviation
-                                    :max kixi/max
-                                    :min kixi/min
-                                    :mean kixi/mean
-                                    :count kixi/count})))))
+    (->>
+     (get-answers ds form-id question-id)
+     (transduce identity (fuse {:sd kixi/standard-deviation
+                                :max kixi/max
+                                :min kixi/min
+                                :mean kixi/mean
+                                :count kixi/count})))))
 
 (comment
   (def ds-spec {:hostname "akvoflow-xx.appspot.com"
