@@ -76,3 +76,18 @@
               "fbfb" 1}
              (stats/question-counts dss {:questionId (str question-id)
                                          :formId (str form-id)}))))))
+
+(deftest test-number-question
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
+    (let [dss (DatastoreServiceFactory/getDatastoreService)
+          form-id "145492013"
+          ;; After how many (full) strokes does water start flowing?
+          question-id "146622024"]
+      (is
+       (= {:sd 165.42890102277977
+           :max 365.0
+           :min 0.0
+           :mean 134.67441860465115
+           :count 129}
+          (stats/number-question-stats dss {:formId form-id
+                                            :questionId question-id}))))))

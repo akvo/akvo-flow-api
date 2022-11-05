@@ -65,7 +65,7 @@
                                 :question_id "999"}}))
   (testing "Question is not an Option Question"
     (test-error 400
-                "Not an OPTION question"
+                "Not an [Option|Number] question"
                 "http://localhost:3000/orgs/akvoflowsandbox/stats"
                 {:headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
                  :query-params {:survey_id "148412306"

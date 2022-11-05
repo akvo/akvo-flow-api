@@ -39,7 +39,8 @@
                  [org.slf4j/slf4j-api "1.7.14"]
                  [org.slf4j/log4j-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jcl-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
-                 [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]]
+                 [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
+                 [kixi/stats "0.5.5"]]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
   :test-paths ["test/clojure"]
@@ -72,5 +73,6 @@
                                     :port    47480}
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources"]
-                   :env {:port "3000"}}
+                   :env {:port "3000"}
+                   :eftest {:fail-fast? true}}
    :project/test  {}})
