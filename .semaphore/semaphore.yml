@@ -38,6 +38,9 @@ blocks:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
           value: '1'
       epilogue:
+        always:
+          commands:
+            - ./ci/clean-up.sh
         on_pass:
           commands:
             - cache store lein-deps-$(checksum api/project.clj) "$HOME/.m2"
