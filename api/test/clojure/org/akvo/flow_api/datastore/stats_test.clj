@@ -91,3 +91,21 @@
            :count 129}
           (stats/number-question-stats dss {:formId form-id
                                             :questionId question-id}))))))
+
+(deftest test-filter-anwers
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
+    (let [dss (DatastoreServiceFactory/getDatastoreService)
+          form-id (System/currentTimeMillis)
+          form-instance-id (inc form-id)
+          question-id (inc form-id)
+          v (rand)
+          now (Date.)]
+      (doseq [e [(new-question form-id question-id "NUMBER" now)
+                 (new-form-instance form-id form-instance-id now)
+                 (new-answer form-id form-instance-id question-id "VALUE" (str v) now)
+                 (new-answer form-id 0 question-id "VALUE" "1" now)]]
+        (.put dss ^Entity e))
+      (let [answers (stats/get-answers dss form-id question-id)
+            answer (first answers)]
+        (is (= 1 (count answers)))
+        (is (= v answer))))))
