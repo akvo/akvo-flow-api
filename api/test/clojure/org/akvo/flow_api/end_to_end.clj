@@ -80,7 +80,17 @@
                                      :question_id "147432013"}
                       :content-type :json})]
       (is (= 200 (:status response)))
-      (is (= 2 (-> response :body :Kpalbe))))))
+      (is (= 2 (-> response :body :Kpalbe))))
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/stats"
+                     {:as :json
+                      :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                      :query-params {:survey_id "148412306"
+                                     :form_id "145492013"
+                                     :question_id "146622024"}
+                      :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 365.0 (-> response :body :max)))
+      (is (= "max-age=120" (get-in response [:headers "Cache-Control"]))))))
 
 (deftest form-instances
   (testing "Submission date filter is optional"

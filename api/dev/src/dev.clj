@@ -33,5 +33,6 @@
 
   (reset)
   (test)
+  (refresh)
 
   ,)

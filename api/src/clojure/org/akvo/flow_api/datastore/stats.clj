@@ -46,14 +46,14 @@
                                                   "surveyInstanceId" Long}}
                                    {})))))
 
-(defn question-counts [ds {:keys [formId questionId]}]
+(defn option-question-stats [ds {:keys [formId questionId]}]
   (let [question-id (Long/parseLong questionId)
         form-id (Long/parseLong formId)
         q (q/entity ds "Question" question-id)]
     (validate-question q form-id question-id)
     (->>
      (get-answers ds form-id question-id)
-     (reduce (fn [acc {:keys [text]}]
+     (reduce (fn [acc {:keys [text]}] ;; code vs text?
                (if (contains? acc text)
                  (update acc text inc)
                  (assoc acc text 1)))
@@ -78,6 +78,6 @@
                 :service-account-id "sa-akvoflow-xx@akvoflow-xx.iam.gserviceaccount.com"
                 :private-key-file "/server-config/akvoflow-xx/akvoflow-xx.p12"})
   (gae/with-datastore [ds ds-spec]
-    (doto (question-counts ds {:formId "313200912"
-                               :questionId "311160912"}) prn))
+    (doto (option-question-stats ds {:formId "313200912"
+                                     :questionId "311160912"}) prn))
   )

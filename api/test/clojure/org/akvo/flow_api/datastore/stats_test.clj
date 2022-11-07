@@ -74,7 +74,7 @@
               "ssdd" 1
               "fsdfs" 1
               "fbfb" 1}
-             (stats/question-counts dss {:questionId (str question-id)
+             (stats/option-question-stats dss {:questionId (str question-id)
                                          :formId (str form-id)}))))))
 
 (deftest test-number-question

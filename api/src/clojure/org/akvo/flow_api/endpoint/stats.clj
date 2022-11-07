@@ -9,7 +9,7 @@
             [org.akvo.flow-api.endpoint.form-instance :as fi]
             [org.akvo.flow-api.middleware.resolve-alias :refer [wrap-resolve-alias]]
             [org.akvo.flow-api.middleware.jdo-persistent-manager :as jdo-pm]
-            [ring.util.response :refer [response]]
+            [ring.util.response :refer [response header]]
             [org.akvo.flow-api.datastore :as ds])
   (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
 
@@ -33,8 +33,16 @@
             survey (survey/by-id remote-api instance-id user-id survey-id)
             form (fi/find-form (:forms survey) form-id)]
         (if (some? form)
-          (-> (st/question-counts dss {:formId form-id :questionId question-id})
-              (response))
+          (let [{:keys [type]} (->> (get-in form [:question-groups])
+                                    (map :questions)
+                                    flatten
+                                    (filter #(= (:id %) (str question-id)))
+                                    first)]
+            (-> (if (= type "OPTION")
+                  (st/option-question-stats dss {:formId form-id :questionId question-id})
+                  (st/number-question-stats dss {:formId form-id :questionId question-id}))
+                (response)
+                (header "Cache-Control" "max-age=120")))
           {:status 404
            :body {"formId" form-id
                   "message" "Form not found"}})))))
