@@ -75,7 +75,7 @@
               "fsdfs" 1
               "fbfb" 1}
              (stats/option-question-stats dss {:questionId (str question-id)
-                                         :formId (str form-id)}))))))
+                                               :formId (str form-id)}))))))
 
 (deftest test-number-question
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
@@ -84,13 +84,12 @@
           ;; After how many (full) strokes does water start flowing?
           question-id "146622024"]
       (is
-       (= {:sd 165.42890102277977
-           :max 365.0
+       (= {:max 365.0
            :min 0.0
-           :mean 134.67441860465115
            :count 129}
-          (stats/number-question-stats dss {:formId form-id
-                                            :questionId question-id}))))))
+          (select-keys (stats/number-question-stats dss {:formId form-id
+                                                         :questionId question-id})
+                       [:max :min :count]))))))
 
 (deftest test-filter-anwers
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
