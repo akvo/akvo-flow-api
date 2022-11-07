@@ -48,6 +48,6 @@
                   "message" "Form not found"}})))))
 
 (defn endpoint [{:keys [akvo-flow-server-config] :as deps}]
-  (-> (endpoint* deps)
+  (-> (#'endpoint* deps)
       (wrap-resolve-alias akvo-flow-server-config)
       (jdo-pm/wrap-close-persistent-manager)))
