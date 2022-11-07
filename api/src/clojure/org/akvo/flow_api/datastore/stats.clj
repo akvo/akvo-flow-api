@@ -42,7 +42,11 @@
            (ds/reducible-gae-query ds
                                    {:kind "QuestionAnswerStore"
                                     :filter (q/= "questionID" (str question-id))
-                                    :projections {"value" String
+                                    :sort-by "createdDateTime"
+                                    ;; TODO:
+                                    ;; Recover projections when index is up
+                                    ;; https://github.com/akvo/akvo-flow/issues/3932
+                                    #_#_:projections {"value" String
                                                   "surveyInstanceId" Long}}
                                    {})))))
 
