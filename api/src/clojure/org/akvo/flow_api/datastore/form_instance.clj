@@ -13,14 +13,6 @@
 
 (set! *warn-on-reflection* true)
 
-(def MAX_PAGE_SIZE 300)
-
-(defn normalize-page-size [page-size]
-  (if-not page-size
-    30 ;; default
-    (if (<= page-size MAX_PAGE_SIZE)
-      page-size
-      MAX_PAGE_SIZE)))
 
 (defn get-filter
   [form-id submission-date operator]
@@ -34,7 +26,7 @@
 (defn form-instances-query
   ^com.google.appengine.api.datastore.QueryResultIterator
   [ds form-definition {:keys [cursor page-size submission-date operator]}]
-  (let [page-size (normalize-page-size page-size)
+  (let [page-size (ds/normalize-page-size page-size)
         filter (get-filter (:id form-definition) submission-date operator)]
     (.iterator ^QueryResultIterable (q/result ds
                                               {:kind "SurveyInstance"
@@ -234,8 +226,8 @@
                                   :filter (q/in "surveyInstanceId"
                                                 (map (comp #(Long/parseLong %) :id)
                                                      form-instance-batch))}
-                                 {:prefetch-size MAX_PAGE_SIZE
-                                  :chunk-size MAX_PAGE_SIZE})))
+                                 {:prefetch-size ds/MAX_PAGE_SIZE
+                                  :chunk-size ds/MAX_PAGE_SIZE})))
              {}
              (partition-all 30 form-instances)))))
 

@@ -1,0 +1,1 @@
+{:lint-as {akvo.commons.gae/with-datastore clojure.core/with-open}}
