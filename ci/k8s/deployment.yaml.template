@@ -125,6 +125,8 @@ spec:
           value: "/secrets"
         - name: HTTP_PORT
           value: "3000"
+        - name: REPL_PORT
+          value: "47480"
         - name: API_ROOT
           valueFrom:
             configMapKeyRef:
