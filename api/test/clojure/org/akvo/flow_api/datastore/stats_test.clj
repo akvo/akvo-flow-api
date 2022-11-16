@@ -22,6 +22,12 @@
               {"text" "fbfb" "code" "OTHER" "isOther" :true}]
              [{"text" "two" "code" "2"}]])
 
+(def values-no-code [[{"text" "two"}]
+                     [{"text" "ssdd"}
+                      {"text" "fsdfs"}
+                      {"text" "fbfb" "code" "OTHER" "isOther" :true}]
+                     [{"text" "two"}]])
+
 (defn- new-question [^Long form-id ^Long question-id question-type now]
   (doto (Entity. "Question" question-id)
     (.setProperty "surveyId" form-id)
@@ -45,7 +51,7 @@
     (.setProperty "type" answer-type)
     (.setProperty "value" value)))
 
-(defn- gen-option-question-test-data [^DatastoreService dss form-id question-id]
+(defn- gen-option-question-test-data [^DatastoreService dss form-id question-id opt]
   (let [now (Date.)
         form-id (long form-id)
         question-id (long question-id)
@@ -53,26 +59,39 @@
         data (apply conj
                     data
                     (flatten
-                     (for [i (range 0 (count values))]
+                     (for [i (range 0 (count opt))]
                        (let [form-instance-id (System/currentTimeMillis)
                              form-instance (new-form-instance form-id form-instance-id now)
                              answer (new-answer form-id form-instance-id
                                                 question-id "OPTION"
-                                                (json/encode (nth values i)) now)]
+                                                (json/encode (nth opt i)) now)]
                          [form-instance answer]))))]
     (doseq [^Entity e data]
       (.put dss e))
     data))
 
-(deftest test-option-question
+(deftest test-option-question-no-code
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
     (let [dss (DatastoreServiceFactory/getDatastoreService)
           form-id (System/currentTimeMillis)
           question-id (System/currentTimeMillis)]
-      (gen-option-question-test-data dss form-id question-id)
+      (gen-option-question-test-data dss form-id question-id values-no-code)
       (is (= {"two" 2
               "ssdd" 1
               "fsdfs" 1
+              "fbfb" 1}
+             (stats/option-question-stats dss {:questionId (str question-id)
+                                               :formId (str form-id)}))))))
+
+(deftest test-option-question-with-code
+  (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
+    (let [dss (DatastoreServiceFactory/getDatastoreService)
+          form-id (System/currentTimeMillis)
+          question-id (System/currentTimeMillis)]
+      (gen-option-question-test-data dss form-id question-id values)
+      (is (= {"2" 2
+              "two" 1
+              "5" 1
               "fbfb" 1}
              (stats/option-question-stats dss {:questionId (str question-id)
                                                :formId (str form-id)}))))))
