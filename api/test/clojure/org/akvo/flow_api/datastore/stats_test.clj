@@ -90,9 +90,11 @@
           question-id (System/currentTimeMillis)]
       (gen-option-question-test-data dss form-id question-id values)
       (is (= {"2" 2
-              "two" 1
               "5" 1
-              "fbfb" 1}
+              "fbfb" 2
+              "fsdfs" 1
+              "ssdd" 1
+              "two" 3}
              (stats/option-question-stats dss {:questionId (str question-id)
                                                :formId (str form-id)}))))))
 
