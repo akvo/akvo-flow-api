@@ -1,7 +1,7 @@
 (ns org.akvo.flow-api.middleware.anomaly
   (:require [org.akvo.flow-api.endpoint.anomaly :as anomaly]
             [org.akvo.flow-api.anomaly :as an]
-            [clojure.tools.logging :as log]
+            #_[clojure.tools.logging :as log]
             [clojure.stacktrace :as stacktrace])
   (:import [clojure.lang ExceptionInfo]))
 
@@ -25,5 +25,5 @@
       (handler request)
       (catch Throwable e
         (stacktrace/print-stack-trace e)
-        (log/error e (str "Error:" (.getMessage e)))
+        #_(log/error e (str "Error:" (.getMessage e)))
         (translate-exception e)))))
