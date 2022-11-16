@@ -15,7 +15,7 @@
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
                  [commons-fileupload "1.3.1"]
-                 [org.akvo.flow/akvo-flow "20220120-233458.89643d80" :classifier "classes" :exclusions [org.simplejavamail/simple-java-mail]]
+                 [org.akvo.flow/akvo-flow "20221115-123123.ac209264" :classifier "classes" :exclusions [org.simplejavamail/simple-java-mail]]
                  [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
