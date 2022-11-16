@@ -46,7 +46,7 @@
                                     ;; TODO:
                                     ;; Recover projections when index is up
                                     ;; https://github.com/akvo/akvo-flow/issues/3932
-                                    :projections {"value" String
+                                    #_#_:projections {"value" String
                                                   "surveyInstanceId" Long}}
                                    {})))))
 
