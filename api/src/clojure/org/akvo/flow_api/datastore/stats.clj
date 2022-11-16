@@ -46,7 +46,7 @@
                                     ;; TODO:
                                     ;; Recover projections when index is up
                                     ;; https://github.com/akvo/akvo-flow/issues/3932
-                                    #_#_:projections {"value" String
+                                    :projections {"value" String
                                                   "surveyInstanceId" Long}}
                                    {})))))
 
@@ -57,10 +57,13 @@
     (validate-question q form-id question-id)
     (->>
      (get-answers ds form-id question-id)
-     (reduce (fn [acc {:keys [text]}] ;; code vs text?
-               (if (contains? acc text)
-                 (update acc text inc)
-                 (assoc acc text 1)))
+     (reduce (fn [acc {:keys [text code]}] ;; code vs text?
+               (let [opt (if (and code (not= code "OTHER"))
+                           code
+                           text)]
+               (if (contains? acc opt)
+                 (update acc opt inc)
+                 (assoc acc opt 1))))
              {}))))
 
 (defn number-question-stats [ds {:keys [formId questionId]}]
