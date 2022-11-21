@@ -77,6 +77,7 @@
                                 :max kixi/max
                                 :min kixi/min
                                 :mean kixi/mean
+                                :sum +
                                 :count kixi/count})))))
 
 (comment

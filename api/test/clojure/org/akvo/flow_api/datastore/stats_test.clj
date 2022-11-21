@@ -101,13 +101,17 @@
           form-id "145492013"
           ;; After how many (full) strokes does water start flowing?
           question-id "146622024"]
-      (is
-       (= {:max 365.0
-           :min 0.0
-           :count 129}
-          (select-keys (stats/number-question-stats dss {:formId form-id
-                                                         :questionId question-id})
-                       [:max :min :count]))))))
+      (let [results (stats/number-question-stats dss {:formId form-id
+                                                      :questionId question-id})
+            test-values (select-keys results [:max :min :sum :count])]
+        (is
+         (= {:max 365.0
+             :min 0.0
+             :sum 17373
+             :count 129} test-values))
+        (is
+         (= (float (/ (:sum test-values) (:count test-values)))
+            (float (:mean results))))))))
 
 (deftest test-filter-anwers
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"
