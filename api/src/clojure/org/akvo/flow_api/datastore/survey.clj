@@ -45,6 +45,7 @@
       :order (.getOrder question)
       :variable-name (.getVariableName question)
       :personal-data (.getPersonalData question)
+      :answer-stats (.getAnswerStats question)
       :created-at (ds/created-at question)
       :modified-at (ds/modified-at question)}
      (when (= type* "CADDISFLY")

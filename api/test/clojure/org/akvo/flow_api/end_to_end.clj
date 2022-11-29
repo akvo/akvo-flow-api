@@ -38,7 +38,7 @@
              (is (= expected-message message)))
            (throw e))))))
 
-(deftest answer-stats
+(deftest answer-statistic
   (testing "Random email trying to get a statistic"
     (test-error 403
                 "User does not exist"
