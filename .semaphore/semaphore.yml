@@ -29,6 +29,7 @@ blocks:
               else
                 export TRAVIS_PULL_REQUEST="false"
               fi
+            - export USE_GKE_GCLOUD_AUTH_PLUGIN=True
             - ./ci/build.sh && ./ci/deploy.sh
       env_vars:
         - name: CLOUDSDK_CORE_DISABLE_PROMPTS
