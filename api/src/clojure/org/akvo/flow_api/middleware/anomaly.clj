@@ -2,7 +2,7 @@
   (:require [org.akvo.flow-api.endpoint.anomaly :as anomaly]
             [org.akvo.flow-api.anomaly :as an]
             #_[clojure.tools.logging :as log]
-            [clojure.stacktrace :as stacktrace])
+            #_[clojure.stacktrace :as stacktrace])
   (:import [clojure.lang ExceptionInfo]))
 
 (defn wrap-anomaly [handler]
@@ -17,13 +17,14 @@
     "Over Quota" (an/too-many-requests)
     "required more quota" (an/too-many-requests)
     "Please try again in 30 seconds" (an/bad-gateway)
-    (throw e)))
+    ((println (str "The message" e))
+    (throw e))))
 
 (defn wrap-log-errors [handler]
   (fn [request]
     (try
       (handler request)
       (catch Throwable e
-        (stacktrace/print-stack-trace e)
+        #_(stacktrace/print-stack-trace e)
         #_(log/error e (str "Error:" (.getMessage e)))
         (translate-exception e)))))

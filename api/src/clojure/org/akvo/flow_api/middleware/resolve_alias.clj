@@ -10,5 +10,4 @@
         (handler (assoc request
                         :instance-id instance-id
                         :alias alias)))
-      (anomaly/not-found "Could not resolve alias"
-                         {:alias alias}))))
+      (anomaly/not-found (str alias " instance not found.") {}))))
