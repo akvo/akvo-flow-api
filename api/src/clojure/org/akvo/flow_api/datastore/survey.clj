@@ -1,12 +1,10 @@
 (ns org.akvo.flow-api.datastore.survey
   (:refer-clojure :exclude [list list*])
-  (:require [clojure.core.cache :as cache]
-            clojure.set
+  (:require clojure.set
             [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds])
-  (:import [com.gallatinsystems.survey.domain SurveyGroup]
-           [com.google.appengine.api.datastore DatastoreService Entity Key KeyFactory QueryResultIterator]
-           [org.akvo.flow.api.dao FolderDAO SurveyDAO]
+  (:import [com.gallatinsystems.survey.domain SurveyGroup Question QuestionGroup]
+           [org.akvo.flow.api.dao SurveyDAO]
            [org.apache.commons.lang ArrayUtils]))
 
 (defn list*
@@ -24,7 +22,7 @@
 (defn list-by-folder [user-id folder-id]
   (->>
     (list* user-id)
-    (map (fn [survey]
+    (map (fn [^SurveyGroup survey]
            {:id (str (ds/id survey))
             :name (.getName survey)
             :folder-id (str (.getParentId survey))
@@ -38,7 +36,7 @@
         all-forms (.listByKeys form-dao (ArrayUtils/toObject (long-array form-ids)))]
     (.filterByUserAuthorizationObjectId form-dao all-forms user-id)))
 
-(defn ->question [question]
+(defn ->question [^Question question]
   (let [type* (str (.getType question))]
     (merge
      {:id (str (ds/id question))
@@ -47,12 +45,13 @@
       :order (.getOrder question)
       :variable-name (.getVariableName question)
       :personal-data (.getPersonalData question)
+      :answer-stats (.getAnswerStats question)
       :created-at (ds/created-at question)
       :modified-at (ds/modified-at question)}
      (when (= type* "CADDISFLY")
        {:caddisfly-resource-uuid (.getCaddisflyResourceUuid question)}))))
 
-(defn question-group-definition [question-group]
+(defn question-group-definition [^QuestionGroup question-group]
   (let [questions (.values (.getQuestionMap question-group))
         qs (sort-by :order (map ->question questions))]
     {:id (str (ds/id question-group))
@@ -82,11 +81,11 @@
 
 (defn by-id [user-id survey-id]
   (let [survey-dao (com.gallatinsystems.survey.dao.SurveyGroupDAO.)
-        survey (if-let [survey (.getByKey survey-dao (Long/parseLong survey-id))]
+        survey (if-let [survey (.getByKey survey-dao ^Long (Long/parseLong survey-id))]
                  survey
                  (anomaly/not-found "Survey not found"
                                     {:survey-id survey-id}))
-        registration-form-id (.getNewLocaleSurveyId survey)
+        registration-form-id (.getNewLocaleSurveyId ^SurveyGroup survey)
         form-dao (com.gallatinsystems.survey.dao.SurveyDAO.)
         all-forms (.listSurveysByGroup form-dao (Long/parseLong survey-id))
         forms (.filterByUserAuthorizationObjectId form-dao
@@ -97,7 +96,7 @@
                             {:survey-id survey-id
                              :user-id user-id})
       {:id survey-id
-       :name (.getName survey)
+       :name (.getName ^SurveyGroup survey)
        :registration-form-id (str registration-form-id)
        :forms (mapv #(get-form-definition (ds/id %)) forms)
        :created-at (ds/created-at survey)

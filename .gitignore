@@ -15,6 +15,7 @@
 **/.cache/
 **/.eastwood
 /bin/
+gae-dev-server/
 .idea
 
 nginx/keycloak.json

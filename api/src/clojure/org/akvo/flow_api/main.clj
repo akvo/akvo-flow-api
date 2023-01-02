@@ -31,7 +31,7 @@
     (secret-value secret-key)
     (catch FileNotFoundException _ nil)))
 
-(defn -main [& args]
+(defn -main [& _args]
   (let [bindings {'http-port (Integer/parseInt (:http-port env "3000"))
                   'github-auth-token (secret-value "github-auth-token")
                   'sentry-dsn (secret-value "sentry-dsn")
@@ -46,5 +46,21 @@
                       (reset! the-system))]
     (add-shutdown-hook ::stop-system #(component/stop system))
     (println "Started HTTP server on port" (-> system :http :port))
-    (let [repl-server (repl/start-server :port (Integer/parseInt (:repl-port env "0")))]
+    (let [repl-server (repl/start-server :bind "0.0.0.0" :port (Integer/parseInt (:repl-port env "0")))]
       (println "REPL started on port" (:port repl-server)))))
+
+(comment
+
+  ;; Debug remotely
+  ;;
+  ;; 1) Comment out the repl-server code in `main` namespace - because the nrepl server is not part
+  ;; of the "system"
+  ;;
+  ;; 2) Change the code, evaluate the namespace
+  ;;
+  ;; 3) stop the system
+  (component/stop @the-system)
+  ;;
+  ;; 4) call (-main) to start the system
+  (-main)
+  ,)

@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore.data-point-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
+            org.akvo.flow-api.component.remote-api
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.data-point :as data-point]
             [org.akvo.flow-api.datastore.survey :as survey]

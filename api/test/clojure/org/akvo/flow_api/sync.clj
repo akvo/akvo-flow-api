@@ -1,5 +1,5 @@
 (ns org.akvo.flow-api.sync
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest testing is]]
             [org.akvo.flow-api.unilog.unilog :as unilog]
             [org.akvo.flow-api.unilog.spec :as spec]
             [cheshire.core :as json]))

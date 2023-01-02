@@ -1,12 +1,12 @@
 (ns org.akvo.flow-api.datastore
-  (:require [clojure.java.io :as io]
+  (:require [akvo.commons.gae.query :as q]
+            [clojure.java.io :as io]
             [org.akvo.flow-api.boundary.remote-api :as remote-api])
   (:import [com.gallatinsystems.framework.domain BaseDomain]
-           [com.google.appengine.api.datastore Entity QueryResultIterator]
-           [com.google.appengine.tools.remoteapi RemoteApiInstaller RemoteApiOptions]
+           [com.google.appengine.api.datastore Entity QueryResultIterator QueryResultIterable]
+           [com.google.appengine.tools.remoteapi RemoteApiInstaller]
            [java.text Format]
            [java.time.format DateTimeFormatter]
-           [java.util Date]
            [java.util.logging LogManager]))
 
 (set! *warn-on-reflection* true)
@@ -52,7 +52,7 @@
   (modified-at [this]
     (to-iso-8601 (.getLastUpdateDateTime this))))
 
-(def MAX_PAGE_SIZE 300)
+(def ^:const MAX_PAGE_SIZE 300)
 
 (defn normalize-page-size [page-size]
   (if-not page-size
@@ -65,3 +65,22 @@
   (let [cursor (.toWebSafeString (.getCursor iterator))]
     (when-not (empty? cursor)
       cursor)))
+
+(defn reducible-gae-query
+  [ds query fetch-opts]
+  (reify
+    clojure.lang.IReduceInit
+    (reduce [_ rf init]
+      (let [iter (.iterator
+                  ^QueryResultIterable
+                  (q/result ds query (merge {:chunk-size MAX_PAGE_SIZE
+                                             :prefetch-size MAX_PAGE_SIZE}
+                                            fetch-opts)))]
+        (loop [acc init
+               has-next? (.hasNext iter)]
+          (if has-next?
+            (let [ret (rf acc (.next iter))]
+              (if (reduced? ret)
+                @ret
+                (recur ret (.hasNext iter))))
+            acc))))))

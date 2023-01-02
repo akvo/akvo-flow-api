@@ -17,7 +17,8 @@
 (defn test []
   (eftest/run-tests (->> (eftest/find-tests "test")
                          (remove (fn [t] (or (-> t meta :kubernetes-test)
-                                             (-> t meta :ns meta :kubernetes-test)))))))
+                                             (-> t meta :ns meta :kubernetes-test)))))
+                    {:fail-fast? true}))
 
 (when (io/resource "local.clj")
   (load "local"))
@@ -25,3 +26,13 @@
 (gen/set-ns-prefix 'org.akvo.flow-api)
 
 (reloaded.repl/set-init! new-system)
+
+
+
+(comment
+
+  (reset)
+  (test)
+  (refresh)
+
+  ,)

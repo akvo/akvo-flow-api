@@ -11,12 +11,12 @@ spec:
     metadata:
       labels:
         run: flow-api
-        akvo-flow-api-version: ${TRAVIS_COMMIT}
+        akvo-flow-api-version: ${CI_COMMIT}
         environment: ${ENVIRONMENT}
     spec:
       containers:
       - name: flow-api-proxy
-        image: akvo/flow-api-proxy:${TRAVIS_COMMIT}
+        image: akvo/flow-api-proxy:${CI_COMMIT}
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
@@ -42,7 +42,7 @@ spec:
               name: flow-api
               key: token.introspection.url
       - name: flow-api-auth0-proxy
-        image: akvo/flow-api-auth0-proxy:${TRAVIS_COMMIT}
+        image: akvo/flow-api-auth0-proxy:${CI_COMMIT}
         imagePullPolicy: Always
         ports:
         - containerPort: 8082
@@ -87,7 +87,7 @@ spec:
           mountPath: /secrets
           readOnly: true
       - name: flow-api-backend
-        image: akvo/flow-api-backend:${TRAVIS_COMMIT}
+        image: akvo/flow-api-backend:${CI_COMMIT}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -125,6 +125,8 @@ spec:
           value: "/secrets"
         - name: HTTP_PORT
           value: "3000"
+        - name: REPL_PORT
+          value: "47480"
         - name: API_ROOT
           valueFrom:
             configMapKeyRef:

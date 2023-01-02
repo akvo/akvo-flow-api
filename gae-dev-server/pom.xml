@@ -97,6 +97,9 @@
                     <version>${app.version}</version>
                     <address>0.0.0.0</address>
                     <port>8888</port>
+                    <jvmFlags>
+                      <jvmFlag>-Ddatastore.default_high_rep_job_policy_unapplied_job_pct=0</jvmFlag>
+                    </jvmFlags>
                 </configuration>
             </plugin>
             <plugin>

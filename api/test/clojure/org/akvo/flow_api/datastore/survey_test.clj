@@ -1,5 +1,6 @@
 (ns org.akvo.flow-api.datastore.survey-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [use-fixtures deftest testing is are]]
+            [org.akvo.flow-api.component.remote-api]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.survey :as survey]
             [org.akvo.flow-api.datastore.user :as user]
@@ -40,7 +41,7 @@
         survey #{:id :name :forms :registration-form-id}
         form #{:id :name :question-groups}
         question-group #{:id :name :repeatable :questions}
-        question #{:id :name :type :order :personal-data}))))
+        question #{:id :name :type :order :personal-data :answer-stats}))))
 
 (deftest list-authorized-forms
   (ds/with-remote-api (:remote-api fixtures/*system*) "akvoflowsandbox"

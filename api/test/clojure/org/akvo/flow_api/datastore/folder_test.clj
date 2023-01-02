@@ -1,13 +1,10 @@
 (ns org.akvo.flow-api.datastore.folder-test
-  (:require [clojure.test :refer :all]
-            [com.stuartsierra.component :as component]
-            [duct.util.system :as duct]
+  (:require [clojure.test :refer [deftest testing is use-fixtures]]
             [org.akvo.flow-api.component.remote-api]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.datastore.folder :as folder]
             [org.akvo.flow-api.datastore.user :as user]
-            [org.akvo.flow-api.fixtures :as fixtures])
-  (:import [com.google.appengine.api.datastore DatastoreServiceFactory]))
+            [org.akvo.flow-api.fixtures :as fixtures]))
 
 (def system {:components
              {:remote-api #'org.akvo.flow-api.component.remote-api/local-api}

@@ -14,7 +14,7 @@
 (defn list-by-folder [user-id folder-id]
   (doall (survey/list-by-folder user-id folder-id)))
 
-(defn by-id [{:keys [survey-cache] :as this} instance-id user-id survey-id]
+(defn by-id [{:keys [survey-cache]} instance-id user-id survey-id]
   (if-let [survey-definition (get-survey-definition survey-cache
                                                     instance-id
                                                     user-id

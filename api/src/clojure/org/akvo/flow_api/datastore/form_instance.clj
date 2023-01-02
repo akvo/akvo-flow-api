@@ -1,28 +1,18 @@
 (ns org.akvo.flow-api.datastore.form-instance
-  (:require [akvo.commons.gae :as gae]
-            [akvo.commons.gae.query :as q]
+  (:require [akvo.commons.gae.query :as q]
             [cheshire.core :as json]
             [clojure.string :as s]
-            [org.akvo.flow-api.anomaly :as anomaly]
             [org.akvo.flow-api.datastore :as ds]
             [org.akvo.flow-api.utils :as utils])
-  (:refer-clojure :exclude [list])
+  (:refer-clojure :exclude [list parse-double])
   (:import com.fasterxml.jackson.core.JsonParseException
-           [com.google.appengine.api.datastore Entity Text QueryResultIterator QueryResultIterable DatastoreService KeyFactory]
+           [com.google.appengine.api.datastore Entity Text QueryResultIterable DatastoreService KeyFactory]
            java.text.SimpleDateFormat
            java.util.Date
            java.time.Instant))
 
 (set! *warn-on-reflection* true)
 
-(def MAX_PAGE_SIZE 300)
-
-(defn normalize-page-size [page-size]
-  (if-not page-size
-    30 ;; default
-    (if (<= page-size MAX_PAGE_SIZE)
-      page-size
-      MAX_PAGE_SIZE)))
 
 (defn get-filter
   [form-id submission-date operator]
@@ -36,7 +26,7 @@
 (defn form-instances-query
   ^com.google.appengine.api.datastore.QueryResultIterator
   [ds form-definition {:keys [cursor page-size submission-date operator]}]
-  (let [page-size (normalize-page-size page-size)
+  (let [page-size (ds/normalize-page-size page-size)
         filter (get-filter (:id form-definition) submission-date operator)]
     (.iterator ^QueryResultIterable (q/result ds
                                               {:kind "SurveyInstance"
@@ -65,14 +55,14 @@
 
 ;; FREE_TEXT, OPTION, NUMBER, GEO, PHOTO, VIDEO, SCAN, TRACK,
 ;; NAME, STRENGTH, DATE, CASCADE, GEOSHAPE, SIGNATURE
-(defmulti parse-response (fn [type response-str opts] type))
+(defmulti parse-response (fn [type _response-str _opts] type))
 
 (defmethod parse-response "FREE_TEXT"
-  [_ response-str opts]
+  [_ response-str _]
   response-str)
 
 (defmethod parse-response "OPTION"
-  [_ response-str opts]
+  [_ response-str _opts]
   (let [response-str (s/trim response-str)]
     (if (s/starts-with? response-str "[")
       (json/parse-string response-str)
@@ -85,12 +75,12 @@
        (catch NullPointerException _)))
 
 (defmethod parse-response "NUMBER"
-  [_ response-str opts]
+  [_ response-str _]
   (parse-double response-str))
 
 ;; 52.40376391|-1.75630525|189.6|6oqmgtjv
 (defmethod parse-response "GEO"
-  [_ response-str opts]
+  [_ response-str _]
   (let [[lat long elev code] (s/split response-str #"\|")]
     (when-not (and (nil? lat) (nil? long))
       {:lat (parse-double lat)
@@ -127,25 +117,25 @@
       (update video "filename" replace-path asset-url-root)) ))
 
 (defmethod parse-response "SCAN"
-  [_ response-str opts]
+  [_ response-str _]
   response-str)
 
 (defmethod parse-response "TRACK"
-  [_ response-str opts]
+  [_ response-str _]
   response-str)
 
 (defmethod parse-response "NAME"
-  [_ response-str opts]
+  [_ response-str _]
   response-str)
 
 (defmethod parse-response "STRENGTH"
-  [_ response-str opts]
+  [_ response-str _]
   response-str)
 
 (defmethod parse-response "DATE"
-  [_ response-str opts]
+  [_ response-str _]
   (let [date (try (java.util.Date. (Long/parseLong response-str))
-                  (catch NumberFormatException e
+                  (catch NumberFormatException _
                     (let [;; SimpleDateFormat is not thread safe so we create a
                           ;; new one every time.
                           date-format (SimpleDateFormat. "dd-MM-yyyy HH:mm:ss z")]
@@ -157,24 +147,24 @@
     (ds/to-iso-8601 date)))
 
 (defmethod parse-response "CASCADE"
-  [_ response-str opts]
+  [_ response-str _]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
 (defmethod parse-response "GEOSHAPE"
-  [_ response-str opts]
+  [_ response-str _]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
 (defmethod parse-response "SIGNATURE"
-  [_ response-str opts]
+  [_ response-str _]
   (try (json/parse-string response-str)
        (catch JsonParseException _)))
 
 (defmethod parse-response "CADDISFLY"
   [_ response-str {:keys [asset-url-root]}]
   (let [json-data (json/parse-string response-str)]
-    (if-let [image (get json-data "image")]
+    (if-let [_image (get json-data "image")]
       (update json-data "image" replace-path asset-url-root)
       json-data)))
 
@@ -236,8 +226,8 @@
                                   :filter (q/in "surveyInstanceId"
                                                 (map (comp #(Long/parseLong %) :id)
                                                      form-instance-batch))}
-                                 {:prefetch-size MAX_PAGE_SIZE
-                                  :chunk-size MAX_PAGE_SIZE})))
+                                 {:prefetch-size ds/MAX_PAGE_SIZE
+                                  :chunk-size ds/MAX_PAGE_SIZE})))
              {}
              (partition-all 30 form-instances)))))
 

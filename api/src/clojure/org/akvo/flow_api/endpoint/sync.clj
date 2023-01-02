@@ -72,7 +72,7 @@
       (= offset (unilog/get-cursor db)) no-more-changes
       :else (changes-response offset db instance-id remote-api req))))
 
-(defn changes [deps {:keys [alias instance-id params] :as req}]
+(defn changes [deps {:keys [instance-id params] :as req}]
   (let [{:keys [initial cursor next]} (spec/validate-params params-spec params)]
     (cond
       (and initial (or cursor next)) (anomaly/bad-request "Invalid parameters" {})

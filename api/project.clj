@@ -15,7 +15,7 @@
                  [ring/ring-json "0.4.0"]
                  [ring-jetty-component "0.3.1"]
                  [commons-fileupload "1.3.1"]
-                 [org.akvo.flow/akvo-flow "20220120-233458.89643d80" :classifier "classes"]
+                 [org.akvo.flow/akvo-flow "20221129-162458.6638f28c" :classifier "classes" :exclusions [org.simplejavamail/simple-java-mail]]
                  [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
@@ -33,18 +33,20 @@
                  [com.google.cloud.sql/postgres-socket-factory "1.0.16"]
                  [clj-http "2.3.0"]
                  [cheshire "5.7.0"]
-                 [nrepl/nrepl "0.6.0"]
+                 [nrepl/nrepl "1.0.0"]
                  [com.taoensso/timbre "4.10.0"]
                  [com.fzakaria/slf4j-timbre "0.3.8" :exclusions [org.slf4j/slf4j-jdk14]]
                  [org.slf4j/slf4j-api "1.7.14"]
                  [org.slf4j/log4j-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
                  [org.slf4j/jcl-over-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
-                 [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]]
+                 [org.slf4j/jul-to-slf4j "1.7.26" :exclusions [org.slf4j/slf4j-api]]
+                 [kixi/stats "0.5.5"]]
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
   :test-paths ["test/clojure"]
   :plugins [[lein-environ "1.0.3"]
-            [jonase/eastwood "0.3.7"]]
+            [jonase/eastwood "1.3.0"]
+            [lein-eftest "0.5.9"]]
   :aliases {"setup"  ["run" "-m" "duct.util.repl/setup"]}
   :profiles
   {:dev  [:project/dev  :profiles/dev]
@@ -71,5 +73,6 @@
                                     :port    47480}
                    :source-paths   ["dev/src"]
                    :resource-paths ["dev/resources"]
-                   :env {:port "3000"}}
+                   :env {:port "3000"}
+                   :eftest {:fail-fast? true}}
    :project/test  {}})
