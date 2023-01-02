@@ -6,7 +6,7 @@
          (map? m)]}
   (throw (ex-info message (assoc m :org.akvo.flow-api/anomaly key))))
 
-(defn not-found [message m]
+(defn not-found [^String message m]
   (throw-anomaly ::not-found message m))
 
 (defn unauthorized [message m]
