@@ -12,6 +12,10 @@ services:
      - ./gae-dev-server:/app
  flow-api:
    network_mode: service:mainnetwork
+   environment:
+     TAOENSSO_TIMBRE_CONFIG_EDN: "{ :min-level :info }"
+     TIMBRE_LEVEL: ":info"
+     TAOENSSO_TIMBRE_MIN_LEVEL_EDN: ":warn"
    volumes:
      - ~/.m2:/home/akvo/.m2
      - pg-data:/pg-certs:ro
