@@ -13,10 +13,7 @@ services:
  flow-api:
    network_mode: service:mainnetwork
    environment:
-     TAOENSSO_TIMBRE_CONFIG_EDN: "{ :min-level :info }"
-     TIMBRE_LEVEL: ":info"
-     TAOENSSO_TIMBRE_MIN_LEVEL_EDN: ":warn"
-     JAVA_OPTS: "-Dtaoensso.timbre.min-level.edn=:info"
+     TIMBRE_LEVEL: ":debug"
    volumes:
      - ~/.m2:/home/akvo/.m2
      - pg-data:/pg-certs:ro

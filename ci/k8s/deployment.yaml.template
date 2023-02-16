@@ -127,6 +127,9 @@ spec:
           value: "3000"
         - name: REPL_PORT
           value: "47480"
+        # The log level for com.taoensso/timbre
+        - name: TIMBRE_LEVEL
+          value: ":info"
         - name: API_ROOT
           valueFrom:
             configMapKeyRef:
