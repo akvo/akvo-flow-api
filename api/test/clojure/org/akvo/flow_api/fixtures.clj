@@ -21,7 +21,7 @@
            (= status# ::error) (throw (RuntimeException. (str "Failed: " ~msg) return#)))))))
 
 (defn wait-for-server [url]
-  (try-for (str "Not 200 for " url) 60
+  (try-for (str "Not 200 for " url) 120
     (= 200 (:status (clj-http.client/get url)))))
 
 (defn check-servers-up []
