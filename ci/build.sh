@@ -76,8 +76,10 @@ docker run \
 	   cljkondo/clj-kondo:2022.10.14-alpine \
 	   clj-kondo --lint src test
 
+log Building images for Backend tests
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml build
 log Starting Backend tests docker environment
-docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up --build -d
+docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml up -d
 log Starting tests
 docker-compose -p akvo-flow-api-ci -f docker-compose.yml -f docker-compose.ci.yml exec -T tests dev/run-as-user.sh lein do clean, check, eastwood, eftest :all
 log Building uberjar
