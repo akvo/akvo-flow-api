@@ -12,6 +12,8 @@ services:
      - ./gae-dev-server:/app
  flow-api:
    network_mode: service:mainnetwork
+   environment:
+     TIMBRE_LEVEL: ":debug"
    volumes:
      - ~/.m2:/home/akvo/.m2
      - pg-data:/pg-certs:ro
