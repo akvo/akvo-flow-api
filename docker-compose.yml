@@ -18,7 +18,7 @@ services:
      - ~/.m2:/home/akvo/.m2
      - pg-data:/pg-certs:ro
  wiremock-proxy:
-   image: rodolpheche/wiremock:2.16.0-alpine
+   image: wiremock/wiremock:2.32.0-alpine
  unilog:
    image: akvo/akvo-postgres-11:20190222.b31bfb0
    network_mode: service:mainnetwork
