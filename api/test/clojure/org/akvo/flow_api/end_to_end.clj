@@ -142,3 +142,12 @@
                       :content-type :json})]
       (is (= 200 (:status response)))
       (is (= 1 (-> response :body :folders count))))))
+
+(deftest device
+  (testing "Connected devices"
+    (let [response (clj-http.client/get "http://mainnetwork:3000/orgs/akvoflowsandbox/devices"
+                     {:as :json
+                       :headers {"x-akvo-email" "akvo.flow.user.test@gmail.com"}
+                       :content-type :json})]
+      (is (= 200 (:status response)))
+      (is (= 2 (-> response :body :devices count))))))
