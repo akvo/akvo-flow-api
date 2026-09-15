@@ -1,10 +1,23 @@
 FROM openresty/openresty:1.15.8.2-7-alpine-fat-nosse42
 
+# luarocks.org's root manifest has outgrown Lua 5.1's 65536-constant limit, so
+# this luarocks can no longer parse it ("main function has more than 65536
+# constants") and finds nothing. Install each rock from its publisher's own
+# manifest instead, which stays small enough to load. Versions are pinned to
+# what 1.7.2-1 resolves against. Its rockspec asks only for lua-resty-session
+# >= 2.8, but 4.x changed the API it expects, so hold the 3.10 line -- the same
+# ceiling 1.7.6 went on to declare outright.
+ARG M=https://luarocks.org/manifests
+
 RUN apk add --no-cache \
     build-base~=0.5 \
     openssl-dev~=1 \
     git~=2 && \
-    luarocks install lua-resty-openidc 1.7.2-1 && \
+    luarocks install --server=$M/pintsized     lua-resty-http    0.18.0-0 && \
+    luarocks install --server=$M/bungle        lua-resty-session 3.10-1 && \
+    luarocks install --server=$M/fffonion      lua-resty-openssl 1.9.0-1 && \
+    luarocks install --server=$M/cdbattags     lua-resty-jwt     0.2.4-1 && \
+    luarocks install --server=$M/hanszandbelt  lua-resty-openidc 1.7.2-1 && \
     cp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.pem
 
 EXPOSE 8081
