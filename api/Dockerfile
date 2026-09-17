@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8-jre-alpine
+FROM amazoncorretto:8-alpine-jre
 
 ENV SECRETS_MOUNT_PATH /secrets
 ENV HTTP_PORT 3000
