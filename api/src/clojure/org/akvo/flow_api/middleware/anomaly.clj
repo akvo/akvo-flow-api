@@ -20,6 +20,10 @@
     "Over Quota" (an/too-many-requests)
     "required more quota" (an/too-many-requests)
     "Please try again in 30 seconds" (an/bad-gateway)
+    ;; Upstream failure on an idempotent read, which is what 502 says and 500 does not.
+    ;; Matched on the message, not on `RemoteApiException`: that also covers credential
+    ;; and configuration faults, where inviting a retry would bury a real bug.
+    "remote API call: I/O error" (an/bad-gateway)
     (do (log/error e "Unhandled exception, returning 500")
         (throw e))))
 

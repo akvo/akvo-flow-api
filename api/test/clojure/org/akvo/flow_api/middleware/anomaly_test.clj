@@ -23,7 +23,8 @@
     (is (= exception (ex? exception))))
   (is (= (ex? "... Over Quota ...") :org.akvo.flow-api.anomaly/too-many-requests))
   (is (= (ex? "... required more quota ...") :org.akvo.flow-api.anomaly/too-many-requests))
-  (is (= (ex? "... Please try again in 30 seconds ...") :org.akvo.flow-api.anomaly/bad-gateway)))
+  (is (= (ex? "... Please try again in 30 seconds ...") :org.akvo.flow-api.anomaly/bad-gateway))
+  (is (= (ex? "remote API call: I/O error") :org.akvo.flow-api.anomaly/bad-gateway)))
 
 ;; Binds the logger factory rather than redefining `log*`: `with-redefs` alters a var
 ;; root every thread shares, eftest runs these in parallel, and the sibling test reaches
