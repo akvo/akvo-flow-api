@@ -1,7 +1,8 @@
 (ns org.akvo.flow-api.akvo-flow-server-config
   (:require [clj-http.client :as http]
             [clojure.java.io :as io]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [clojure.tools.logging :as log])
   (:import [com.google.apphosting.utils.config AppEngineWebXmlReader]
            [java.io File]
            [org.apache.commons.codec.binary Base64]))
@@ -71,14 +72,24 @@
 
 
 
+;; `get-instance-props` and `read-instance-props` both return nil on failure, so a
+;; dropped instance looks identical to one that was never in the repository. This is the
+;; only place that knows both counts. Logged, not thrown: one bad descriptor should not
+;; take the other 109 instances down with it.
 (defn get-instance-map [auth-token tmp-dir]
-  (let [instance-ids (fetch-instance-ids auth-token)]
-    (reduce (fn [m instance-id]
-              (if-let [props (get-instance-props auth-token tmp-dir instance-id)]
-                (assoc m instance-id props)
-                m))
-            {}
-            instance-ids)))
+  (let [instance-ids (fetch-instance-ids auth-token)
+        instances (reduce (fn [m instance-id]
+                            (if-let [props (get-instance-props auth-token tmp-dir instance-id)]
+                              (assoc m instance-id props)
+                              m))
+                          {}
+                          instance-ids)
+        unreadable (remove instances instance-ids)]
+    (when (seq unreadable)
+      (log/error "Could not read appengine-web.xml for" (count unreadable) "of"
+                 (count instance-ids) "instances; their aliases will not resolve:"
+                 (str/join ", " unreadable)))
+    instances))
 
 (defn get-alias-map [instances-map]
   (reduce (fn [m [instance-id props]]
