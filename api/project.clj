@@ -19,10 +19,16 @@
                  [org.akvo/commons "0.4.5" :exclusions [org.clojure/tools.nrepl]]
                  [raven-clj "1.5.0"]
                  [javax.jdo/jdo2-api "2.3-eb"]
-                 [com.google.appengine/appengine-tools-sdk "1.9.63"]
-                 [com.google.appengine/appengine-remote-api "1.9.63"]
-                 [com.google.appengine/appengine-api-1.0-sdk "1.9.63"]
-                 [com.google.appengine/appengine-jsr107cache "1.9.63"]
+                 ; 1.9.x rejects `<app-engine-apis>`, which every descriptor in
+                 ; akvo-flow-server-config now has. Do not go back below 2.x, and keep
+                 ; these three on one version: tools-sdk and api-1.0-sdk share some 2300
+                 ; repackaged classes, so mixing them leaves which copy wins up to
+                 ; classpath order.
+                 [com.google.appengine/appengine-tools-sdk "2.0.38"]
+                 [com.google.appengine/appengine-remote-api "2.0.38"]
+                 [com.google.appengine/appengine-api-1.0-sdk "2.0.38"]
+                 ; No 2.x release of this artifact exists; 1.9.98 is the last one.
+                 [com.google.appengine/appengine-jsr107cache "1.9.98"]
                  [net.sf.jsr107cache/jsr107cache "1.1"]
                  [javax.servlet/servlet-api "2.5"]
                  [org.apache.geronimo.specs/geronimo-jpa_3.0_spec "1.1.1"]
