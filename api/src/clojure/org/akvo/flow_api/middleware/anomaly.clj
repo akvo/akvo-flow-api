@@ -1,8 +1,7 @@
 (ns org.akvo.flow-api.middleware.anomaly
   (:require [org.akvo.flow-api.endpoint.anomaly :as anomaly]
             [org.akvo.flow-api.anomaly :as an]
-            #_[clojure.tools.logging :as log]
-            #_[clojure.stacktrace :as stacktrace])
+            [clojure.tools.logging :as log])
   (:import [clojure.lang ExceptionInfo]))
 
 (defn wrap-anomaly [handler]
@@ -12,19 +11,21 @@
       (catch ExceptionInfo e
         (anomaly/handle e)))))
 
+;; Matched conditions are translated quietly; each is a status the caller can act on.
+;; Anything else reaches the client as a bare "Internal Server Error" from `:hide-errors`,
+;; so the logged trace is the only record. It has no request context -- pair the timestamp
+;; with the proxy access log for the path and org.
 (defn translate-exception [^Throwable e]
   (condp #(.contains ^String %2 ^String %1) (or (.getMessage e) "")
     "Over Quota" (an/too-many-requests)
     "required more quota" (an/too-many-requests)
     "Please try again in 30 seconds" (an/bad-gateway)
-    ((println (str "The message" e))
-    (throw e))))
+    (do (log/error e "Unhandled exception, returning 500")
+        (throw e))))
 
 (defn wrap-log-errors [handler]
   (fn [request]
     (try
       (handler request)
       (catch Throwable e
-        #_(stacktrace/print-stack-trace e)
-        #_(log/error e (str "Error:" (.getMessage e)))
         (translate-exception e)))))
