@@ -29,6 +29,10 @@
                  [com.google.appengine/appengine-api-1.0-sdk "2.0.38"]
                  ; No 2.x release of this artifact exists; 1.9.98 is the last one.
                  [com.google.appengine/appengine-jsr107cache "1.9.98"]
+                 ; Nothing here imports gson. appengine-remote-api needs it and its pom
+                 ; does not declare it -- see classpath-test. 2.10.1 is what the
+                 ; google-http-client-gson 1.43.3 inside that jar was built against.
+                 [com.google.code.gson/gson "2.10.1"]
                  [net.sf.jsr107cache/jsr107cache "1.1"]
                  [javax.servlet/servlet-api "2.5"]
                  [org.apache.geronimo.specs/geronimo-jpa_3.0_spec "1.1.1"]
