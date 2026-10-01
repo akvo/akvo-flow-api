@@ -63,33 +63,31 @@
       (.getSystemProperties (.readAppEngineWebXml ae-reader)))
     (catch Exception _)))
 
+;; A nil here drops the instance from the config map and silently stops every one of its
+;; aliases resolving, so the two reasons for it are worth keeping apart. `fetch-instance-ids`
+;; lists every directory in the repository, and five of them -- `.github`, `ci`,
+;; `aws-api-keys`, `auth0-extensions`, `0_instanceCreation` -- hold no descriptor at all.
+;; Those 404 and land in the catch below: not instances, nothing wrong. A descriptor that
+;; exists and will not parse is the other case, and it is the one that cost every alias
+;; three weeks of downtime without a log line, so it says so.
 (defn get-instance-props [auth-token tmp-dir instance-id]
   (try
     (let [tmp-file (get-appengine-web-xml-file auth-token tmp-dir instance-id)]
-      (read-instance-props (format "%s%s/" tmp-dir instance-id)
-                           (.getName tmp-file)))
+      (or (read-instance-props (format "%s%s/" tmp-dir instance-id)
+                               (.getName tmp-file))
+          (log/error "Dropping" instance-id
+                     "-- its appengine-web.xml did not parse, so none of its aliases"
+                     "will resolve")))
     (catch clojure.lang.ExceptionInfo _)))
 
-
-
-;; `get-instance-props` and `read-instance-props` both return nil on failure, so a
-;; dropped instance looks identical to one that was never in the repository. This is the
-;; only place that knows both counts. Logged, not thrown: one bad descriptor should not
-;; take the other 109 instances down with it.
 (defn get-instance-map [auth-token tmp-dir]
-  (let [instance-ids (fetch-instance-ids auth-token)
-        instances (reduce (fn [m instance-id]
-                            (if-let [props (get-instance-props auth-token tmp-dir instance-id)]
-                              (assoc m instance-id props)
-                              m))
-                          {}
-                          instance-ids)
-        unreadable (remove instances instance-ids)]
-    (when (seq unreadable)
-      (log/error "Could not read appengine-web.xml for" (count unreadable) "of"
-                 (count instance-ids) "instances; their aliases will not resolve:"
-                 (str/join ", " unreadable)))
-    instances))
+  (let [instance-ids (fetch-instance-ids auth-token)]
+    (reduce (fn [m instance-id]
+              (if-let [props (get-instance-props auth-token tmp-dir instance-id)]
+                (assoc m instance-id props)
+                m))
+            {}
+            instance-ids)))
 
 (defn get-alias-map [instances-map]
   (reduce (fn [m [instance-id props]]
